@@ -1,0 +1,1077 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Semantle — Word by Meaning</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+  :root {
+    --bg: #080b0f;
+    --surface: #0f1318;
+    --card: #141920;
+    --border: #1e2730;
+    --accent: #00ff88;
+    --accent-dim: #00cc6a;
+    --accent-glow: rgba(0,255,136,0.12);
+    --cold: #3b82f6;
+    --text: #e8edf2;
+    --muted: #4a5568;
+    --secondary: #718096;
+    --radius: 12px;
+    --radius-lg: 20px;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+  body::before {
+    content:'';
+    position:fixed; inset:0;
+    background-image:
+      linear-gradient(rgba(0,255,136,0.025) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0,255,136,0.025) 1px, transparent 1px);
+    background-size: 48px 48px;
+    pointer-events:none; z-index:0;
+  }
+  body::after {
+    content:'';
+    position:fixed; top:-20%; left:50%; transform:translateX(-50%);
+    width:600px; height:600px;
+    background: radial-gradient(circle, rgba(0,255,136,0.05) 0%, transparent 70%);
+    pointer-events:none; z-index:0;
+  }
+
+  /* ── SCREENS ── */
+  .screen { display:none; min-height:100vh; position:relative; z-index:1; }
+  .screen.active { display:flex; flex-direction:column; }
+
+  /* ── LOADING ── */
+  #loading {
+    align-items:center; justify-content:center;
+    flex-direction:column; gap:20px;
+  }
+  .loader-logo {
+    font-family:'Syne',sans-serif; font-size:48px; font-weight:800;
+    background: linear-gradient(135deg,#fff 40%, var(--accent) 100%);
+    -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;
+    letter-spacing:-2px;
+  }
+  .loader-bar {
+    width:200px; height:3px; background:var(--border); border-radius:2px; overflow:hidden;
+  }
+  .loader-fill {
+    height:100%; width:0%; background:var(--accent);
+    border-radius:2px; animation:loadBar 1.8s ease forwards;
+  }
+  @keyframes loadBar { to { width:100%; } }
+  .loader-text {
+    font-family:'DM Mono',monospace; font-size:12px; color:var(--muted);
+    letter-spacing:1px;
+  }
+
+  /* ── USERNAME SCREEN ── */
+  #username-screen {
+    align-items:center; justify-content:center; padding:40px 20px;
+  }
+  .username-card {
+    background:var(--card); border:1px solid var(--border);
+    border-radius:24px; padding:48px 40px; max-width:420px; width:100%;
+    text-align:center; animation:fadeUp 0.6s ease both;
+  }
+  .username-icon { font-size:52px; margin-bottom:20px; }
+  .username-title {
+    font-family:'Syne',sans-serif; font-size:28px; font-weight:800;
+    letter-spacing:-1px; margin-bottom:8px;
+  }
+  .username-sub { color:var(--secondary); font-size:14px; margin-bottom:32px; }
+  .username-input {
+    width:100%; background:var(--surface); border:1.5px solid var(--border);
+    border-radius:var(--radius); padding:14px 18px;
+    font-family:'DM Mono',monospace; font-size:18px; color:var(--text);
+    outline:none; transition:border-color 0.2s,box-shadow 0.2s;
+    text-align:center; letter-spacing:2px; margin-bottom:12px;
+  }
+  .username-input:focus { border-color:var(--accent); box-shadow:0 0 0 3px var(--accent-glow); }
+  .username-rules { font-size:12px; color:var(--muted); margin-bottom:24px; font-family:'DM Mono',monospace; }
+  .username-btn {
+    width:100%; background:var(--accent); color:#000; border:none;
+    border-radius:var(--radius); padding:15px; font-family:'Syne',sans-serif;
+    font-weight:700; font-size:16px; cursor:pointer; transition:all 0.2s; letter-spacing:0.5px;
+  }
+  .username-btn:hover { box-shadow:0 0 24px rgba(0,255,136,0.4); transform:translateY(-1px); }
+  .username-err { color:#ef4444; font-size:13px; margin-top:12px; font-family:'DM Mono',monospace; min-height:18px; }
+
+  /* ── HOME ── */
+  #home { align-items:center; justify-content:center; padding:40px 20px; }
+  .home-inner { width:100%; max-width:480px; display:flex; flex-direction:column; align-items:center; gap:40px; }
+  .logo-block { text-align:center; animation:fadeUp 0.8s ease both; }
+  .logo-eyebrow {
+    font-family:'DM Mono',monospace; font-size:11px; letter-spacing:3px;
+    text-transform:uppercase; color:var(--accent); margin-bottom:12px; opacity:0.8;
+  }
+  .logo-title {
+    font-family:'Syne',sans-serif; font-size:clamp(52px,12vw,80px); font-weight:800;
+    letter-spacing:-3px; line-height:1;
+    background:linear-gradient(135deg,#fff 40%,var(--accent) 100%);
+    -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;
+  }
+  .logo-sub { font-size:15px; color:var(--secondary); margin-top:14px; font-weight:300; }
+  .user-pill {
+    display:flex; align-items:center; gap:10px;
+    background:var(--card); border:1px solid var(--border);
+    border-radius:30px; padding:8px 16px 8px 8px;
+    animation:fadeUp 0.8s 0.05s ease both;
+  }
+  .user-avatar {
+    width:32px; height:32px; border-radius:50%;
+    background:linear-gradient(135deg,var(--accent),#0066ff);
+    display:flex; align-items:center; justify-content:center;
+    font-family:'Syne',sans-serif; font-weight:700; font-size:13px; color:#000;
+  }
+  .user-name { font-family:'DM Mono',monospace; font-size:13px; }
+  .user-change { font-size:11px; color:var(--muted); cursor:pointer; margin-left:4px; }
+  .user-change:hover { color:var(--accent); }
+
+  .mode-cards { width:100%; display:flex; flex-direction:column; gap:12px; animation:fadeUp 0.8s 0.1s ease both; }
+  .mode-card {
+    background:var(--card); border:1px solid var(--border);
+    border-radius:var(--radius-lg); padding:20px 24px;
+    cursor:pointer; transition:all 0.2s; display:flex; align-items:center; gap:18px;
+    position:relative; overflow:hidden;
+  }
+  .mode-card::before {
+    content:''; position:absolute; inset:0;
+    background:linear-gradient(135deg,var(--accent-glow),transparent);
+    opacity:0; transition:opacity 0.2s;
+  }
+  .mode-card:hover { border-color:var(--accent); transform:translateY(-2px); box-shadow:0 8px 32px rgba(0,255,136,0.1); }
+  .mode-card:hover::before { opacity:1; }
+  .mode-icon {
+    font-size:26px; width:50px; height:50px; background:var(--surface);
+    border-radius:14px; display:flex; align-items:center; justify-content:center;
+    flex-shrink:0; border:1px solid var(--border);
+  }
+  .mode-info { flex:1; }
+  .mode-name { font-family:'Syne',sans-serif; font-weight:700; font-size:17px; margin-bottom:3px; }
+  .mode-desc { font-size:13px; color:var(--secondary); font-weight:300; }
+  .mode-badge {
+    font-family:'DM Mono',monospace; font-size:10px;
+    background:var(--accent-glow); border:1px solid rgba(0,255,136,0.3);
+    color:var(--accent); padding:3px 8px; border-radius:20px; letter-spacing:1px; text-transform:uppercase;
+  }
+  .mode-badge.warm { background:rgba(249,115,22,0.12); border-color:rgba(249,115,22,0.3); color:#f97316; }
+  .mode-solved { opacity:0.5; }
+  .mode-solved .mode-badge { background:rgba(0,255,136,0.05); color:var(--muted); border-color:var(--border); }
+
+  .stats-row { display:flex; gap:24px; animation:fadeUp 0.8s 0.2s ease both; }
+  .stat-chip { display:flex; flex-direction:column; align-items:center; gap:4px; }
+  .stat-num { font-family:'Syne',sans-serif; font-weight:700; font-size:22px; color:var(--accent); }
+  .stat-label { font-size:11px; color:var(--muted); letter-spacing:1px; text-transform:uppercase; font-family:'DM Mono',monospace; }
+  .stat-divider { width:1px; background:var(--border); align-self:stretch; }
+
+  /* ── LEADERBOARD SCREEN ── */
+  #leaderboard-screen { padding:0 16px 40px; max-width:600px; margin:0 auto; width:100%; }
+  .lb-header { display:flex; align-items:center; gap:16px; padding:20px 0 24px; }
+  .lb-title { font-family:'Syne',sans-serif; font-size:28px; font-weight:800; letter-spacing:-1px; flex:1; }
+  .lb-tabs { display:flex; gap:8px; margin-bottom:20px; flex-wrap:wrap; }
+  .lb-tab {
+    padding:8px 16px; border-radius:8px; border:1px solid var(--border);
+    background:var(--card); color:var(--secondary); font-family:'DM Mono',monospace;
+    font-size:11px; letter-spacing:1px; text-transform:uppercase; cursor:pointer; transition:all 0.2s;
+  }
+  .lb-tab.active { border-color:var(--accent); color:var(--accent); background:var(--accent-glow); }
+  .lb-table { display:flex; flex-direction:column; gap:8px; }
+  .lb-row {
+    display:flex; align-items:center; gap:14px;
+    background:var(--card); border:1px solid var(--border);
+    border-radius:var(--radius); padding:12px 16px;
+    transition:border-color 0.2s;
+  }
+  .lb-row.me { border-color:var(--accent); background:var(--accent-glow); }
+  .lb-rank {
+    font-family:'Syne',sans-serif; font-weight:800; font-size:18px;
+    width:28px; text-align:center; color:var(--muted);
+  }
+  .lb-rank.gold { color:#fbbf24; }
+  .lb-rank.silver { color:#94a3b8; }
+  .lb-rank.bronze { color:#c07841; }
+  .lb-user { flex:1; font-family:'DM Mono',monospace; font-size:14px; }
+  .lb-guesses { font-family:'Syne',sans-serif; font-weight:700; font-size:16px; color:var(--accent); }
+  .lb-time { font-family:'DM Mono',monospace; font-size:12px; color:var(--secondary); min-width:50px; text-align:right; }
+  .lb-empty { text-align:center; color:var(--muted); font-family:'DM Mono',monospace; font-size:13px; padding:40px 0; }
+
+  /* ── GAME SCREEN ── */
+  #game { flex-direction:column; max-width:600px; margin:0 auto; width:100%; padding:0 16px 40px; }
+  .game-header {
+    display:flex; align-items:center; justify-content:space-between;
+    padding:20px 0 0; margin-bottom:20px;
+  }
+  .back-btn {
+    background:none; border:1px solid var(--border); color:var(--secondary);
+    padding:8px 16px; border-radius:8px; cursor:pointer; font-family:'DM Sans',sans-serif;
+    font-size:13px; transition:all 0.2s; display:flex; align-items:center; gap:6px;
+  }
+  .back-btn:hover { border-color:var(--accent); color:var(--accent); }
+  .game-mode-label { font-family:'DM Mono',monospace; font-size:11px; letter-spacing:2px; text-transform:uppercase; color:var(--accent); opacity:0.7; }
+  .streak-badge {
+    display:flex; align-items:center; gap:5px;
+    font-family:'DM Mono',monospace; font-size:12px; color:#f97316;
+    background:rgba(249,115,22,0.1); border:1px solid rgba(249,115,22,0.2);
+    padding:5px 10px; border-radius:20px;
+  }
+  .diff-tabs { display:flex; gap:8px; margin-bottom:20px; animation:fadeUp 0.5s ease both; }
+  .diff-tab {
+    flex:1; padding:10px; border-radius:10px; border:1px solid var(--border);
+    background:var(--card); color:var(--secondary); font-family:'DM Mono',monospace;
+    font-size:11px; letter-spacing:1px; text-transform:uppercase; cursor:pointer; transition:all 0.2s; text-align:center;
+  }
+  .diff-tab.active { border-color:var(--accent); color:var(--accent); background:var(--accent-glow); }
+  .diff-tab.solved-tab { opacity:0.5; }
+
+  .riddle-card {
+    background:var(--card); border:1px solid var(--border); border-radius:var(--radius-lg);
+    padding:24px; margin-bottom:20px; position:relative; overflow:hidden; animation:fadeUp 0.5s ease both;
+  }
+  .riddle-card::before {
+    content:'"'; position:absolute; top:-10px; left:16px; font-size:120px;
+    font-family:'Syne',sans-serif; color:var(--accent); opacity:0.06; line-height:1; pointer-events:none;
+  }
+  .riddle-label {
+    font-family:'DM Mono',monospace; font-size:10px; letter-spacing:2px;
+    text-transform:uppercase; color:var(--accent); opacity:0.7; margin-bottom:12px;
+    display:flex; align-items:center; gap:6px;
+  }
+  .riddle-label::after { content:''; flex:1; height:1px; background:linear-gradient(to right,var(--accent-glow),transparent); }
+  .riddle-text { font-family:'Syne',sans-serif; font-size:20px; font-weight:600; line-height:1.5; }
+  .diff-pips { display:flex; gap:4px; margin-top:14px; }
+  .pip { width:20px; height:4px; border-radius:2px; background:var(--border); }
+  .pip.active { background:var(--accent); }
+
+  .progress-wrap { margin-bottom:16px; animation:fadeUp 0.5s 0.1s ease both; }
+  .progress-top { display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; }
+  .progress-label { font-family:'DM Mono',monospace; font-size:11px; letter-spacing:1px; color:var(--muted); text-transform:uppercase; }
+  .progress-pct { font-family:'Syne',sans-serif; font-weight:700; font-size:18px; color:var(--accent); transition:color 0.5s; }
+  .progress-track { height:6px; background:var(--surface); border-radius:3px; overflow:hidden; border:1px solid var(--border); }
+  .progress-fill { height:100%; border-radius:3px; background:linear-gradient(90deg,#00cc6a,#00ff88); transition:width 0.6s cubic-bezier(0.34,1.56,0.64,1); width:0%; box-shadow:0 0 10px var(--accent); }
+
+  .input-row { display:flex; gap:10px; margin-bottom:8px; animation:fadeUp 0.5s 0.15s ease both; }
+  .guess-input {
+    flex:1; background:var(--card); border:1.5px solid var(--border);
+    border-radius:var(--radius); padding:14px 18px;
+    font-family:'DM Mono',monospace; font-size:16px; color:var(--text);
+    outline:none; transition:border-color 0.2s,box-shadow 0.2s; letter-spacing:0.5px;
+  }
+  .guess-input:focus { border-color:var(--accent); box-shadow:0 0 0 3px var(--accent-glow); }
+  .guess-input::placeholder { color:var(--muted); }
+  .submit-btn {
+    background:var(--accent); color:#000; border:none; border-radius:var(--radius);
+    padding:14px 22px; font-family:'Syne',sans-serif; font-weight:700; font-size:14px;
+    cursor:pointer; transition:all 0.2s; white-space:nowrap; letter-spacing:0.5px;
+  }
+  .submit-btn:hover { box-shadow:0 0 20px rgba(0,255,136,0.4); transform:translateY(-1px); }
+
+  .feedback-msg { text-align:center; font-family:'DM Mono',monospace; font-size:13px; color:var(--secondary); min-height:20px; margin-bottom:8px; transition:all 0.3s; }
+  .feedback-msg.error { color:#ef4444; }
+  .feedback-msg.success { color:var(--accent); }
+
+  .guesses-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; animation:fadeUp 0.5s 0.2s ease both; }
+  .guesses-count { font-family:'DM Mono',monospace; font-size:11px; letter-spacing:1.5px; text-transform:uppercase; color:var(--muted); }
+  .action-btns { display:flex; gap:8px; }
+  .hint-btn, .giveup-btn {
+    padding:6px 14px; border-radius:8px; font-family:'DM Sans',sans-serif;
+    font-size:12px; cursor:pointer; transition:all 0.2s;
+  }
+  .hint-btn { background:transparent; border:1px solid rgba(0,255,136,0.3); color:var(--accent); }
+  .hint-btn:hover { background:var(--accent-glow); }
+  .giveup-btn { background:transparent; border:1px solid rgba(239,68,68,0.3); color:#ef4444; }
+  .giveup-btn:hover { background:rgba(239,68,68,0.1); }
+
+  .hint-panel {
+    background:var(--card); border:1px solid rgba(0,255,136,0.2);
+    border-radius:var(--radius); padding:16px; margin-bottom:16px; display:none; animation:fadeUp 0.3s ease both;
+  }
+  .hint-panel.visible { display:block; }
+  .hint-title { font-family:'DM Mono',monospace; font-size:10px; letter-spacing:2px; text-transform:uppercase; color:var(--accent); margin-bottom:8px; }
+  .hint-text { font-size:15px; color:var(--text); }
+  .hint-slots { display:flex; gap:6px; margin-top:10px; }
+  .hint-slot { width:28px; height:4px; border-radius:2px; background:var(--border); transition:background 0.3s; }
+  .hint-slot.used { background:var(--accent); }
+
+  .guess-list { display:flex; flex-direction:column; gap:6px; animation:fadeUp 0.5s 0.25s ease both; }
+  .guess-item {
+    display:flex; align-items:center; background:var(--card); border:1px solid var(--border);
+    border-radius:var(--radius); padding:12px 16px; gap:12px;
+    animation:slideIn 0.3s ease both; position:relative; overflow:hidden;
+  }
+  .guess-item::before {
+    content:''; position:absolute; left:0; top:0; bottom:0; width:3px;
+    background:var(--heat-color,var(--border));
+  }
+  .guess-bar-fill {
+    position:absolute; left:0; top:0; bottom:0;
+    background:linear-gradient(90deg,transparent,var(--heat-color,transparent));
+    opacity:0.06; pointer-events:none; z-index:0;
+  }
+  .guess-rank { font-family:'DM Mono',monospace; font-size:11px; color:var(--muted); width:20px; text-align:right; flex-shrink:0; position:relative; z-index:1; }
+  .guess-word { font-family:'Syne',sans-serif; font-weight:600; font-size:16px; flex:1; text-transform:capitalize; position:relative; z-index:1; }
+  .guess-pct { font-family:'DM Mono',monospace; font-size:13px; font-weight:500; min-width:42px; text-align:right; position:relative; z-index:1; }
+  .guess-heat { font-size:14px; min-width:80px; letter-spacing:1px; position:relative; z-index:1; }
+
+  /* ── WIN OVERLAY ── */
+  .win-overlay {
+    display:none; position:fixed; inset:0;
+    background:rgba(8,11,15,0.92); z-index:100;
+    align-items:center; justify-content:center; backdrop-filter:blur(8px);
+  }
+  .win-overlay.visible { display:flex; }
+  .win-card {
+    background:var(--card); border:1px solid var(--accent); border-radius:24px; padding:40px;
+    max-width:420px; width:90%; text-align:center;
+    box-shadow:0 0 80px rgba(0,255,136,0.2); animation:popIn 0.5s cubic-bezier(0.34,1.56,0.64,1) both;
+  }
+  .win-emoji { font-size:56px; margin-bottom:16px; }
+  .win-title { font-family:'Syne',sans-serif; font-size:36px; font-weight:800; color:var(--accent); margin-bottom:8px; letter-spacing:-1px; }
+  .win-subtitle { color:var(--secondary); font-size:14px; margin-bottom:10px; }
+  .win-word {
+    font-family:'DM Mono',monospace; font-size:26px; color:var(--text); margin-bottom:24px;
+    background:var(--surface); padding:12px 24px; border-radius:10px;
+    display:inline-block; border:1px solid var(--border);
+  }
+  .win-stats { display:flex; gap:20px; justify-content:center; margin-bottom:28px; }
+  .win-stat { text-align:center; }
+  .win-stat-num { font-family:'Syne',sans-serif; font-size:26px; font-weight:700; color:var(--accent); }
+  .win-stat-label { font-size:11px; color:var(--secondary); font-family:'DM Mono',monospace; text-transform:uppercase; letter-spacing:1px; }
+  .win-actions { display:flex; flex-direction:column; gap:10px; }
+  .win-btn { padding:14px; border-radius:12px; font-family:'Syne',sans-serif; font-weight:700; font-size:15px; cursor:pointer; transition:all 0.2s; }
+  .win-btn.primary { background:var(--accent); border:none; color:#000; }
+  .win-btn.primary:hover { box-shadow:0 0 20px rgba(0,255,136,0.4); }
+  .win-btn.secondary { background:transparent; border:1px solid var(--border); color:var(--secondary); }
+  .win-btn.secondary:hover { border-color:var(--text); color:var(--text); }
+
+  /* ── TOAST ── */
+  .toast {
+    position:fixed; bottom:24px; left:50%; transform:translateX(-50%) translateY(80px);
+    background:var(--card); border:1px solid var(--border); border-radius:12px;
+    padding:12px 24px; font-family:'DM Mono',monospace; font-size:13px;
+    z-index:200; transition:transform 0.3s cubic-bezier(0.34,1.56,0.64,1);
+    white-space:nowrap; box-shadow:0 8px 32px rgba(0,0,0,0.4);
+  }
+  .toast.show { transform:translateX(-50%) translateY(0); }
+  .toast.green { border-color:var(--accent); color:var(--accent); }
+  .toast.red { border-color:#ef4444; color:#ef4444; }
+
+  /* ── ANIMATIONS ── */
+  @keyframes fadeUp { from{opacity:0;transform:translateY(16px)} to{opacity:1;transform:translateY(0)} }
+  @keyframes slideIn { from{opacity:0;transform:translateX(-12px)} to{opacity:1;transform:translateX(0)} }
+  @keyframes popIn { from{opacity:0;transform:scale(0.85)} to{opacity:1;transform:scale(1)} }
+  @keyframes shake { 0%,100%{transform:translateX(0)} 20%,60%{transform:translateX(-6px)} 40%,80%{transform:translateX(6px)} }
+  .shake { animation:shake 0.4s ease; }
+</style>
+</head>
+<body>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<!-- ══════════ LOADING ══════════ -->
+<div id="loading" class="screen active">
+  <div class="loader-logo">Semantle</div>
+  <div class="loader-bar"><div class="loader-fill"></div></div>
+  <div class="loader-text" id="loader-text">Connecting...</div>
+</div>
+
+<!-- ══════════ USERNAME ══════════ -->
+<div id="username-screen" class="screen">
+  <div class="username-card">
+    <div class="username-icon">👤</div>
+    <div class="username-title">Choose a Username</div>
+    <div class="username-sub">This is how you'll appear on the leaderboard. No password needed.</div>
+    <input type="text" class="username-input" id="username-input" placeholder="your_name" maxlength="15"
+      onkeydown="if(event.key==='Enter') saveUsername()" autocomplete="off" spellcheck="false" />
+    <div class="username-rules">3–15 characters · letters, numbers, underscores only</div>
+    <button class="username-btn" onclick="saveUsername()">Start Playing →</button>
+    <div class="username-err" id="username-err"></div>
+  </div>
+</div>
+
+<!-- ══════════ HOME ══════════ -->
+<div id="home" class="screen">
+  <div class="home-inner">
+    <div class="logo-block">
+      <div class="logo-eyebrow">Word × Meaning</div>
+      <div class="logo-title">Semantle</div>
+      <div class="logo-sub">Guess the word — not by spelling, but by meaning.</div>
+    </div>
+
+    <div class="user-pill">
+      <div class="user-avatar" id="home-avatar">?</div>
+      <span class="user-name" id="home-username">loading...</span>
+      <span class="user-change" onclick="changeUsername()" title="Change username">✎</span>
+    </div>
+
+    <div class="mode-cards">
+      <div class="mode-card" id="card-easy" onclick="startGame('riddle','easy')">
+        <div class="mode-icon">🟢</div>
+        <div class="mode-info">
+          <div class="mode-name">Easy Riddle</div>
+          <div class="mode-desc" id="desc-easy">Today's gentle riddle. Perfect to start.</div>
+        </div>
+        <div class="mode-badge" id="badge-easy">Daily</div>
+      </div>
+      <div class="mode-card" id="card-medium" onclick="startGame('riddle','medium')">
+        <div class="mode-icon">🟡</div>
+        <div class="mode-info">
+          <div class="mode-name">Medium Riddle</div>
+          <div class="mode-desc" id="desc-medium">A bit trickier. Think deeper.</div>
+        </div>
+        <div class="mode-badge" id="badge-medium">Daily</div>
+      </div>
+      <div class="mode-card" id="card-hard" onclick="startGame('riddle','hard')">
+        <div class="mode-icon">🔴</div>
+        <div class="mode-info">
+          <div class="mode-name">Hard Riddle</div>
+          <div class="mode-desc" id="desc-hard">For the brave. Good luck.</div>
+        </div>
+        <div class="mode-badge" id="badge-hard">Daily</div>
+      </div>
+      <div class="mode-card" id="card-theme" onclick="startGame('theme','theme')">
+        <div class="mode-icon">🌊</div>
+        <div class="mode-info">
+          <div class="mode-name">Daily Theme</div>
+          <div class="mode-desc" id="desc-theme">A theme-based word puzzle. New every day.</div>
+        </div>
+        <div class="mode-badge" id="badge-theme">Daily</div>
+      </div>
+      <div class="mode-card" onclick="startGame('random','random')">
+        <div class="mode-icon">♾️</div>
+        <div class="mode-info">
+          <div class="mode-name">Random Mode</div>
+          <div class="mode-desc">Unlimited practice. No pressure.</div>
+        </div>
+        <div class="mode-badge warm">∞</div>
+      </div>
+    </div>
+
+    <div style="display:flex;gap:16px;align-items:center;">
+      <div class="stats-row">
+        <div class="stat-chip">
+          <span class="stat-num" id="stat-streak">0</span>
+          <span class="stat-label">Streak</span>
+        </div>
+        <div class="stat-divider"></div>
+        <div class="stat-chip">
+          <span class="stat-num" id="stat-best">0</span>
+          <span class="stat-label">Best</span>
+        </div>
+        <div class="stat-divider"></div>
+        <div class="stat-chip">
+          <span class="stat-num" id="stat-solved">0</span>
+          <span class="stat-label">Solved</span>
+        </div>
+      </div>
+      <button onclick="showLeaderboard()" style="background:var(--card);border:1px solid var(--border);color:var(--secondary);padding:10px 16px;border-radius:10px;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:13px;transition:all 0.2s;" onmouseover="this.style.borderColor='var(--accent)';this.style.color='var(--accent)'" onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--secondary)'">🏆 Leaderboard</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════ LEADERBOARD ══════════ -->
+<div id="leaderboard-screen" class="screen">
+  <div class="lb-header">
+    <button class="back-btn" onclick="showScreen('home')">← Back</button>
+    <div class="lb-title">Leaderboard</div>
+  </div>
+  <div class="lb-tabs">
+    <button class="lb-tab active" onclick="loadLeaderboard('easy',this)">Easy</button>
+    <button class="lb-tab" onclick="loadLeaderboard('medium',this)">Medium</button>
+    <button class="lb-tab" onclick="loadLeaderboard('hard',this)">Hard</button>
+    <button class="lb-tab" onclick="loadLeaderboard('theme',this)">Theme</button>
+  </div>
+  <div class="lb-table" id="lb-table"><div class="lb-empty">Loading...</div></div>
+</div>
+
+<!-- ══════════ GAME ══════════ -->
+<div id="game" class="screen">
+  <div class="game-header">
+    <button class="back-btn" onclick="goHome()">← Home</button>
+    <span class="game-mode-label" id="mode-label">Daily Riddle</span>
+    <div class="streak-badge">🔥 <span id="streak-count">0</span></div>
+  </div>
+
+  <div class="riddle-card" id="puzzle-card">
+    <div class="riddle-label" id="riddle-label-text">Loading puzzle...</div>
+    <div class="riddle-text" id="riddle-text">Please wait...</div>
+    <div class="diff-pips" id="diff-pips"></div>
+  </div>
+
+  <div class="progress-wrap">
+    <div class="progress-top">
+      <span class="progress-label">Best similarity</span>
+      <span class="progress-pct" id="progress-pct">0%</span>
+    </div>
+    <div class="progress-track"><div class="progress-fill" id="progress-fill"></div></div>
+  </div>
+
+  <div class="input-row">
+    <input type="text" class="guess-input" id="guess-input" placeholder="Type a word..."
+      autocomplete="off" autocorrect="off" spellcheck="false"
+      onkeydown="if(event.key==='Enter') submitGuess()" />
+    <button class="submit-btn" onclick="submitGuess()">Guess →</button>
+  </div>
+  <div class="feedback-msg" id="feedback-msg"></div>
+
+  <div class="guesses-header">
+    <span class="guesses-count">Guesses: <span id="guess-count">0</span></span>
+    <div class="action-btns">
+      <button class="hint-btn" onclick="getHint()">💡 Hint</button>
+      <button class="giveup-btn" onclick="giveUp()">Give Up</button>
+    </div>
+  </div>
+
+  <div class="hint-panel" id="hint-panel">
+    <div class="hint-title">Hint <span id="hint-num">1</span></div>
+    <div class="hint-text" id="hint-text"></div>
+    <div class="hint-slots">
+      <div class="hint-slot" id="hs-1"></div><div class="hint-slot" id="hs-2"></div>
+      <div class="hint-slot" id="hs-3"></div><div class="hint-slot" id="hs-4"></div>
+      <div class="hint-slot" id="hs-5"></div>
+    </div>
+  </div>
+
+  <div class="guess-list" id="guess-list"></div>
+</div>
+
+<!-- WIN OVERLAY -->
+<div class="win-overlay" id="win-overlay">
+  <div class="win-card">
+    <div class="win-emoji">🎉</div>
+    <div class="win-title">Solved!</div>
+    <div class="win-subtitle">The answer was</div>
+    <div class="win-word" id="win-word">stamp</div>
+    <div class="win-stats">
+      <div class="win-stat"><div class="win-stat-num" id="win-guesses">—</div><div class="win-stat-label">Guesses</div></div>
+      <div class="win-stat"><div class="win-stat-num" id="win-hints">—</div><div class="win-stat-label">Hints</div></div>
+      <div class="win-stat"><div class="win-stat-num" id="win-time">—</div><div class="win-stat-label">Seconds</div></div>
+    </div>
+    <div class="win-actions">
+      <button class="win-btn primary" onclick="nextPuzzle()">Play Next →</button>
+      <button class="win-btn secondary" onclick="goHome()">Back to Home</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════ SCRIPT ══════════════════════════════ -->
+<script>
+// ── SUPABASE INIT ──
+const { createClient } = supabase;
+const SUPABASE_URL = 'https://kpqvhdzoxobacdlvjcnx.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtwcXZoZHpveG9iYWNkbHZqY254Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM2ODEzMzQsImV4cCI6MjA4OTI1NzMzNH0.CT9D2C4FroN7R7O-ijtCcIAJc63hcU0PJn-KE3G-7eQ';
+const db = createClient(SUPABASE_URL, SUPABASE_KEY);
+
+// ── STATE ──
+let state = {
+  username: null,
+  mode: null,
+  difficulty: null,
+  currentPuzzle: null,
+  dailyPuzzle: null,
+  guesses: [],
+  hintsUsed: 0,
+  startTime: null,
+  guessCount: 0,
+  bestSimilarity: 0,
+  solved: false,
+  userStats: { streak: 0, best_streak: 0, total_solved: 0 },
+  todaySolved: {}  // { easy: true, medium: false, ... }
+};
+
+// ── SCREEN MANAGER ──
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+// ── TOAST ──
+let toastTimer;
+function toast(msg, type = '') {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast show ' + type;
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 2800);
+}
+
+// ── INIT ──
+async function init() {
+  setLoaderText('Loading...');
+  // Check stored username
+  const stored = localStorage.getItem('semantle_username');
+  if (stored) {
+    state.username = stored;
+    setLoaderText('Fetching your stats...');
+    await loadUserStats();
+    setLoaderText('Loading today\'s puzzle...');
+    await loadDailyPuzzle();
+    setLoaderText('Ready!');
+    setTimeout(() => { showScreen('home'); refreshHomeUI(); }, 600);
+  } else {
+    setTimeout(() => showScreen('username-screen'), 1200);
+  }
+}
+
+function setLoaderText(t) { document.getElementById('loader-text').textContent = t; }
+
+// ── USERNAME ──
+async function saveUsername() {
+  const val = document.getElementById('username-input').value.trim();
+  const err = document.getElementById('username-err');
+  err.textContent = '';
+
+  if (!/^[a-zA-Z0-9_]{3,15}$/.test(val)) {
+    err.textContent = '3–15 characters. Letters, numbers, underscores only.';
+    return;
+  }
+
+  // Check uniqueness
+  const { data: existing } = await db.from('users').select('username').eq('username', val).single();
+  if (existing) { err.textContent = 'Username taken. Try another!'; return; }
+
+  // Create user in DB
+  const { error } = await db.from('users').insert({ username: val, streak: 0, best_streak: 0, total_solved: 0 });
+  if (error) { err.textContent = 'Error saving. Try again.'; return; }
+
+  state.username = val;
+  localStorage.setItem('semantle_username', val);
+  await loadUserStats();
+  await loadDailyPuzzle();
+  showScreen('home');
+  refreshHomeUI();
+  toast('Welcome, ' + val + '! 👋', 'green');
+}
+
+function changeUsername() {
+  if (!confirm('Change username? Your current progress will be lost.')) return;
+  localStorage.removeItem('semantle_username');
+  state.username = null;
+  showScreen('username-screen');
+}
+
+// ── LOAD USER STATS ──
+async function loadUserStats() {
+  const { data } = await db.from('users').select('*').eq('username', state.username).single();
+  if (data) state.userStats = data;
+
+  // Load today's solved status
+  const today = new Date().toISOString().split('T')[0];
+  const { data: prog } = await db.from('user_progress')
+    .select('puzzle_type, solved')
+    .eq('username', state.username)
+    .eq('date', today);
+
+  state.todaySolved = {};
+  if (prog) prog.forEach(p => { if (p.solved) state.todaySolved[p.puzzle_type] = true; });
+}
+
+// ── LOAD DAILY PUZZLE ──
+async function loadDailyPuzzle() {
+  const today = new Date().toISOString().split('T')[0];
+  const { data } = await db.from('daily_puzzles')
+    .select(`
+      *,
+      easy:easy_riddle_id(id, riddle_text, answer, category, definition, synonyms),
+      medium:medium_riddle_id(id, riddle_text, answer, category, definition, synonyms),
+      hard:hard_riddle_id(id, riddle_text, answer, category, definition, synonyms),
+      theme:theme_id(id, theme_name, theme_emoji)
+    `)
+    .eq('date', today)
+    .single();
+
+  state.dailyPuzzle = data;
+}
+
+// ── HOME UI ──
+function refreshHomeUI() {
+  const u = state.username;
+  document.getElementById('home-username').textContent = u;
+  document.getElementById('home-avatar').textContent = u ? u[0].toUpperCase() : '?';
+  document.getElementById('stat-streak').textContent = state.userStats.streak || 0;
+  document.getElementById('stat-best').textContent = state.userStats.best_streak || 0;
+  document.getElementById('stat-solved').textContent = state.userStats.total_solved || 0;
+  document.getElementById('streak-count').textContent = state.userStats.streak || 0;
+
+  // Mark solved modes
+  ['easy','medium','hard','theme'].forEach(type => {
+    const card = document.getElementById('card-' + type);
+    const badge = document.getElementById('badge-' + type);
+    if (!card) return;
+    if (state.todaySolved[type]) {
+      card.classList.add('mode-solved');
+      badge.textContent = '✓ Done';
+    } else {
+      card.classList.remove('mode-solved');
+      badge.textContent = type === 'theme' ? 'Daily' : 'Daily';
+    }
+  });
+
+  // Update theme card icon/desc
+  if (state.dailyPuzzle?.theme) {
+    const t = state.dailyPuzzle.theme;
+    document.getElementById('card-theme').querySelector('.mode-icon').textContent = t.theme_emoji || '🎯';
+    document.getElementById('desc-theme').textContent = `Theme: ${t.theme_name}. Guess the word!`;
+  }
+}
+
+// ── START GAME ──
+async function startGame(mode, difficulty) {
+  state.mode = mode;
+  state.difficulty = difficulty;
+  state.guesses = [];
+  state.hintsUsed = 0;
+  state.guessCount = 0;
+  state.bestSimilarity = 0;
+  state.solved = false;
+  state.startTime = Date.now();
+
+  // Load puzzle data
+  let puzzle = null;
+
+  if (mode === 'riddle') {
+    if (state.dailyPuzzle) {
+      puzzle = state.dailyPuzzle[difficulty];
+      if (puzzle) {
+        puzzle.answer = puzzle.answer;
+        puzzle.mode = 'riddle';
+      }
+    }
+    // Fallback to random riddle from DB
+    if (!puzzle) {
+      const { data } = await db.from('riddles').select('*').eq('difficulty', difficulty).limit(10);
+      if (data && data.length) puzzle = data[Math.floor(Math.random() * data.length)];
+    }
+  } else if (mode === 'theme') {
+    if (state.dailyPuzzle) {
+      puzzle = {
+        theme: state.dailyPuzzle.theme,
+        answer: state.dailyPuzzle.theme_word,
+        category: state.dailyPuzzle.theme?.theme_name,
+        definition: `A word related to ${state.dailyPuzzle.theme?.theme_name}`,
+        synonyms: [],
+        mode: 'theme'
+      };
+    }
+  } else {
+    // Random mode — pick from DB
+    const { data } = await db.from('riddles').select('*');
+    if (data && data.length) {
+      puzzle = data[Math.floor(Math.random() * data.length)];
+      puzzle.mode = 'random';
+    }
+  }
+
+  if (!puzzle) { toast('Could not load puzzle. Try again.', 'red'); return; }
+  state.currentPuzzle = puzzle;
+
+  // Build game UI
+  const modeLabels = { riddle: 'Daily Riddle · ' + difficulty, theme: 'Daily Theme', random: 'Random Mode' };
+  document.getElementById('mode-label').textContent = modeLabels[mode] || mode;
+
+  // Puzzle card
+  if (mode === 'riddle') {
+    document.getElementById('riddle-label-text').textContent =
+      `Today's Riddle · ${difficulty.charAt(0).toUpperCase() + difficulty.slice(1)}`;
+    document.getElementById('riddle-text').textContent = puzzle.riddle_text;
+    const diffMap = { easy:1, medium:2, hard:3 };
+    document.getElementById('diff-pips').innerHTML = [1,2,3].map(n =>
+      `<div class="pip ${n <= (diffMap[difficulty]||0) ? 'active' : ''}"></div>`).join('');
+    document.getElementById('puzzle-card').style.display = 'block';
+  } else if (mode === 'theme') {
+    document.getElementById('riddle-label-text').textContent = `Today's Theme`;
+    document.getElementById('riddle-text').textContent =
+      `${puzzle.theme?.theme_emoji || '🎯'} Theme: ${puzzle.theme?.theme_name || 'Unknown'}\n\nGuess the hidden word associated with this theme!`;
+    document.getElementById('diff-pips').innerHTML = '';
+    document.getElementById('puzzle-card').style.display = 'block';
+  } else {
+    document.getElementById('puzzle-card').style.display = 'none';
+  }
+
+  // Reset UI
+  document.getElementById('guess-list').innerHTML = '';
+  document.getElementById('guess-count').textContent = '0';
+  document.getElementById('progress-pct').textContent = '0%';
+  document.getElementById('progress-fill').style.width = '0%';
+  document.getElementById('feedback-msg').textContent = '';
+  document.getElementById('hint-panel').classList.remove('visible');
+  document.getElementById('guess-input').value = '';
+  for (let i = 1; i <= 5; i++) document.getElementById(`hs-${i}`).classList.remove('used');
+  document.getElementById('win-overlay').classList.remove('visible');
+
+  showScreen('game');
+  setTimeout(() => document.getElementById('guess-input').focus(), 300);
+}
+
+// ── SIMILARITY ENGINE ──
+// Cosine similarity simulation using semantic word relationships.
+// In production, replace getSimilarity() with a real embedding API call.
+const SEMANTIC_MAP = {
+  stamp:    {postage:94,mail:89,letter:84,envelope:80,post:77,seal:70,mark:65,ink:58,paper:52,address:44,send:42,travel:38},
+  clock:    {watch:95,timer:90,alarm:85,time:82,hourglass:78,dial:72,hand:65,tick:60,hour:56,minute:52,face:44,wall:35},
+  footstep: {step:93,footprint:88,walk:83,track:78,foot:74,path:68,tread:63,stride:58,march:52,pace:48},
+  breath:   {air:91,inhale:87,exhale:85,lung:80,oxygen:75,wind:68,sigh:63,gasp:58,pant:52,breathe:48},
+  echo:     {sound:91,reverberate:85,bounce:78,reflect:72,resonance:68,voice:62,noise:58,wave:52,vibration:48,cave:45,mountain:40},
+  joke:     {pun:92,humor:88,wit:84,laugh:80,comedy:76,funny:72,riddle:65,gag:60,jest:56,banter:50},
+  coffin:   {casket:95,burial:85,grave:80,funeral:76,dead:70,tomb:66,death:62,body:55,cemetery:50},
+  map:      {chart:91,atlas:87,diagram:82,geography:78,navigation:74,route:68,grid:62,compass:56,legend:50},
+  fire:     {flame:95,blaze:90,burn:86,heat:82,smoke:78,inferno:74,ash:68,ember:64,spark:60,torch:55},
+  whale:    {dolphin:93,shark:86,ocean:82,marine:78,sea:74,mammal:70,fish:65,swim:60,blue:52,deep:48,water:44},
+  orbit:    {revolve:93,circle:88,rotate:84,planet:80,moon:76,satellite:72,space:68,gravity:64,ellipse:60,path:55,sun:52},
+  rhythm:   {beat:93,tempo:90,melody:86,music:82,cadence:78,pulse:74,groove:68,pattern:62,flow:56,sound:50},
+  river:    {stream:93,creek:88,waterway:84,water:80,flow:76,current:72,lake:65,ocean:58,flood:52,bank:48,fish:44},
+  forest:   {woods:93,jungle:88,trees:84,wilderness:80,nature:76,grove:70,timber:64,canopy:58,leaf:52,wildlife:48},
+  echo:     {sound:91,noise:82,reverberate:78,bounce:72,reflect:68,voice:62,wave:55,vibration:50,cave:45},
+};
+
+function getSimilarity(guess, answer) {
+  const g = guess.toLowerCase().trim();
+  const a = answer.toLowerCase().trim();
+  if (g === a) return 100;
+
+  const map = SEMANTIC_MAP[a] || {};
+  if (map[g] !== undefined) return map[g];
+
+  // Check reverse
+  const reverseMap = SEMANTIC_MAP[g] || {};
+  if (reverseMap[a] !== undefined) return reverseMap[a];
+
+  // Check synonyms from puzzle
+  const syns = state.currentPuzzle?.synonyms || [];
+  if (syns.map(s => s.toLowerCase()).includes(g)) return 82 + Math.floor(Math.random() * 10);
+
+  // Partial match
+  if (a.includes(g) || g.includes(a)) return 55 + Math.floor(Math.random() * 15);
+
+  // Deterministic hash for consistent results
+  const hash = [...(g + a)].reduce((acc, c) => (acc * 31 + c.charCodeAt(0)) & 0xffff, 0);
+  return 4 + (hash % 28);
+}
+
+function getHeatInfo(pct) {
+  if (pct >= 90) return { emoji:'🔥🔥🔥🔥🔥', color:'#ff4444' };
+  if (pct >= 75) return { emoji:'🔥🔥🔥🔥',   color:'#ff7700' };
+  if (pct >= 60) return { emoji:'🔥🔥🔥',      color:'#ffaa00' };
+  if (pct >= 40) return { emoji:'🔥🔥',         color:'#ffcc44' };
+  if (pct >= 20) return { emoji:'🔥',            color:'#88aaff' };
+  return               { emoji:'❄️',             color:'#3b82f6' };
+}
+
+// ── SUBMIT GUESS ──
+function submitGuess() {
+  if (state.solved) return;
+  const input = document.getElementById('guess-input');
+  const raw = input.value.trim();
+  if (!raw) return;
+  const guess = raw.toLowerCase().replace(/[^a-z]/g, '');
+  if (!guess) return;
+
+  if (state.guesses.find(g => g.word === guess)) {
+    showFeedback('Already guessed!', 'error');
+    input.classList.add('shake');
+    setTimeout(() => input.classList.remove('shake'), 400);
+    return;
+  }
+
+  const similarity = getSimilarity(guess, state.currentPuzzle.answer);
+  state.guesses.push({ word: guess, similarity });
+  state.guesses.sort((a, b) => b.similarity - a.similarity);
+  state.guesses.forEach((g, i) => g.rank = i + 1);
+  state.guessCount++;
+  state.bestSimilarity = Math.max(state.bestSimilarity, similarity);
+
+  updateProgress(state.bestSimilarity);
+  renderGuesses();
+  document.getElementById('guess-count').textContent = state.guessCount + (state.hintsUsed ? ` +${state.hintsUsed}h` : '');
+  document.getElementById('feedback-msg').textContent = '';
+  input.value = '';
+  input.focus();
+
+  if (guess === state.currentPuzzle.answer.toLowerCase() || similarity === 100) {
+    setTimeout(() => showWin(), 400);
+  }
+}
+
+function showFeedback(msg, type = '') {
+  const el = document.getElementById('feedback-msg');
+  el.textContent = msg; el.className = 'feedback-msg ' + type;
+}
+
+function updateProgress(pct) {
+  document.getElementById('progress-pct').textContent = Math.round(pct) + '%';
+  document.getElementById('progress-fill').style.width = pct + '%';
+  const el = document.getElementById('progress-pct');
+  el.style.color = pct >= 75 ? '#ff7700' : 'var(--accent)';
+}
+
+function renderGuesses() {
+  document.getElementById('guess-list').innerHTML = state.guesses.map(g => {
+    const h = getHeatInfo(g.similarity);
+    return `<div class="guess-item" style="--heat-color:${h.color}">
+      <div class="guess-bar-fill" style="width:${g.similarity}%"></div>
+      <span class="guess-rank">${g.rank}</span>
+      <span class="guess-word">${g.word}</span>
+      <span class="guess-pct" style="color:${h.color}">${g.similarity}%</span>
+      <span class="guess-heat">${h.emoji}</span>
+    </div>`;
+  }).join('');
+}
+
+// ── HINTS ──
+function getHint() {
+  if (state.hintsUsed >= 5) { toast('No more hints!', 'red'); return; }
+  const p = state.currentPuzzle;
+  const a = p.answer;
+  const n = state.hintsUsed;
+  const texts = [
+    `The word has ${a.length} letters.`,
+    `It starts with "${a[0].toUpperCase()}".`,
+    `Category: ${p.category || 'unknown'}.`,
+    `Definition: "${(p.definition || '').substring(0, 40)}..."`,
+    `Synonym: "${(p.synonyms || [])[0] || '?'}"`
+  ];
+  state.hintsUsed++;
+  document.getElementById(`hs-${state.hintsUsed}`).classList.add('used');
+  document.getElementById('hint-num').textContent = state.hintsUsed;
+  document.getElementById('hint-text').textContent = texts[n];
+  document.getElementById('hint-panel').classList.add('visible');
+  document.getElementById('guess-count').textContent = state.guessCount + ` +${state.hintsUsed}h`;
+}
+
+// ── GIVE UP ──
+function giveUp() {
+  if (state.solved) return;
+  if (!confirm(`Give up? The answer was "${state.currentPuzzle.answer}".`)) return;
+  showFeedback(`The answer was: ${state.currentPuzzle.answer}`, 'error');
+  // Break streak in DB
+  if (state.mode !== 'random') breakStreak();
+}
+
+async function breakStreak() {
+  await db.from('users').update({ streak: 0 }).eq('username', state.username);
+  state.userStats.streak = 0;
+}
+
+// ── WIN ──
+async function showWin() {
+  state.solved = true;
+  const elapsed = Math.round((Date.now() - state.startTime) / 1000);
+  const totalGuesses = state.guessCount + state.hintsUsed;
+
+  document.getElementById('win-word').textContent = state.currentPuzzle.answer;
+  document.getElementById('win-guesses').textContent = totalGuesses;
+  document.getElementById('win-hints').textContent = state.hintsUsed;
+  document.getElementById('win-time').textContent = elapsed + 's';
+  document.getElementById('win-overlay').classList.add('visible');
+
+  if (state.mode !== 'random') {
+    const today = new Date().toISOString().split('T')[0];
+    const ptype = state.mode === 'theme' ? 'theme' : state.difficulty;
+
+    // Save to leaderboard
+    await db.from('leaderboard').upsert({
+      username: state.username,
+      puzzle_type: ptype,
+      guesses: totalGuesses,
+      hints_used: state.hintsUsed,
+      time_seconds: elapsed,
+      date: today
+    }, { onConflict: 'username,puzzle_type,date' });
+
+    // Save progress
+    await db.from('user_progress').upsert({
+      username: state.username,
+      puzzle_type: ptype,
+      date: today,
+      solved: true,
+      guesses: totalGuesses,
+      hints_used: state.hintsUsed,
+      time_seconds: elapsed
+    }, { onConflict: 'username,puzzle_type,date' });
+
+    // Update streak & stats
+    const newStreak = (state.userStats.streak || 0) + 1;
+    const newBest = Math.max(newStreak, state.userStats.best_streak || 0);
+    const newSolved = (state.userStats.total_solved || 0) + 1;
+
+    await db.from('users').update({
+      streak: newStreak,
+      best_streak: newBest,
+      total_solved: newSolved
+    }).eq('username', state.username);
+
+    state.userStats = { ...state.userStats, streak: newStreak, best_streak: newBest, total_solved: newSolved };
+    state.todaySolved[ptype] = true;
+    document.getElementById('streak-count').textContent = newStreak;
+  } else {
+    // Random mode: just count solved
+    const newSolved = (state.userStats.total_solved || 0) + 1;
+    await db.from('users').update({ total_solved: newSolved }).eq('username', state.username);
+    state.userStats.total_solved = newSolved;
+  }
+}
+
+function nextPuzzle() {
+  document.getElementById('win-overlay').classList.remove('visible');
+  if (state.mode === 'random') startGame('random', 'random');
+  else goHome();
+}
+
+function goHome() {
+  document.getElementById('win-overlay').classList.remove('visible');
+  refreshHomeUI();
+  showScreen('home');
+}
+
+// ── LEADERBOARD ──
+async function showLeaderboard() {
+  showScreen('leaderboard-screen');
+  await loadLeaderboard('easy', document.querySelector('.lb-tab'));
+}
+
+async function loadLeaderboard(type, el) {
+  document.querySelectorAll('.lb-tab').forEach(t => t.classList.remove('active'));
+  if (el) el.classList.add('active');
+
+  const today = new Date().toISOString().split('T')[0];
+  const { data } = await db.from('leaderboard')
+    .select('username, guesses, hints_used, time_seconds')
+    .eq('puzzle_type', type)
+    .eq('date', today)
+    .order('guesses', { ascending: true })
+    .order('time_seconds', { ascending: true })
+    .limit(20);
+
+  const table = document.getElementById('lb-table');
+  if (!data || !data.length) {
+    table.innerHTML = '<div class="lb-empty">No entries yet today. Be the first! 🏆</div>';
+    return;
+  }
+
+  const rankColors = ['gold', 'silver', 'bronze'];
+  table.innerHTML = data.map((row, i) => `
+    <div class="lb-row ${row.username === state.username ? 'me' : ''}">
+      <span class="lb-rank ${rankColors[i] || ''}">${i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : i + 1}</span>
+      <span class="lb-user">${row.username}${row.username === state.username ? ' (you)' : ''}</span>
+      <span class="lb-guesses">${row.guesses}</span>
+      <span class="lb-time">${row.time_seconds}s</span>
+    </div>
+  `).join('');
+}
+
+// ── START ──
+init();
+</script>
+</body>
+</html>
