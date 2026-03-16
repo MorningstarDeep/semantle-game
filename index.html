@@ -123,21 +123,13 @@
     -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;
   }
   .logo-sub { font-size:15px; color:var(--secondary); margin-top:14px; font-weight:300; }
-  .user-pill {
-    display:flex; align-items:center; gap:10px;
-    background:var(--card); border:1px solid var(--border);
-    border-radius:30px; padding:8px 16px 8px 8px;
-    animation:fadeUp 0.8s 0.05s ease both;
-  }
   .user-avatar {
     width:32px; height:32px; border-radius:50%;
     background:linear-gradient(135deg,var(--accent),#0066ff);
     display:flex; align-items:center; justify-content:center;
     font-family:'Syne',sans-serif; font-weight:700; font-size:13px; color:#000;
+    flex-shrink:0;
   }
-  .user-name { font-family:'DM Mono',monospace; font-size:13px; }
-  .user-change { font-size:11px; color:var(--muted); cursor:pointer; margin-left:4px; }
-  .user-change:hover { color:var(--accent); }
 
   .mode-cards { width:100%; display:flex; flex-direction:column; gap:12px; animation:fadeUp 0.8s 0.1s ease both; }
   .mode-card {
@@ -440,11 +432,20 @@
       <div class="logo-sub">Guess the word — not by spelling, but by meaning.</div>
     </div>
 
-    <div class="user-pill">
-      <div class="user-avatar" id="home-avatar">?</div>
-      <span class="user-name" id="home-username">loading...</span>
-      <span class="user-change" onclick="openRenameModal()" title="Change username">✎</span>
-      <span class="user-change" onclick="logOut()" title="Log out" style="margin-left:2px;">⏏</span>
+    <!-- Top-right user controls — fixed position -->
+    <div id="user-topbar" style="position:fixed;top:16px;right:16px;z-index:50;display:flex;align-items:center;gap:8px;">
+      <div style="display:flex;align-items:center;gap:8px;background:var(--card);border:1px solid var(--border);border-radius:30px;padding:6px 14px 6px 8px;">
+        <div class="user-avatar" id="home-avatar">?</div>
+        <span class="user-name" id="home-username" style="font-size:13px;font-family:'DM Mono',monospace;">loading...</span>
+      </div>
+      <button onclick="openRenameModal()" title="Change username"
+        style="background:var(--card);border:1px solid var(--border);color:var(--secondary);width:36px;height:36px;border-radius:50%;cursor:pointer;font-size:15px;transition:all 0.2s;display:flex;align-items:center;justify-content:center;"
+        onmouseover="this.style.borderColor='var(--accent)';this.style.color='var(--accent)'"
+        onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--secondary)'">✎</button>
+      <button onclick="logOut()" title="Log out"
+        style="background:var(--card);border:1px solid var(--border);color:var(--secondary);width:36px;height:36px;border-radius:50%;cursor:pointer;font-size:15px;transition:all 0.2s;display:flex;align-items:center;justify-content:center;"
+        onmouseover="this.style.borderColor='#ef4444';this.style.color='#ef4444'"
+        onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--secondary)'">⏏</button>
     </div>
 
     <div class="mode-cards">
@@ -936,26 +937,32 @@ async function startGame(mode, difficulty) {
   state.guessCount = 0;
   state.bestSimilarity = 0;
   state.solved = false;
+  state.gaveUp = false;
   state.startTime = Date.now();
+
+  // Re-enable input in case previous game was given up
+  const inp = document.getElementById('guess-input');
+  const sbtn = document.querySelector('.submit-btn');
+  if (inp) { inp.disabled = false; inp.placeholder = 'Type a word...'; }
+  if (sbtn) { sbtn.disabled = false; sbtn.style.opacity = '1'; }
 
   // Load puzzle data
   let puzzle = null;
 
   if (mode === 'riddle') {
-    if (state.dailyPuzzle) {
-      puzzle = state.dailyPuzzle[difficulty];
-      if (puzzle) {
-        puzzle.answer = puzzle.answer;
-        puzzle.mode = 'riddle';
-      }
+    // Try daily puzzle first
+    if (state.dailyPuzzle && state.dailyPuzzle[difficulty]) {
+      puzzle = { ...state.dailyPuzzle[difficulty], mode: 'riddle' };
     }
-    // Fallback to random riddle from DB
-    if (!puzzle) {
-      const { data } = await db.from('riddles').select('*').eq('difficulty', difficulty).limit(10);
-      if (data && data.length) puzzle = data[Math.floor(Math.random() * data.length)];
+    // Fallback: pull a random riddle of that difficulty from DB
+    if (!puzzle || !puzzle.answer) {
+      const { data } = await db.from('riddles').select('*').eq('difficulty', difficulty);
+      if (data && data.length) puzzle = { ...data[Math.floor(Math.random() * data.length)], mode: 'riddle' };
     }
+
   } else if (mode === 'theme') {
-    if (state.dailyPuzzle) {
+    // Try daily puzzle first
+    if (state.dailyPuzzle && state.dailyPuzzle.theme_word && state.dailyPuzzle.theme) {
       puzzle = {
         theme: state.dailyPuzzle.theme,
         answer: state.dailyPuzzle.theme_word,
@@ -965,6 +972,24 @@ async function startGame(mode, difficulty) {
         mode: 'theme'
       };
     }
+    // Fallback: pick a random theme + word from themes table
+    if (!puzzle) {
+      const { data: themes } = await db.from('themes').select('*');
+      if (themes && themes.length) {
+        const t = themes[Math.floor(Math.random() * themes.length)];
+        const pool = t.word_pool || [];
+        const word = pool[Math.floor(Math.random() * pool.length)] || 'ocean';
+        puzzle = {
+          theme: { theme_name: t.theme_name, theme_emoji: t.theme_emoji },
+          answer: word,
+          category: t.theme_name,
+          definition: `A word related to ${t.theme_name}`,
+          synonyms: [],
+          mode: 'theme'
+        };
+      }
+    }
+
   } else {
     // Random mode — pick from DB
     const { data } = await db.from('riddles').select('*');
@@ -1154,8 +1179,22 @@ function getHint() {
 function giveUp() {
   if (state.solved) return;
   if (!confirm(`Give up? The answer was "${state.currentPuzzle.answer}".`)) return;
+
+  // Lock the game — mark as gave up, not solved
+  state.solved = true;
+  state.gaveUp = true;
+
+  // Disable input and buttons so the answer can't be re-entered
+  const input = document.getElementById('guess-input');
+  const submitBtn = document.querySelector('.submit-btn');
+  input.disabled = true;
+  input.placeholder = 'Game over';
+  submitBtn.disabled = true;
+  submitBtn.style.opacity = '0.4';
+
   showFeedback(`The answer was: ${state.currentPuzzle.answer}`, 'error');
-  // Break streak in DB
+
+  // Break streak in DB (non-random modes only)
   if (state.mode !== 'random') breakStreak();
 }
 
