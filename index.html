@@ -1163,49 +1163,45 @@ async function startGame(mode, difficulty) {
   setTimeout(() => document.getElementById('guess-input').focus(), 300);
 }
 
-// ── SIMILARITY ENGINE ──
-// Cosine similarity simulation using semantic word relationships.
-// In production, replace getSimilarity() with a real embedding API call.
-const SEMANTIC_MAP = {
-  stamp:    {postage:94,mail:89,letter:84,envelope:80,post:77,seal:70,mark:65,ink:58,paper:52,address:44,send:42,travel:38},
-  clock:    {watch:95,timer:90,alarm:85,time:82,hourglass:78,dial:72,hand:65,tick:60,hour:56,minute:52,face:44,wall:35},
-  footstep: {step:93,footprint:88,walk:83,track:78,foot:74,path:68,tread:63,stride:58,march:52,pace:48},
-  breath:   {air:91,inhale:87,exhale:85,lung:80,oxygen:75,wind:68,sigh:63,gasp:58,pant:52,breathe:48},
-  echo:     {sound:91,reverberate:85,bounce:78,reflect:72,resonance:68,voice:62,noise:58,wave:52,vibration:48,cave:45,mountain:40},
-  joke:     {pun:92,humor:88,wit:84,laugh:80,comedy:76,funny:72,riddle:65,gag:60,jest:56,banter:50},
-  coffin:   {casket:95,burial:85,grave:80,funeral:76,dead:70,tomb:66,death:62,body:55,cemetery:50},
-  map:      {chart:91,atlas:87,diagram:82,geography:78,navigation:74,route:68,grid:62,compass:56,legend:50},
-  fire:     {flame:95,blaze:90,burn:86,heat:82,smoke:78,inferno:74,ash:68,ember:64,spark:60,torch:55},
-  whale:    {dolphin:93,shark:86,ocean:82,marine:78,sea:74,mammal:70,fish:65,swim:60,blue:52,deep:48,water:44},
-  orbit:    {revolve:93,circle:88,rotate:84,planet:80,moon:76,satellite:72,space:68,gravity:64,ellipse:60,path:55,sun:52},
-  rhythm:   {beat:93,tempo:90,melody:86,music:82,cadence:78,pulse:74,groove:68,pattern:62,flow:56,sound:50},
-  river:    {stream:93,creek:88,waterway:84,water:80,flow:76,current:72,lake:65,ocean:58,flood:52,bank:48,fish:44},
-  forest:   {woods:93,jungle:88,trees:84,wilderness:80,nature:76,grove:70,timber:64,canopy:58,leaf:52,wildlife:48},
-  echo:     {sound:91,noise:82,reverberate:78,bounce:72,reflect:68,voice:62,wave:55,vibration:50,cave:45},
-};
+// ── SIMILARITY ENGINE — real pgvector cosine similarity ──
 
-function getSimilarity(guess, answer) {
+// Cache to avoid re-querying same word pairs in a session
+const similarityCache = {};
+
+async function getSimilarity(guess, answer) {
   const g = guess.toLowerCase().trim();
   const a = answer.toLowerCase().trim();
+
+  // Exact match = 100%
   if (g === a) return 100;
 
-  const map = SEMANTIC_MAP[a] || {};
-  if (map[g] !== undefined) return map[g];
+  // Check cache first
+  const cacheKey = g + '|' + a;
+  if (similarityCache[cacheKey] !== undefined) return similarityCache[cacheKey];
 
-  // Check reverse
-  const reverseMap = SEMANTIC_MAP[g] || {};
-  if (reverseMap[a] !== undefined) return reverseMap[a];
+  try {
+    const { data, error } = await db.rpc('word_similarity', {
+      word_a: g,
+      word_b: a
+    });
 
-  // Check synonyms from puzzle
-  const syns = state.currentPuzzle?.synonyms || [];
-  if (syns.map(s => s.toLowerCase()).includes(g)) return 82 + Math.floor(Math.random() * 10);
+    if (error || data === null) {
+      // Fallback: word not in DB — return a low deterministic score
+      const hash = [...(g + a)].reduce((acc, c) => (acc * 31 + c.charCodeAt(0)) & 0xffff, 0);
+      const fallback = 4 + (hash % 22);
+      similarityCache[cacheKey] = fallback;
+      return fallback;
+    }
 
-  // Partial match
-  if (a.includes(g) || g.includes(a)) return 55 + Math.floor(Math.random() * 15);
+    const score = parseFloat(data);
+    similarityCache[cacheKey] = score;
+    return score;
 
-  // Deterministic hash for consistent results
-  const hash = [...(g + a)].reduce((acc, c) => (acc * 31 + c.charCodeAt(0)) & 0xffff, 0);
-  return 4 + (hash % 28);
+  } catch (e) {
+    // Network error fallback
+    const hash = [...(g + a)].reduce((acc, c) => (acc * 31 + c.charCodeAt(0)) & 0xffff, 0);
+    return 4 + (hash % 22);
+  }
 }
 
 function getHeatInfo(pct) {
@@ -1218,7 +1214,7 @@ function getHeatInfo(pct) {
 }
 
 // ── SUBMIT GUESS ──
-function submitGuess() {
+async function submitGuess() {
   if (state.solved) return;
   const input = document.getElementById('guess-input');
   const raw = input.value.trim();
@@ -1233,7 +1229,20 @@ function submitGuess() {
     return;
   }
 
-  const similarity = getSimilarity(guess, state.currentPuzzle.answer);
+  // Show loading state while fetching similarity
+  const submitBtn = document.querySelector('.submit-btn');
+  submitBtn.textContent = '...';
+  submitBtn.disabled = true;
+  input.disabled = true;
+
+  const similarity = await getSimilarity(guess, state.currentPuzzle.answer);
+
+  // Restore button
+  submitBtn.textContent = 'Guess →';
+  submitBtn.disabled = false;
+  input.disabled = false;
+  input.focus();
+
   state.guesses.push({ word: guess, similarity });
   state.guesses.sort((a, b) => b.similarity - a.similarity);
   state.guesses.forEach((g, i) => g.rank = i + 1);
@@ -1245,9 +1254,8 @@ function submitGuess() {
   document.getElementById('guess-count').textContent = state.guessCount + (state.hintsUsed ? ` +${state.hintsUsed}h` : '');
   document.getElementById('feedback-msg').textContent = '';
   input.value = '';
-  input.focus();
 
-  if (guess === state.currentPuzzle.answer.toLowerCase() || similarity === 100) {
+  if (guess === state.currentPuzzle.answer.toLowerCase() || similarity >= 99.9) {
     setTimeout(() => showWin(), 400);
   }
 }
