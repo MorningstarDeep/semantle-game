@@ -637,6 +637,15 @@
       <div id="end-answer" style="font-family:'DM Mono',monospace;font-size:24px;padding:12px 28px;border-radius:10px;display:inline-block;background:var(--surface);border:1px solid var(--border);"></div>
     </div>
 
+    <!-- Riddle / Theme context block -->
+    <div id="end-context" style="background:var(--card);border:1px solid var(--border);border-radius:16px;padding:20px 24px;display:none;">
+      <div id="end-context-label" style="font-family:'DM Mono',monospace;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--accent);opacity:0.7;margin-bottom:10px;display:flex;align-items:center;gap:6px;">
+        Riddle
+        <span style="flex:1;height:1px;background:linear-gradient(to right,rgba(0,255,136,0.2),transparent);display:inline-block;"></span>
+      </div>
+      <div id="end-context-text" style="font-family:'Syne',sans-serif;font-size:17px;font-weight:600;line-height:1.55;color:var(--text);"></div>
+    </div>
+
     <!-- Stats row -->
     <div id="end-stats" style="display:flex;gap:0;background:var(--card);border:1px solid var(--border);border-radius:16px;overflow:hidden;">
       <div style="flex:1;padding:20px;text-align:center;border-right:1px solid var(--border);">
@@ -1498,14 +1507,47 @@ function showEndScreen(mode, difficulty, status) {
     document.getElementById('end-subtitle').textContent = 'You gave up on this puzzle today. The answer was:';
   }
 
-  // Figure out answer to show
+  // ── Answer ──
   let answer = '?';
   if (mode === 'riddle' && state.dailyPuzzle?.[difficulty]?.answer) {
     answer = state.dailyPuzzle[difficulty].answer;
   } else if (mode === 'theme' && state.dailyPuzzle?.theme_word) {
     answer = state.dailyPuzzle.theme_word;
+  } else if (state.currentPuzzle?.answer) {
+    answer = state.currentPuzzle.answer;
   }
   document.getElementById('end-answer').textContent = answer;
+
+  // ── Riddle / Theme context ──
+  const ctx = document.getElementById('end-context');
+  const ctxLabel = document.getElementById('end-context-label');
+  const ctxText  = document.getElementById('end-context-text');
+
+  if (mode === 'riddle') {
+    const riddleText = state.dailyPuzzle?.[difficulty]?.riddle_text
+                    || state.currentPuzzle?.riddle_text
+                    || null;
+    if (riddleText) {
+      ctxLabel.innerHTML = `The Riddle <span style="flex:1;height:1px;background:linear-gradient(to right,rgba(0,255,136,0.2),transparent);display:inline-block;margin-left:6px;"></span>`;
+      ctxText.textContent = riddleText;
+      ctx.style.display = 'block';
+    } else {
+      ctx.style.display = 'none';
+    }
+  } else if (mode === 'theme') {
+    const theme = state.dailyPuzzle?.theme || state.currentPuzzle?.theme;
+    if (theme) {
+      const emoji = theme.theme_emoji || '🎯';
+      const name  = theme.theme_name  || 'Theme';
+      ctxLabel.innerHTML = `Today's Theme <span style="flex:1;height:1px;background:linear-gradient(to right,rgba(0,255,136,0.2),transparent);display:inline-block;margin-left:6px;"></span>`;
+      ctxText.innerHTML  = `<span style="font-size:28px;margin-right:10px;">${emoji}</span>${name}`;
+      ctx.style.display = 'block';
+    } else {
+      ctx.style.display = 'none';
+    }
+  } else {
+    ctx.style.display = 'none';
+  }
 
   document.getElementById('end-guesses').textContent = result.guesses ?? '—';
   document.getElementById('end-hints').textContent   = result.hints   ?? '—';
