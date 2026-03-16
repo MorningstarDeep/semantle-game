@@ -99,6 +99,7 @@
   }
   .username-input:focus { border-color:var(--accent); box-shadow:0 0 0 3px var(--accent-glow); }
   .username-rules { font-size:12px; color:var(--muted); margin-bottom:24px; font-family:'DM Mono',monospace; }
+  .username-input { text-transform: lowercase; }
   .username-btn {
     width:100%; background:var(--accent); color:#000; border:none;
     border-radius:var(--radius); padding:15px; font-family:'Syne',sans-serif;
@@ -168,6 +169,9 @@
   .mode-badge.warm { background:rgba(249,115,22,0.12); border-color:rgba(249,115,22,0.3); color:#f97316; }
   .mode-solved { opacity:0.5; }
   .mode-solved .mode-badge { background:rgba(0,255,136,0.05); color:var(--muted); border-color:var(--border); }
+  .sub-card { padding:14px 20px; }
+  .sub-card .mode-name { font-size:15px; }
+  .mode-icon-bare { font-size:32px; width:50px; height:50px; display:flex; align-items:center; justify-content:center; flex-shrink:0; border:none; background:transparent; }
 
   .stats-row { display:flex; gap:24px; animation:fadeUp 0.8s 0.2s ease both; }
   .stat-chip { display:flex; flex-direction:column; align-items:center; gap:4px; }
@@ -186,6 +190,12 @@
     font-size:11px; letter-spacing:1px; text-transform:uppercase; cursor:pointer; transition:all 0.2s;
   }
   .lb-tab.active { border-color:var(--accent); color:var(--accent); background:var(--accent-glow); }
+  .lb-subtab {
+    padding:6px 14px; border-radius:8px; border:1px solid var(--border);
+    background:var(--surface); color:var(--muted); font-family:'DM Mono',monospace;
+    font-size:10px; letter-spacing:1px; text-transform:uppercase; cursor:pointer; transition:all 0.2s;
+  }
+  .lb-subtab.active { border-color:rgba(0,255,136,0.5); color:var(--accent); background:var(--accent-glow); }
   .lb-table { display:flex; flex-direction:column; gap:8px; }
   .lb-row {
     display:flex; align-items:center; gap:14px;
@@ -393,7 +403,9 @@
     <div class="username-title">Choose a Username</div>
     <div class="username-sub">This is how you'll appear on the leaderboard. No password needed.</div>
     <input type="text" class="username-input" id="username-input" placeholder="your_name" maxlength="15"
-      onkeydown="if(event.key==='Enter') saveUsername()" autocomplete="off" spellcheck="false" />
+      onkeydown="if(event.key==='Enter') saveUsername()"
+      oninput="this.value=this.value.toLowerCase()"
+      autocomplete="off" spellcheck="false" />
     <div class="username-rules">3–15 characters · letters, numbers, underscores only</div>
     <button class="username-btn" onclick="saveUsername()">Start Playing →</button>
     <div class="username-err" id="username-err"></div>
@@ -416,45 +428,58 @@
     </div>
 
     <div class="mode-cards">
-      <div class="mode-card" id="card-easy" onclick="startGame('riddle','easy')">
-        <div class="mode-icon">🟢</div>
+      <!-- Riddle card — expands to show Easy/Medium/Hard -->
+      <div class="mode-card" id="card-riddle" onclick="toggleRiddleExpand()">
+        <div class="mode-icon">🎭</div>
         <div class="mode-info">
-          <div class="mode-name">Easy Riddle</div>
-          <div class="mode-desc" id="desc-easy">Today's gentle riddle. Perfect to start.</div>
+          <div class="mode-name">Daily Riddle</div>
+          <div class="mode-desc">Solve today's riddle. Three difficulties, daily streaks.</div>
         </div>
-        <div class="mode-badge" id="badge-easy">Daily</div>
+        <div class="mode-badge" id="badge-riddle">Daily</div>
       </div>
-      <div class="mode-card" id="card-medium" onclick="startGame('riddle','medium')">
-        <div class="mode-icon">🟡</div>
-        <div class="mode-info">
-          <div class="mode-name">Medium Riddle</div>
-          <div class="mode-desc" id="desc-medium">A bit trickier. Think deeper.</div>
+      <!-- Riddle sub-options (hidden by default) -->
+      <div id="riddle-suboptions" style="display:none; flex-direction:column; gap:8px; padding-left:16px; animation:fadeUp 0.3s ease both;">
+        <div class="mode-card sub-card" id="card-easy" onclick="startGame('riddle','easy'); event.stopPropagation()">
+          <div class="mode-icon" style="width:40px;height:40px;font-size:20px;">🟢</div>
+          <div class="mode-info">
+            <div class="mode-name" style="font-size:15px;">Easy</div>
+            <div class="mode-desc">Gentle. Perfect to start.</div>
+          </div>
+          <div class="mode-badge" id="badge-easy">Daily</div>
         </div>
-        <div class="mode-badge" id="badge-medium">Daily</div>
-      </div>
-      <div class="mode-card" id="card-hard" onclick="startGame('riddle','hard')">
-        <div class="mode-icon">🔴</div>
-        <div class="mode-info">
-          <div class="mode-name">Hard Riddle</div>
-          <div class="mode-desc" id="desc-hard">For the brave. Good luck.</div>
+        <div class="mode-card sub-card" id="card-medium" onclick="startGame('riddle','medium'); event.stopPropagation()">
+          <div class="mode-icon" style="width:40px;height:40px;font-size:20px;">🟡</div>
+          <div class="mode-info">
+            <div class="mode-name" style="font-size:15px;">Medium</div>
+            <div class="mode-desc">A bit trickier. Think deeper.</div>
+          </div>
+          <div class="mode-badge" id="badge-medium">Daily</div>
         </div>
-        <div class="mode-badge" id="badge-hard">Daily</div>
+        <div class="mode-card sub-card" id="card-hard" onclick="startGame('riddle','hard'); event.stopPropagation()">
+          <div class="mode-icon" style="width:40px;height:40px;font-size:20px;">🔴</div>
+          <div class="mode-info">
+            <div class="mode-name" style="font-size:15px;">Hard</div>
+            <div class="mode-desc">For the brave. Good luck.</div>
+          </div>
+          <div class="mode-badge" id="badge-hard">Daily</div>
+        </div>
       </div>
+
       <div class="mode-card" id="card-theme" onclick="startGame('theme','theme')">
-        <div class="mode-icon">🌊</div>
+        <div class="mode-icon" id="theme-card-icon">🌊</div>
         <div class="mode-info">
           <div class="mode-name">Daily Theme</div>
           <div class="mode-desc" id="desc-theme">A theme-based word puzzle. New every day.</div>
         </div>
         <div class="mode-badge" id="badge-theme">Daily</div>
       </div>
+
       <div class="mode-card" onclick="startGame('random','random')">
-        <div class="mode-icon">♾️</div>
+        <div class="mode-icon" style="font-size:32px; border:none; background:transparent;">♾️</div>
         <div class="mode-info">
           <div class="mode-name">Random Mode</div>
           <div class="mode-desc">Unlimited practice. No pressure.</div>
         </div>
-        <div class="mode-badge warm">∞</div>
       </div>
     </div>
 
@@ -482,17 +507,25 @@
 
 <!-- ══════════ LEADERBOARD ══════════ -->
 <div id="leaderboard-screen" class="screen">
+  <div style="max-width:600px;margin:0 auto;width:100%;padding:0 16px 40px;">
   <div class="lb-header">
     <button class="back-btn" onclick="showScreen('home')">← Back</button>
     <div class="lb-title">Leaderboard</div>
   </div>
-  <div class="lb-tabs">
-    <button class="lb-tab active" onclick="loadLeaderboard('easy',this)">Easy</button>
-    <button class="lb-tab" onclick="loadLeaderboard('medium',this)">Medium</button>
-    <button class="lb-tab" onclick="loadLeaderboard('hard',this)">Hard</button>
-    <button class="lb-tab" onclick="loadLeaderboard('theme',this)">Theme</button>
+  <!-- Primary tabs -->
+  <div class="lb-tabs" id="lb-primary-tabs">
+    <button class="lb-tab active" onclick="selectLbTab('streak',this)">🔥 Streak</button>
+    <button class="lb-tab" onclick="selectLbTab('riddle',this)">🎭 Riddle</button>
+    <button class="lb-tab" onclick="selectLbTab('theme',this)">🌊 Theme</button>
+  </div>
+  <!-- Riddle sub-tabs (shown only when Riddle is selected) -->
+  <div class="lb-tabs" id="lb-riddle-subtabs" style="display:none; margin-top:-8px; margin-bottom:20px;">
+    <button class="lb-subtab active" onclick="selectLbSubTab('easy',this)">Easy</button>
+    <button class="lb-subtab" onclick="selectLbSubTab('medium',this)">Medium</button>
+    <button class="lb-subtab" onclick="selectLbSubTab('hard',this)">Hard</button>
   </div>
   <div class="lb-table" id="lb-table"><div class="lb-empty">Loading...</div></div>
+  </div>
 </div>
 
 <!-- ══════════ GAME ══════════ -->
@@ -628,7 +661,7 @@ function setLoaderText(t) { document.getElementById('loader-text').textContent =
 
 // ── USERNAME ──
 async function saveUsername() {
-  const val = document.getElementById('username-input').value.trim();
+  const val = document.getElementById('username-input').value.trim().toLowerCase();
   const err = document.getElementById('username-err');
   err.textContent = '';
 
@@ -721,7 +754,7 @@ function refreshHomeUI() {
   // Update theme card icon/desc
   if (state.dailyPuzzle?.theme) {
     const t = state.dailyPuzzle.theme;
-    document.getElementById('card-theme').querySelector('.mode-icon').textContent = t.theme_emoji || '🎯';
+    document.getElementById('theme-card-icon').textContent = t.theme_emoji || '🎯';
     document.getElementById('desc-theme').textContent = `Theme: ${t.theme_name}. Guess the word!`;
   }
 }
@@ -791,8 +824,8 @@ async function startGame(mode, difficulty) {
     document.getElementById('puzzle-card').style.display = 'block';
   } else if (mode === 'theme') {
     document.getElementById('riddle-label-text').textContent = `Today's Theme`;
-    document.getElementById('riddle-text').textContent =
-      `${puzzle.theme?.theme_emoji || '🎯'} Theme: ${puzzle.theme?.theme_name || 'Unknown'}\n\nGuess the hidden word associated with this theme!`;
+    document.getElementById('riddle-text').innerHTML =
+      `<span style="font-size:22px;">${puzzle.theme?.theme_emoji || '🎯'} ${puzzle.theme?.theme_name || 'Unknown'}</span><br><span style="font-size:15px;font-weight:400;color:var(--secondary);font-family:'DM Sans',sans-serif;">Guess the hidden word associated with this theme!</span>`;
     document.getElementById('diff-pips').innerHTML = '';
     document.getElementById('puzzle-card').style.display = 'block';
   } else {
@@ -1034,40 +1067,108 @@ function goHome() {
   showScreen('home');
 }
 
-// ── LEADERBOARD ──
-async function showLeaderboard() {
-  showScreen('leaderboard-screen');
-  await loadLeaderboard('easy', document.querySelector('.lb-tab'));
+// ── RIDDLE EXPAND ──
+let riddleExpanded = false;
+function toggleRiddleExpand() {
+  riddleExpanded = !riddleExpanded;
+  const sub = document.getElementById('riddle-suboptions');
+  sub.style.display = riddleExpanded ? 'flex' : 'none';
+  const card = document.getElementById('card-riddle');
+  card.style.borderColor = riddleExpanded ? 'var(--accent)' : '';
 }
 
-async function loadLeaderboard(type, el) {
-  document.querySelectorAll('.lb-tab').forEach(t => t.classList.remove('active'));
-  if (el) el.classList.add('active');
+// ── LEADERBOARD ──
+let currentLbTab = 'streak';
+let currentLbSubTab = 'easy';
 
-  const today = new Date().toISOString().split('T')[0];
-  const { data } = await db.from('leaderboard')
-    .select('username, guesses, hints_used, time_seconds')
-    .eq('puzzle_type', type)
-    .eq('date', today)
-    .order('guesses', { ascending: true })
-    .order('time_seconds', { ascending: true })
-    .limit(20);
+async function showLeaderboard() {
+  showScreen('leaderboard-screen');
+  // Reset to streak tab
+  document.querySelectorAll('#lb-primary-tabs .lb-tab').forEach(t => t.classList.remove('active'));
+  document.querySelector('#lb-primary-tabs .lb-tab').classList.add('active');
+  document.getElementById('lb-riddle-subtabs').style.display = 'none';
+  currentLbTab = 'streak';
+  await loadLeaderboardData();
+}
 
-  const table = document.getElementById('lb-table');
-  if (!data || !data.length) {
-    table.innerHTML = '<div class="lb-empty">No entries yet today. Be the first! 🏆</div>';
-    return;
+function selectLbTab(tab, el) {
+  currentLbTab = tab;
+  document.querySelectorAll('#lb-primary-tabs .lb-tab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  const subtabs = document.getElementById('lb-riddle-subtabs');
+  if (tab === 'riddle') {
+    subtabs.style.display = 'flex';
+    currentLbSubTab = 'easy';
+    document.querySelectorAll('#lb-riddle-subtabs .lb-subtab').forEach((t,i) => t.classList.toggle('active', i===0));
+  } else {
+    subtabs.style.display = 'none';
   }
+  loadLeaderboardData();
+}
 
-  const rankColors = ['gold', 'silver', 'bronze'];
-  table.innerHTML = data.map((row, i) => `
-    <div class="lb-row ${row.username === state.username ? 'me' : ''}">
-      <span class="lb-rank ${rankColors[i] || ''}">${i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : i + 1}</span>
-      <span class="lb-user">${row.username}${row.username === state.username ? ' (you)' : ''}</span>
-      <span class="lb-guesses">${row.guesses}</span>
-      <span class="lb-time">${row.time_seconds}s</span>
-    </div>
-  `).join('');
+function selectLbSubTab(sub, el) {
+  currentLbSubTab = sub;
+  document.querySelectorAll('#lb-riddle-subtabs .lb-subtab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  loadLeaderboardData();
+}
+
+async function loadLeaderboardData() {
+  const table = document.getElementById('lb-table');
+  table.innerHTML = '<div class="lb-empty">Loading...</div>';
+  const today = new Date().toISOString().split('T')[0];
+
+  if (currentLbTab === 'streak') {
+    // Streak leaderboard: from users table, sorted by streak desc
+    const { data } = await db.from('users')
+      .select('username, streak, best_streak, total_solved')
+      .order('streak', { ascending: false })
+      .limit(20);
+    if (!data || !data.length) { table.innerHTML = '<div class="lb-empty">No players yet. Be the first! 🏆</div>'; return; }
+    const rankColors = ['gold','silver','bronze'];
+    table.innerHTML = data.map((row, i) => `
+      <div class="lb-row ${row.username === state.username ? 'me' : ''}">
+        <span class="lb-rank ${rankColors[i]||''}">${i===0?'🥇':i===1?'🥈':i===2?'🥉':i+1}</span>
+        <span class="lb-user">${row.username}${row.username===state.username?' (you)':''}</span>
+        <span class="lb-guesses">🔥 ${row.streak}</span>
+        <span class="lb-time">best: ${row.best_streak}</span>
+      </div>`).join('');
+
+  } else if (currentLbTab === 'riddle') {
+    const ptype = currentLbSubTab;
+    const { data } = await db.from('leaderboard')
+      .select('username, guesses, hints_used, time_seconds')
+      .eq('puzzle_type', ptype).eq('date', today)
+      .order('guesses', { ascending: true })
+      .order('time_seconds', { ascending: true })
+      .limit(20);
+    if (!data || !data.length) { table.innerHTML = '<div class="lb-empty">No entries yet today. Be the first! 🏆</div>'; return; }
+    const rankColors = ['gold','silver','bronze'];
+    table.innerHTML = data.map((row, i) => `
+      <div class="lb-row ${row.username === state.username ? 'me' : ''}">
+        <span class="lb-rank ${rankColors[i]||''}">${i===0?'🥇':i===1?'🥈':i===2?'🥉':i+1}</span>
+        <span class="lb-user">${row.username}${row.username===state.username?' (you)':''}</span>
+        <span class="lb-guesses">${row.guesses} guesses</span>
+        <span class="lb-time">${row.time_seconds}s</span>
+      </div>`).join('');
+
+  } else if (currentLbTab === 'theme') {
+    const { data } = await db.from('leaderboard')
+      .select('username, guesses, hints_used, time_seconds')
+      .eq('puzzle_type', 'theme').eq('date', today)
+      .order('guesses', { ascending: true })
+      .order('time_seconds', { ascending: true })
+      .limit(20);
+    if (!data || !data.length) { table.innerHTML = '<div class="lb-empty">No entries yet today. Be the first! 🏆</div>'; return; }
+    const rankColors = ['gold','silver','bronze'];
+    table.innerHTML = data.map((row, i) => `
+      <div class="lb-row ${row.username === state.username ? 'me' : ''}">
+        <span class="lb-rank ${rankColors[i]||''}">${i===0?'🥇':i===1?'🥈':i===2?'🥉':i+1}</span>
+        <span class="lb-user">${row.username}${row.username===state.username?' (you)':''}</span>
+        <span class="lb-guesses">${row.guesses} guesses</span>
+        <span class="lb-time">${row.time_seconds}s</span>
+      </div>`).join('');
+  }
 }
 
 // ── START ──
