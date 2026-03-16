@@ -396,19 +396,38 @@
   <div class="loader-text" id="loader-text">Connecting...</div>
 </div>
 
-<!-- ══════════ USERNAME ══════════ -->
+<!-- ══════════ LOGIN SCREEN ══════════ -->
 <div id="username-screen" class="screen">
   <div class="username-card">
-    <div class="username-icon">👤</div>
-    <div class="username-title">Choose a Username</div>
-    <div class="username-sub">This is how you'll appear on the leaderboard. No password needed.</div>
+    <div class="username-icon" id="login-icon">👤</div>
+    <div class="username-title" id="login-title">Welcome to Semantle</div>
+    <div class="username-sub" id="login-sub">Enter your username to play. If you've played before, your progress will be restored.</div>
     <input type="text" class="username-input" id="username-input" placeholder="your_name" maxlength="15"
       onkeydown="if(event.key==='Enter') saveUsername()"
       oninput="this.value=this.value.toLowerCase()"
       autocomplete="off" spellcheck="false" />
     <div class="username-rules">3–15 characters · letters, numbers, underscores only</div>
-    <button class="username-btn" onclick="saveUsername()">Start Playing →</button>
+    <button class="username-btn" id="login-btn" onclick="saveUsername()">Continue →</button>
     <div class="username-err" id="username-err"></div>
+    <!-- Status indicator shown while checking -->
+    <div id="login-status" style="margin-top:14px;font-family:'DM Mono',monospace;font-size:12px;color:var(--muted);min-height:16px;"></div>
+  </div>
+</div>
+
+<!-- ══════════ CHANGE USERNAME MODAL ══════════ -->
+<div id="rename-overlay" style="display:none;position:fixed;inset:0;background:rgba(8,11,15,0.92);z-index:150;align-items:center;justify-content:center;backdrop-filter:blur(8px);">
+  <div class="username-card" style="animation:popIn 0.4s cubic-bezier(0.34,1.56,0.64,1) both;">
+    <div class="username-icon">✏️</div>
+    <div class="username-title">Change Username</div>
+    <div class="username-sub">Pick a new name. Your streaks, scores and progress are kept.</div>
+    <input type="text" class="username-input" id="rename-input" placeholder="new_username" maxlength="15"
+      onkeydown="if(event.key==='Enter') submitRename()"
+      oninput="this.value=this.value.toLowerCase()"
+      autocomplete="off" spellcheck="false" />
+    <div class="username-rules">3–15 characters · letters, numbers, underscores only</div>
+    <button class="username-btn" onclick="submitRename()">Save New Name →</button>
+    <div class="username-err" id="rename-err"></div>
+    <button onclick="closeRenameModal()" style="margin-top:14px;background:none;border:none;color:var(--muted);font-family:'DM Mono',monospace;font-size:12px;cursor:pointer;letter-spacing:1px;">Cancel</button>
   </div>
 </div>
 
@@ -424,7 +443,8 @@
     <div class="user-pill">
       <div class="user-avatar" id="home-avatar">?</div>
       <span class="user-name" id="home-username">loading...</span>
-      <span class="user-change" onclick="changeUsername()" title="Change username">✎</span>
+      <span class="user-change" onclick="openRenameModal()" title="Change username">✎</span>
+      <span class="user-change" onclick="logOut()" title="Log out" style="margin-left:2px;">⏏</span>
     </div>
 
     <div class="mode-cards">
@@ -642,16 +662,49 @@ function toast(msg, type = '') {
 // ── INIT ──
 async function init() {
   setLoaderText('Loading...');
-  // Check stored username
   const stored = localStorage.getItem('semantle_username');
+
   if (stored) {
-    state.username = stored;
-    setLoaderText('Fetching your stats...');
-    await loadUserStats();
-    setLoaderText('Loading today\'s puzzle...');
-    await loadDailyPuzzle();
-    setLoaderText('Ready!');
-    setTimeout(() => { showScreen('home'); refreshHomeUI(); }, 600);
+    setLoaderText('Verifying account...');
+
+    // Always verify the user actually exists in Supabase
+    const { data: existsInDB } = await db
+      .from('users')
+      .select('username')
+      .eq('username', stored)
+      .single();
+
+    if (existsInDB) {
+      // User confirmed in DB — load normally
+      state.username = stored;
+      setLoaderText('Fetching your stats...');
+      await loadUserStats();
+      setLoaderText("Loading today's puzzle...");
+      await loadDailyPuzzle();
+      setLoaderText('Ready!');
+      setTimeout(() => { showScreen('home'); refreshHomeUI(); }, 600);
+    } else {
+      // User was deleted from DB — recreate their account automatically
+      setLoaderText('Restoring account...');
+      const { error } = await db
+        .from('users')
+        .insert({ username: stored, streak: 0, best_streak: 0, total_solved: 0 });
+
+      if (!error) {
+        state.username = stored;
+        await loadUserStats();
+        await loadDailyPuzzle();
+        setTimeout(() => {
+          showScreen('home');
+          refreshHomeUI();
+          toast('Account restored — welcome back, ' + stored + '!', 'green');
+        }, 600);
+      } else {
+        // Could not recreate — clear and send to login
+        localStorage.removeItem('semantle_username');
+        setTimeout(() => showScreen('username-screen'), 1200);
+      }
+    }
   } else {
     setTimeout(() => showScreen('username-screen'), 1200);
   }
@@ -659,55 +712,170 @@ async function init() {
 
 function setLoaderText(t) { document.getElementById('loader-text').textContent = t; }
 
-// ── USERNAME ──
+// ── LOGIN (handles both new + returning users) ──
 async function saveUsername() {
   const val = document.getElementById('username-input').value.trim().toLowerCase();
   const err = document.getElementById('username-err');
+  const status = document.getElementById('login-status');
   err.textContent = '';
+  status.textContent = '';
 
-  if (!/^[a-zA-Z0-9_]{3,15}$/.test(val)) {
-    err.textContent = '3–15 characters. Letters, numbers, underscores only.';
+  if (!/^[a-z0-9_]{3,15}$/.test(val)) {
+    err.textContent = '3–15 characters. Lowercase letters, numbers, underscores only.';
     return;
   }
 
-  // Check uniqueness
-  const { data: existing } = await db.from('users').select('username').eq('username', val).single();
-  if (existing) { err.textContent = 'Username taken. Try another!'; return; }
+  status.textContent = 'Checking...';
+  const btn = document.getElementById('login-btn');
+  btn.disabled = true; btn.textContent = 'Please wait...';
 
-  // Create user in DB
-  const { error } = await db.from('users').insert({ username: val, streak: 0, best_streak: 0, total_solved: 0 });
-  if (error) { err.textContent = 'Error saving. Try again.'; return; }
+  // Check if user already exists
+  const { data: existing } = await db.from('users').select('*').eq('username', val).single();
 
-  state.username = val;
-  localStorage.setItem('semantle_username', val);
-  await loadUserStats();
-  await loadDailyPuzzle();
-  showScreen('home');
-  refreshHomeUI();
-  toast('Welcome, ' + val + '! 👋', 'green');
+  if (existing) {
+    // Returning user — load their account
+    status.textContent = '✓ Account found! Loading your progress...';
+    state.username = val;
+    localStorage.setItem('semantle_username', val);
+    await loadUserStats();
+    await loadDailyPuzzle();
+    btn.disabled = false; btn.textContent = 'Continue →';
+    document.getElementById('username-input').value = '';
+    showScreen('home');
+    refreshHomeUI();
+    toast('Welcome back, ' + val + '! 👋', 'green');
+  } else {
+    // New user — create account
+    status.textContent = 'Creating your account...';
+    const { error } = await db.from('users').insert({ username: val, streak: 0, best_streak: 0, total_solved: 0 });
+    if (error) {
+      err.textContent = 'Error creating account. Try again.';
+      status.textContent = '';
+      btn.disabled = false; btn.textContent = 'Continue →';
+      return;
+    }
+    state.username = val;
+    localStorage.setItem('semantle_username', val);
+    await loadUserStats();
+    await loadDailyPuzzle();
+    btn.disabled = false; btn.textContent = 'Continue →';
+    document.getElementById('username-input').value = '';
+    showScreen('home');
+    refreshHomeUI();
+    toast('Welcome, ' + val + '! 👋', 'green');
+  }
 }
 
-function changeUsername() {
-  if (!confirm('Change username? Your current progress will be lost.')) return;
+// ── LOGOUT ──
+function logOut() {
+  if (!confirm('Log out? You can log back in anytime with your username.')) return;
   localStorage.removeItem('semantle_username');
   state.username = null;
+  state.userStats = { streak: 0, best_streak: 0, total_solved: 0 };
+  state.todaySolved = {};
+  // Reset login screen to default state
+  document.getElementById('login-icon').textContent = '👤';
+  document.getElementById('login-title').textContent = 'Welcome to Semantle';
+  document.getElementById('login-sub').textContent = 'Enter your username to play. If you\'ve played before, your progress will be restored.';
+  document.getElementById('login-btn').textContent = 'Continue →';
+  document.getElementById('username-input').value = '';
+  document.getElementById('username-err').textContent = '';
+  document.getElementById('login-status').textContent = '';
   showScreen('username-screen');
+  toast('Logged out. See you soon!');
+}
+
+// ── RENAME MODAL ──
+function openRenameModal() {
+  document.getElementById('rename-input').value = '';
+  document.getElementById('rename-err').textContent = '';
+  const overlay = document.getElementById('rename-overlay');
+  overlay.style.display = 'flex';
+  setTimeout(() => document.getElementById('rename-input').focus(), 100);
+}
+
+function closeRenameModal() {
+  document.getElementById('rename-overlay').style.display = 'none';
+}
+
+async function submitRename() {
+  const newName = document.getElementById('rename-input').value.trim().toLowerCase();
+  const err = document.getElementById('rename-err');
+  err.textContent = '';
+
+  if (!/^[a-z0-9_]{3,15}$/.test(newName)) {
+    err.textContent = '3–15 characters. Lowercase letters, numbers, underscores only.';
+    return;
+  }
+  if (newName === state.username) {
+    err.textContent = 'That\'s already your username!';
+    return;
+  }
+
+  // Check if name is taken
+  const { data: existing } = await db.from('users').select('username').eq('username', newName).single();
+  if (existing) { err.textContent = 'Username already taken. Try another.'; return; }
+
+  const oldName = state.username;
+
+  // Update username in all tables
+  const updates = [
+    db.from('users').update({ username: newName }).eq('username', oldName),
+    db.from('leaderboard').update({ username: newName }).eq('username', oldName),
+    db.from('user_progress').update({ username: newName }).eq('username', oldName),
+  ];
+  const results = await Promise.all(updates);
+  const anyError = results.find(r => r.error);
+  if (anyError) { err.textContent = 'Error updating. Try again.'; return; }
+
+  // Update local state
+  state.username = newName;
+  localStorage.setItem('semantle_username', newName);
+  closeRenameModal();
+  refreshHomeUI();
+  toast('Username changed to ' + newName + ' ✓', 'green');
 }
 
 // ── LOAD USER STATS ──
 async function loadUserStats() {
-  const { data } = await db.from('users').select('*').eq('username', state.username).single();
-  if (data) state.userStats = data;
+  // ── users row ──
+  const { data: userData } = await db
+    .from('users').select('*').eq('username', state.username).single();
 
-  // Load today's solved status
+  if (userData) {
+    // Row exists — use DB values
+    state.userStats = {
+      streak:       userData.streak       ?? 0,
+      best_streak:  userData.best_streak  ?? 0,
+      total_solved: userData.total_solved ?? 0,
+    };
+  } else {
+    // Row missing (deleted externally) — reset to safe defaults
+    // and recreate the row so future writes don't fail
+    state.userStats = { streak: 0, best_streak: 0, total_solved: 0 };
+    await db.from('users').insert({
+      username:     state.username,
+      streak:       0,
+      best_streak:  0,
+      total_solved: 0,
+    });
+  }
+
+  // ── today's solved status (user_progress) ──
   const today = new Date().toISOString().split('T')[0];
-  const { data: prog } = await db.from('user_progress')
+  const { data: prog } = await db
+    .from('user_progress')
     .select('puzzle_type, solved')
     .eq('username', state.username)
     .eq('date', today);
 
+  // Always reset first — if rows were deleted we start fresh
   state.todaySolved = {};
-  if (prog) prog.forEach(p => { if (p.solved) state.todaySolved[p.puzzle_type] = true; });
+  if (prog && prog.length) {
+    prog.forEach(p => { if (p.solved) state.todaySolved[p.puzzle_type] = true; });
+  }
+  // (leaderboard entries being deleted just means scores are gone —
+  //  no crash, the leaderboard will simply not show that user's entry)
 }
 
 // ── LOAD DAILY PUZZLE ──
