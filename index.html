@@ -554,7 +554,13 @@
   <div class="game-header">
     <button class="back-btn" onclick="goHome()">← Home</button>
     <span class="game-mode-label" id="mode-label">Daily Riddle</span>
-    <div class="streak-badge">🔥 <span id="streak-count">0</span></div>
+    <div style="display:flex;gap:8px;align-items:center;">
+      <button id="refresh-btn" onclick="refreshRandom()" title="New word"
+        style="display:none;background:var(--card);border:1px solid var(--border);color:var(--secondary);padding:6px 12px;border-radius:8px;cursor:pointer;font-size:13px;font-family:'DM Sans',sans-serif;transition:all 0.2s;"
+        onmouseover="this.style.borderColor='var(--accent)';this.style.color='var(--accent)'"
+        onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--secondary)'">↺ New Word</button>
+      <div class="streak-badge">🔥 <span id="streak-count">0</span></div>
+    </div>
   </div>
 
   <div class="riddle-card" id="puzzle-card">
@@ -600,6 +606,66 @@
   <div class="guess-list" id="guess-list"></div>
 </div>
 
+<!-- ══════════ CUSTOM CONFIRM MODAL ══════════ -->
+<div id="confirm-overlay" style="display:none;position:fixed;inset:0;background:rgba(8,11,15,0.92);z-index:300;align-items:center;justify-content:center;backdrop-filter:blur(8px);">
+  <div style="background:var(--card);border:1px solid var(--border);border-radius:20px;padding:36px;max-width:360px;width:90%;text-align:center;animation:popIn 0.35s cubic-bezier(0.34,1.56,0.64,1) both;">
+    <div id="confirm-icon" style="font-size:40px;margin-bottom:12px;">⚠️</div>
+    <div id="confirm-title" style="font-family:'Syne',sans-serif;font-size:22px;font-weight:800;margin-bottom:10px;letter-spacing:-0.5px;"></div>
+    <div id="confirm-body" style="font-size:14px;color:var(--secondary);line-height:1.6;margin-bottom:28px;"></div>
+    <div style="display:flex;flex-direction:column;gap:10px;">
+      <button id="confirm-ok" style="background:var(--accent);color:#000;border:none;border-radius:12px;padding:13px;font-family:'Syne',sans-serif;font-weight:700;font-size:15px;cursor:pointer;transition:all 0.2s;"></button>
+      <button onclick="closeConfirm()" style="background:transparent;border:1px solid var(--border);color:var(--secondary);border-radius:12px;padding:13px;font-family:'Syne',sans-serif;font-weight:600;font-size:14px;cursor:pointer;transition:all 0.2s;">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════ END SCREEN (solved / gave up inline) ══════════ -->
+<div id="end-screen" class="screen">
+  <div style="max-width:520px;margin:0 auto;width:100%;padding:0 20px 40px;display:flex;flex-direction:column;min-height:100vh;justify-content:center;gap:24px;">
+    <!-- Header -->
+    <div style="display:flex;align-items:center;justify-content:space-between;padding-top:20px;">
+      <button class="back-btn" onclick="goHome()">← Home</button>
+      <span id="end-mode-label" style="font-family:'DM Mono',monospace;font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--accent);opacity:0.7;"></span>
+      <div style="width:60px;"></div>
+    </div>
+
+    <!-- Status banner -->
+    <div id="end-banner" style="border-radius:20px;padding:32px 28px;text-align:center;border:1px solid var(--border);">
+      <div id="end-emoji" style="font-size:60px;margin-bottom:16px;"></div>
+      <div id="end-title" style="font-family:'Syne',sans-serif;font-size:36px;font-weight:800;letter-spacing:-1px;margin-bottom:8px;"></div>
+      <div id="end-subtitle" style="font-size:14px;color:var(--secondary);margin-bottom:16px;"></div>
+      <div id="end-answer" style="font-family:'DM Mono',monospace;font-size:24px;padding:12px 28px;border-radius:10px;display:inline-block;background:var(--surface);border:1px solid var(--border);"></div>
+    </div>
+
+    <!-- Stats row -->
+    <div id="end-stats" style="display:flex;gap:0;background:var(--card);border:1px solid var(--border);border-radius:16px;overflow:hidden;">
+      <div style="flex:1;padding:20px;text-align:center;border-right:1px solid var(--border);">
+        <div id="end-guesses" style="font-family:'Syne',sans-serif;font-size:28px;font-weight:800;color:var(--accent);">—</div>
+        <div style="font-family:'DM Mono',monospace;font-size:10px;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-top:4px;">Guesses</div>
+      </div>
+      <div style="flex:1;padding:20px;text-align:center;border-right:1px solid var(--border);">
+        <div id="end-hints" style="font-family:'Syne',sans-serif;font-size:28px;font-weight:800;color:var(--accent);">—</div>
+        <div style="font-family:'DM Mono',monospace;font-size:10px;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-top:4px;">Hints</div>
+      </div>
+      <div style="flex:1;padding:20px;text-align:center;">
+        <div id="end-time" style="font-family:'Syne',sans-serif;font-size:28px;font-weight:800;color:var(--accent);">—</div>
+        <div style="font-family:'DM Mono',monospace;font-size:10px;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-top:4px;">Seconds</div>
+      </div>
+    </div>
+
+    <!-- Come back tomorrow message -->
+    <div style="background:var(--card);border:1px solid var(--border);border-radius:16px;padding:20px 24px;display:flex;align-items:center;gap:14px;">
+      <span style="font-size:28px;">🗓️</span>
+      <div>
+        <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:15px;margin-bottom:3px;">Come back tomorrow</div>
+        <div style="font-size:13px;color:var(--secondary);">New puzzles reset at midnight. See you then!</div>
+      </div>
+    </div>
+
+    <button onclick="goHome()" style="background:var(--accent);color:#000;border:none;border-radius:14px;padding:15px;font-family:'Syne',sans-serif;font-weight:700;font-size:16px;cursor:pointer;transition:all 0.2s;letter-spacing:0.5px;">← Back to Home</button>
+  </div>
+</div>
+
 <!-- WIN OVERLAY -->
 <div class="win-overlay" id="win-overlay">
   <div class="win-card">
@@ -640,8 +706,11 @@ let state = {
   guessCount: 0,
   bestSimilarity: 0,
   solved: false,
+  gaveUp: false,
   userStats: { streak: 0, best_streak: 0, total_solved: 0 },
-  todaySolved: {}  // { easy: true, medium: false, ... }
+  todaySolved: {},   // { easy: true, medium: false, ... }
+  todayGaveUp: {},   // { hard: true, ... }
+  todayResults: {}   // { easy: { guesses:5, hints:1, time:42 }, ... }
 };
 
 // ── SCREEN MANAGER ──
@@ -769,8 +838,8 @@ async function saveUsername() {
 
 // ── LOGOUT ──
 function logOut() {
-  if (!confirm('Log out? You can log back in anytime with your username.')) return;
-  localStorage.removeItem('semantle_username');
+  showConfirm('Log out?', 'You can log back in anytime with your username.', 'Log Out', () => {
+    localStorage.removeItem('semantle_username');
   state.username = null;
   state.userStats = { streak: 0, best_streak: 0, total_solved: 0 };
   state.todaySolved = {};
@@ -782,8 +851,9 @@ function logOut() {
   document.getElementById('username-input').value = '';
   document.getElementById('username-err').textContent = '';
   document.getElementById('login-status').textContent = '';
-  showScreen('username-screen');
-  toast('Logged out. See you soon!');
+    showScreen('username-screen');
+    toast('Logged out. See you soon!');
+  });
 }
 
 // ── RENAME MODAL ──
@@ -862,21 +932,26 @@ async function loadUserStats() {
     });
   }
 
-  // ── today's solved status (user_progress) ──
+  // ── today's solved/gaveup status (user_progress) ──
   const today = new Date().toISOString().split('T')[0];
   const { data: prog } = await db
     .from('user_progress')
-    .select('puzzle_type, solved')
+    .select('puzzle_type, solved, guesses, hints_used, time_seconds')
     .eq('username', state.username)
     .eq('date', today);
 
-  // Always reset first — if rows were deleted we start fresh
-  state.todaySolved = {};
+  state.todaySolved  = {};
+  state.todayGaveUp  = {};
+  state.todayResults = {};
   if (prog && prog.length) {
-    prog.forEach(p => { if (p.solved) state.todaySolved[p.puzzle_type] = true; });
+    prog.forEach(p => {
+      if (p.solved)  state.todaySolved[p.puzzle_type]  = true;
+      else           state.todayGaveUp[p.puzzle_type]  = true;
+      state.todayResults[p.puzzle_type] = {
+        guesses: p.guesses, hints: p.hints_used, time: p.time_seconds
+      };
+    });
   }
-  // (leaderboard entries being deleted just means scores are gone —
-  //  no crash, the leaderboard will simply not show that user's entry)
 }
 
 // ── LOAD DAILY PUZZLE ──
@@ -906,19 +981,42 @@ function refreshHomeUI() {
   document.getElementById('stat-solved').textContent = state.userStats.total_solved || 0;
   document.getElementById('streak-count').textContent = state.userStats.streak || 0;
 
-  // Mark solved modes
+  // Mark solved / gave-up modes
   ['easy','medium','hard','theme'].forEach(type => {
     const card = document.getElementById('card-' + type);
     const badge = document.getElementById('badge-' + type);
     if (!card) return;
     if (state.todaySolved[type]) {
       card.classList.add('mode-solved');
-      badge.textContent = '✓ Done';
+      card.style.borderColor = '';
+      badge.textContent = '✓ Solved';
+      badge.style.color = 'var(--accent)';
+    } else if (state.todayGaveUp[type]) {
+      card.classList.add('mode-solved');
+      card.style.borderColor = 'rgba(239,68,68,0.3)';
+      badge.textContent = '✗ Gave Up';
+      badge.style.color = '#ef4444';
     } else {
       card.classList.remove('mode-solved');
-      badge.textContent = type === 'theme' ? 'Daily' : 'Daily';
+      card.style.borderColor = '';
+      badge.textContent = 'Daily';
+      badge.style.color = '';
     }
   });
+
+  // Riddle parent card: check if ALL three are done
+  const allRiddleDone = ['easy','medium','hard'].every(
+    t => state.todaySolved[t] || state.todayGaveUp[t]
+  );
+  const riddleCard = document.getElementById('card-riddle');
+  const riddleBadge = document.getElementById('badge-riddle');
+  if (riddleCard && allRiddleDone) {
+    riddleCard.classList.add('mode-solved');
+    riddleBadge.textContent = 'All Done';
+  } else if (riddleCard) {
+    riddleCard.classList.remove('mode-solved');
+    riddleBadge.textContent = 'Daily';
+  }
 
   // Update theme card icon/desc
   if (state.dailyPuzzle?.theme) {
@@ -930,6 +1028,18 @@ function refreshHomeUI() {
 
 // ── START GAME ──
 async function startGame(mode, difficulty) {
+  const ptype = mode === 'theme' ? 'theme' : difficulty;
+
+  // For daily modes, check if already played today
+  if (mode !== 'random') {
+    const alreadySolved = state.todaySolved[ptype];
+    const alreadyGaveUp = state.todayGaveUp[ptype];
+    if (alreadySolved || alreadyGaveUp) {
+      showEndScreen(mode, difficulty, alreadySolved ? 'solved' : 'gaveup');
+      return;
+    }
+  }
+
   state.mode = mode;
   state.difficulty = difficulty;
   state.guesses = [];
@@ -940,7 +1050,7 @@ async function startGame(mode, difficulty) {
   state.gaveUp = false;
   state.startTime = Date.now();
 
-  // Re-enable input in case previous game was given up
+  // Re-enable input
   const inp = document.getElementById('guess-input');
   const sbtn = document.querySelector('.submit-btn');
   if (inp) { inp.disabled = false; inp.placeholder = 'Type a word...'; }
@@ -1035,6 +1145,10 @@ async function startGame(mode, difficulty) {
   document.getElementById('guess-input').value = '';
   for (let i = 1; i <= 5; i++) document.getElementById(`hs-${i}`).classList.remove('used');
   document.getElementById('win-overlay').classList.remove('visible');
+
+  // Show refresh button only in random mode
+  const refreshBtn = document.getElementById('refresh-btn');
+  if (refreshBtn) refreshBtn.style.display = mode === 'random' ? 'block' : 'none';
 
   showScreen('game');
   setTimeout(() => document.getElementById('guess-input').focus(), 300);
@@ -1178,24 +1292,43 @@ function getHint() {
 // ── GIVE UP ──
 function giveUp() {
   if (state.solved) return;
-  if (!confirm(`Give up? The answer was "${state.currentPuzzle.answer}".`)) return;
+  showConfirm(
+    'Give up?',
+    `The answer was <strong>${state.currentPuzzle.answer}</strong>. Your streak will reset.`,
+    'Yes, give up',
+    async () => {
+      state.solved = true;
+      state.gaveUp = true;
 
-  // Lock the game — mark as gave up, not solved
-  state.solved = true;
-  state.gaveUp = true;
+      // Disable input
+      const input = document.getElementById('guess-input');
+      const submitBtn = document.querySelector('.submit-btn');
+      input.disabled = true;
+      input.placeholder = 'Game over';
+      submitBtn.disabled = true;
+      submitBtn.style.opacity = '0.4';
 
-  // Disable input and buttons so the answer can't be re-entered
-  const input = document.getElementById('guess-input');
-  const submitBtn = document.querySelector('.submit-btn');
-  input.disabled = true;
-  input.placeholder = 'Game over';
-  submitBtn.disabled = true;
-  submitBtn.style.opacity = '0.4';
+      showFeedback(`The answer was: ${state.currentPuzzle.answer}`, 'error');
 
-  showFeedback(`The answer was: ${state.currentPuzzle.answer}`, 'error');
+      // Save gave-up state to DB so it persists across sessions
+      if (state.mode !== 'random') {
+        const today = new Date().toISOString().split('T')[0];
+        const ptype = state.mode === 'theme' ? 'theme' : state.difficulty;
+        await db.from('user_progress').upsert({
+          username: state.username,
+          puzzle_type: ptype,
+          date: today,
+          solved: false,
+          guesses: state.guessCount,
+          hints_used: state.hintsUsed,
+          time_seconds: Math.round((Date.now() - state.startTime) / 1000)
+        }, { onConflict: 'username,puzzle_type,date' });
 
-  // Break streak in DB (non-random modes only)
-  if (state.mode !== 'random') breakStreak();
+        state.todayGaveUp[ptype] = true;
+        await breakStreak();
+      }
+    }
+  );
 }
 
 async function breakStreak() {
@@ -1203,69 +1336,11 @@ async function breakStreak() {
   state.userStats.streak = 0;
 }
 
-// ── WIN ──
-async function showWin() {
-  state.solved = true;
-  const elapsed = Math.round((Date.now() - state.startTime) / 1000);
-  const totalGuesses = state.guessCount + state.hintsUsed;
-
-  document.getElementById('win-word').textContent = state.currentPuzzle.answer;
-  document.getElementById('win-guesses').textContent = totalGuesses;
-  document.getElementById('win-hints').textContent = state.hintsUsed;
-  document.getElementById('win-time').textContent = elapsed + 's';
-  document.getElementById('win-overlay').classList.add('visible');
-
-  if (state.mode !== 'random') {
-    const today = new Date().toISOString().split('T')[0];
-    const ptype = state.mode === 'theme' ? 'theme' : state.difficulty;
-
-    // Save to leaderboard
-    await db.from('leaderboard').upsert({
-      username: state.username,
-      puzzle_type: ptype,
-      guesses: totalGuesses,
-      hints_used: state.hintsUsed,
-      time_seconds: elapsed,
-      date: today
-    }, { onConflict: 'username,puzzle_type,date' });
-
-    // Save progress
-    await db.from('user_progress').upsert({
-      username: state.username,
-      puzzle_type: ptype,
-      date: today,
-      solved: true,
-      guesses: totalGuesses,
-      hints_used: state.hintsUsed,
-      time_seconds: elapsed
-    }, { onConflict: 'username,puzzle_type,date' });
-
-    // Update streak & stats
-    const newStreak = (state.userStats.streak || 0) + 1;
-    const newBest = Math.max(newStreak, state.userStats.best_streak || 0);
-    const newSolved = (state.userStats.total_solved || 0) + 1;
-
-    await db.from('users').update({
-      streak: newStreak,
-      best_streak: newBest,
-      total_solved: newSolved
-    }).eq('username', state.username);
-
-    state.userStats = { ...state.userStats, streak: newStreak, best_streak: newBest, total_solved: newSolved };
-    state.todaySolved[ptype] = true;
-    document.getElementById('streak-count').textContent = newStreak;
-  } else {
-    // Random mode: just count solved
-    const newSolved = (state.userStats.total_solved || 0) + 1;
-    await db.from('users').update({ total_solved: newSolved }).eq('username', state.username);
-    state.userStats.total_solved = newSolved;
-  }
-}
+// showWin moved to bottom of file
 
 function nextPuzzle() {
   document.getElementById('win-overlay').classList.remove('visible');
-  if (state.mode === 'random') startGame('random', 'random');
-  else goHome();
+  startGame('random', 'random');
 }
 
 function goHome() {
@@ -1376,6 +1451,131 @@ async function loadLeaderboardData() {
         <span class="lb-time">${row.time_seconds}s</span>
       </div>`).join('');
   }
+}
+
+// ── CUSTOM CONFIRM ──
+let _confirmCallback = null;
+function showConfirm(title, body, okLabel, callback, icon = '⚠️') {
+  document.getElementById('confirm-icon').textContent = icon;
+  document.getElementById('confirm-title').textContent = title;
+  document.getElementById('confirm-body').innerHTML = body;
+  document.getElementById('confirm-ok').textContent = okLabel;
+  _confirmCallback = callback;
+  document.getElementById('confirm-overlay').style.display = 'flex';
+}
+function closeConfirm() {
+  document.getElementById('confirm-overlay').style.display = 'none';
+  _confirmCallback = null;
+}
+document.getElementById('confirm-ok').addEventListener('click', () => {
+  const cb = _confirmCallback;
+  closeConfirm();
+  if (cb) cb();
+});
+
+// ── END SCREEN (inline result for already-played daily modes) ──
+function showEndScreen(mode, difficulty, status) {
+  const ptype = mode === 'theme' ? 'theme' : difficulty;
+  const result = state.todayResults[ptype] || {};
+  const modeLabels = { riddle: 'Daily Riddle · ' + difficulty, theme: 'Daily Theme', random: 'Random' };
+
+  document.getElementById('end-mode-label').textContent = modeLabels[mode] || mode;
+
+  const banner = document.getElementById('end-banner');
+  if (status === 'solved') {
+    banner.style.borderColor = 'var(--accent)';
+    banner.style.background = 'rgba(0,255,136,0.04)';
+    document.getElementById('end-emoji').textContent = '🎉';
+    document.getElementById('end-title').textContent = 'Solved!';
+    document.getElementById('end-title').style.color = 'var(--accent)';
+    document.getElementById('end-subtitle').textContent = 'You already solved this puzzle today. The answer was:';
+  } else {
+    banner.style.borderColor = 'rgba(239,68,68,0.3)';
+    banner.style.background = 'rgba(239,68,68,0.04)';
+    document.getElementById('end-emoji').textContent = '😔';
+    document.getElementById('end-title').textContent = 'Better Luck Tomorrow';
+    document.getElementById('end-title').style.color = '#ef4444';
+    document.getElementById('end-subtitle').textContent = 'You gave up on this puzzle today. The answer was:';
+  }
+
+  // Figure out answer to show
+  let answer = '?';
+  if (mode === 'riddle' && state.dailyPuzzle?.[difficulty]?.answer) {
+    answer = state.dailyPuzzle[difficulty].answer;
+  } else if (mode === 'theme' && state.dailyPuzzle?.theme_word) {
+    answer = state.dailyPuzzle.theme_word;
+  }
+  document.getElementById('end-answer').textContent = answer;
+
+  document.getElementById('end-guesses').textContent = result.guesses ?? '—';
+  document.getElementById('end-hints').textContent   = result.hints   ?? '—';
+  document.getElementById('end-time').textContent    = result.time != null ? result.time + 's' : '—';
+
+  showScreen('end-screen');
+}
+
+// ── SHOW WIN (inline result, no overlay popup for daily modes) ──
+// After solving, show the end screen inline instead of the overlay
+// For random, keep using the overlay (quick and replayable)
+async function showWin() {
+  state.solved = true;
+  const elapsed = Math.round((Date.now() - state.startTime) / 1000);
+  const totalGuesses = state.guessCount + state.hintsUsed;
+
+  if (state.mode !== 'random') {
+    const today = new Date().toISOString().split('T')[0];
+    const ptype = state.mode === 'theme' ? 'theme' : state.difficulty;
+
+    await db.from('leaderboard').upsert({
+      username: state.username, puzzle_type: ptype,
+      guesses: totalGuesses, hints_used: state.hintsUsed,
+      time_seconds: elapsed, date: today
+    }, { onConflict: 'username,puzzle_type,date' });
+
+    await db.from('user_progress').upsert({
+      username: state.username, puzzle_type: ptype, date: today,
+      solved: true, guesses: totalGuesses,
+      hints_used: state.hintsUsed, time_seconds: elapsed
+    }, { onConflict: 'username,puzzle_type,date' });
+
+    const newStreak  = (state.userStats.streak || 0) + 1;
+    const newBest    = Math.max(newStreak, state.userStats.best_streak || 0);
+    const newSolved  = (state.userStats.total_solved || 0) + 1;
+
+    await db.from('users').update({
+      streak: newStreak, best_streak: newBest, total_solved: newSolved
+    }).eq('username', state.username);
+
+    state.userStats = { ...state.userStats, streak: newStreak, best_streak: newBest, total_solved: newSolved };
+    state.todaySolved[ptype] = true;
+    state.todayResults[ptype] = { guesses: totalGuesses, hints: state.hintsUsed, time: elapsed };
+
+    // Show inline end screen
+    showEndScreen(state.mode, state.difficulty, 'solved');
+
+  } else {
+    // Random mode — use win overlay
+    const newSolved = (state.userStats.total_solved || 0) + 1;
+    await db.from('users').update({ total_solved: newSolved }).eq('username', state.username);
+    state.userStats.total_solved = newSolved;
+
+    document.getElementById('win-word').textContent    = state.currentPuzzle.answer;
+    document.getElementById('win-guesses').textContent = totalGuesses;
+    document.getElementById('win-hints').textContent   = state.hintsUsed;
+    document.getElementById('win-time').textContent    = elapsed + 's';
+    document.getElementById('win-overlay').classList.add('visible');
+  }
+}
+
+// ── REFRESH RANDOM WORD ──
+function refreshRandom() {
+  showConfirm(
+    'New Word?',
+    'This will start a fresh random puzzle. Your current progress will be lost.',
+    'Yes, new word',
+    () => startGame('random', 'random'),
+    '↺'
+  );
 }
 
 // ── START ──
