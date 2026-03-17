@@ -158,10 +158,8 @@
     display: block;
     text-align: center;
     overflow: visible;
-    /* Scale down if still overflowing as last resort */
     max-width: 100%;
-    white-space: nowrap;
-    /* scale-down via container query fallback */
+    /* No white-space:nowrap — allow natural sizing */
   }
   .logo-sub { font-size:var(--fs-md); color:var(--secondary); margin-top:var(--sp-sm); font-weight:300; line-height:1.4; }
 
@@ -517,6 +515,13 @@
     .toast { max-width: 88vw; font-size: 11px; padding: 10px 14px; }
     #leaderboard-screen { padding: 0 12px 40px; }
     #landing > div { padding: clamp(20px,5vw,40px) 14px; gap: 20px; }
+    /* Home bottom row */
+    #home > .home-inner > div:last-child { flex-direction: column; align-items: center; gap: 12px; }
+    .stats-row { justify-content: center; }
+    /* Leaderboard username truncation */
+    .lb-user { max-width: 120px; }
+    /* Admin panel header wrapping */
+    #admin-screen .back-btn { font-size: 11px; padding: 6px 8px; }
   }
 
   /* ── Tablet 481–768px ── */
@@ -608,7 +613,7 @@
 
 <!-- ══════════ LOGIN SCREEN ══════════ -->
 <div id="login-screen" class="screen">
-  <div style="max-width:420px;margin:0 auto;width:100%;padding:40px 20px;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;">
+  <div style="max-width:420px;margin:0 auto;width:100%;padding:40px 16px;box-sizing:border-box;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;">
     <div class="username-card" style="width:100%;">
       <div class="username-icon">👤</div>
       <div class="username-title">Welcome Back</div>
@@ -636,7 +641,7 @@
 
 <!-- ══════════ REGISTER SCREEN ══════════ -->
 <div id="register-screen" class="screen">
-  <div style="max-width:420px;margin:0 auto;width:100%;padding:40px 20px;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;">
+  <div style="max-width:420px;margin:0 auto;width:100%;padding:40px 16px;box-sizing:border-box;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;">
     <div class="username-card" style="width:100%;">
       <div class="username-icon">✨</div>
       <div class="username-title">Create Account</div>
@@ -807,7 +812,7 @@
       </div>
     </div>
 
-    <div style="display:flex;gap:16px;align-items:center;">
+    <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;justify-content:center;width:100%;">
       <div class="stats-row">
         <div class="stat-chip">
           <span class="stat-num" id="stat-streak">0</span>
@@ -832,7 +837,7 @@
 
 <!-- ══════════ LEADERBOARD ══════════ -->
 <div id="leaderboard-screen" class="screen">
-  <div style="max-width:600px;margin:0 auto;width:100%;padding:0 12px 40px;box-sizing:border-box;overflow-x:hidden;">
+  <div style="max-width:600px;margin:0 auto;width:100%;padding:0 12px 40px;box-sizing:border-box;overflow-x:hidden;word-break:break-word;">
   <div class="lb-header">
     <button class="back-btn" onclick="showScreen('home')">← Back</button>
     <div class="lb-title">Leaderboard</div>
@@ -925,7 +930,7 @@
 
 <!-- ══════════ END SCREEN (solved / gave up inline) ══════════ -->
 <div id="end-screen" class="screen">
-  <div style="max-width:520px;margin:0 auto;width:100%;padding:0 20px 40px;display:flex;flex-direction:column;min-height:100vh;justify-content:center;gap:24px;">
+  <div style="max-width:520px;margin:0 auto;width:100%;padding:0 16px 40px;box-sizing:border-box;display:flex;flex-direction:column;min-height:100vh;justify-content:center;gap:24px;">
     <!-- Header -->
     <div style="display:flex;align-items:center;justify-content:space-between;padding-top:20px;">
       <button class="back-btn" onclick="goHome()">← Home</button>
@@ -1052,7 +1057,7 @@
 
 <!-- ══════════ ADMIN SCREEN ══════════ -->
 <div id="admin-screen" class="screen">
-  <div style="max-width:700px;margin:0 auto;width:100%;padding:20px 12px 60px;box-sizing:border-box;overflow-x:hidden;">
+  <div style="max-width:700px;margin:0 auto;width:100%;padding:20px 12px 60px;box-sizing:border-box;overflow-x:hidden;word-break:break-word;">
 
     <!-- Header -->
     <div style="display:flex;align-items:center;gap:10px;margin-bottom:28px;padding-top:4px;">
