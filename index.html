@@ -1422,11 +1422,25 @@ async function submitGuess() {
     return;
   }
 
-  // Store guess with full info
+  // Resolve the final display word (lemmatized base form)
+  const finalWord  = result.matched;
+  const finalLemma = browserLemmatize(finalWord);
+  const displayWord = (finalLemma.length >= 2) ? finalLemma : finalWord;
+
+  // Post-processing duplicate check:
+  // Compare displayWord against every already-stored guess's displayWord
+  // This catches: run+running, cat+cats, ran+run, etc.
+  const postDuplicate = state.guesses.find(g => g.word === displayWord);
+  if (postDuplicate) {
+    showFeedback(`Already guessed "${postDuplicate.word}"!`, 'error');
+    input.classList.add('shake');
+    setTimeout(() => input.classList.remove('shake'), 400);
+    return;
+  }
   state.guesses.push({
-    word:      result.matched,   // display the matched/lemmatized word
+    word:      displayWord,      // lemmatized display word (cats→cat)
     typed:     normalized,       // what user actually typed
-    corrected: result.corrected || (result.matched !== normalized),
+    corrected: result.corrected || (displayWord !== normalized),
     similarity: result.similarity
   });
   state.guesses.sort((a, b) => b.similarity - a.similarity);
