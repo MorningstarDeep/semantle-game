@@ -141,7 +141,7 @@
   /* ══════════════════════════════════════════════════
      LOGO BLOCK (shared between landing + home)
   ══════════════════════════════════════════════════ */
-  .logo-block { text-align:center; animation:fadeUp 0.8s ease both; width:100%; }
+  .logo-block { text-align:center; animation:fadeUp 0.8s ease both; width:100%; overflow:visible; }
   .logo-eyebrow {
     font-family:'DM Mono',monospace; font-size:var(--fs-xs);
     letter-spacing: clamp(1px,0.5vw,3px);
@@ -151,15 +151,17 @@
     font-family:'Syne',sans-serif;
     font-size: var(--fs-logo);
     font-weight:800;
-    letter-spacing: -3px;
+    letter-spacing: -2px;
     line-height:1;
     background:linear-gradient(135deg,#fff 40%,var(--accent) 100%);
     -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;
     display: block;
     text-align: center;
-    /* Never clip characters */
     overflow: visible;
-    width: 100%;
+    /* Scale down if still overflowing as last resort */
+    max-width: 100%;
+    white-space: nowrap;
+    /* scale-down via container query fallback */
   }
   .logo-sub { font-size:var(--fs-md); color:var(--secondary); margin-top:var(--sp-sm); font-weight:300; line-height:1.4; }
 
@@ -167,7 +169,7 @@
      HOME SCREEN
   ══════════════════════════════════════════════════ */
   #home { align-items:center; justify-content:center; padding: 40px 20px; }
-  .home-inner { width:100%; max-width:480px; display:flex; flex-direction:column; align-items:center; gap:40px; }
+  .home-inner { width:100%; max-width:560px; display:flex; flex-direction:column; align-items:center; gap:40px; }
 
   /* User topbar */
   #user-topbar {
@@ -545,7 +547,7 @@
 
 <!-- ══════════ LANDING PAGE ══════════ -->
 <div id="landing" class="screen">
-  <div style="max-width:520px;margin:0 auto;width:100%;padding:clamp(20px,4vw,40px) 16px;box-sizing:border-box;overflow-x:hidden;display:flex;flex-direction:column;align-items:center;gap:28px;min-height:100vh;justify-content:center;overflow-x:hidden;">
+  <div style="max-width:560px;margin:0 auto;width:100%;padding:clamp(20px,4vw,40px) 16px;box-sizing:border-box;display:flex;flex-direction:column;align-items:center;gap:28px;min-height:100vh;justify-content:center;">
 
     <!-- Logo -->
     <div style="text-align:center;animation:fadeUp 0.8s ease both;">
