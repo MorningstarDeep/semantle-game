@@ -1175,45 +1175,192 @@ async function startGame(mode, difficulty) {
   setTimeout(() => document.getElementById('guess-input').focus(), 300);
 }
 
-// ── SIMILARITY ENGINE — real pgvector cosine similarity ──
+// ══════════════════════════════════════════════════════
+// WORD PROCESSING PIPELINE
+// Layer 1 — Browser: normalize + lemmatize (instant)
+// Layer 2 — Supabase: fuzzy match + similarity (smart)
+// ══════════════════════════════════════════════════════
 
-// Cache to avoid re-querying same word pairs in a session
-const similarityCache = {};
+const guessCache = {}; // cache full results by "guess|answer"
 
-async function getSimilarity(guess, answer) {
-  const g = guess.toLowerCase().trim();
-  const a = answer.toLowerCase().trim();
+// ── LAYER 1: Browser lemmatizer ──
+// Handles the most common English inflections instantly,
+// no network call needed.
+function browserLemmatize(word) {
+  const w = word.toLowerCase().trim();
 
-  // Exact match = 100%
-  if (g === a) return 100;
+  // Irregular forms — checked first
+  const irregulars = {
+    'are':'be','were':'be','been':'be','being':'be','is':'be','was':'be','am':'be',
+    'ran':'run','running':'run',
+    'ate':'eat','eating':'eat','eaten':'eat',
+    'went':'go','going':'go','gone':'go',
+    'saw':'see','seen':'see','seeing':'see',
+    'took':'take','taken':'take','taking':'take',
+    'came':'come','coming':'come',
+    'knew':'know','known':'know','knowing':'know',
+    'grew':'grow','grown':'grow','growing':'grow',
+    'flew':'fly','flown':'fly','flying':'fly',
+    'drew':'draw','drawn':'draw','drawing':'draw',
+    'threw':'throw','thrown':'throw','throwing':'throw',
+    'broke':'break','broken':'break','breaking':'break',
+    'spoke':'speak','spoken':'speak','speaking':'speak',
+    'wrote':'write','written':'write','writing':'write',
+    'rode':'ride','ridden':'ride','riding':'ride',
+    'rose':'rise','risen':'rise','rising':'rise',
+    'gave':'give','given':'give','giving':'give',
+    'fell':'fall','fallen':'fall','falling':'fall',
+    'felt':'feel','feeling':'feel',
+    'left':'leave','leaving':'leave',
+    'kept':'keep','keeping':'keep',
+    'met':'meet','meeting':'meet',
+    'sent':'send','sending':'send',
+    'built':'build','building':'build',
+    'bought':'buy','buying':'buy',
+    'brought':'bring','bringing':'bring',
+    'caught':'catch','catching':'catch',
+    'taught':'teach','teaching':'teach',
+    'thought':'think','thinking':'think',
+    'fought':'fight','fighting':'fight',
+    'sought':'seek','seeking':'seek',
+    'found':'find','finding':'find',
+    'bound':'bind','binding':'bind',
+    'wound':'wind','winding':'wind',
+    'held':'hold','holding':'hold',
+    'told':'tell','telling':'tell',
+    'sold':'sell','selling':'sell',
+    'children':'child','mice':'mouse','geese':'goose',
+    'feet':'foot','teeth':'tooth','men':'man','women':'woman',
+    'people':'person','oxen':'ox','sheep':'sheep','fish':'fish',
+    'wolves':'wolf','leaves':'leaf','knives':'knife','lives':'life',
+    'wives':'wife','halves':'half','scarves':'scarf',
+    'cities':'city','countries':'country','families':'family',
+    'babies':'baby','bodies':'body','copies':'copy',
+    'stories':'story','parties':'party','libraries':'library',
+    'easier':'easy','easiest':'easy','harder':'hard','hardest':'hard',
+    'bigger':'big','biggest':'big','faster':'fast','fastest':'fast',
+    'slower':'slow','slowest':'slow','stronger':'strong','strongest':'strong',
+    'weaker':'weak','weakest':'weak','older':'old','oldest':'old',
+    'younger':'young','youngest':'young','better':'good','best':'good',
+    'worse':'bad','worst':'bad','more':'much','most':'much',
+  };
 
-  // Check cache first
-  const cacheKey = g + '|' + a;
-  if (similarityCache[cacheKey] !== undefined) return similarityCache[cacheKey];
+  if (irregulars[w]) return irregulars[w];
 
-  try {
-    const { data, error } = await db.rpc('word_similarity', {
-      word_a: g,
-      word_b: a
-    });
+  // Rule-based stripping (order matters)
+  const rules = [
+    // -ing: running→run, swimming→swim, writing→write
+    [/(.{3,})ing$/, (m, s) => {
+      if (s.endsWith(s[s.length-1]) && s.length > 3) return s.slice(0,-1); // swimming→swim
+      if (s.endsWith('e')) return s;                                          // writing→write (keep e stripped)
+      return s;                                                                // running→run
+    }],
+    // -ed: jumped→jump, stopped→stop, smiled→smile
+    [/(.{3,})ed$/, (m, s) => {
+      if (s.endsWith(s[s.length-1]) && s.length > 3) return s.slice(0,-1); // stopped→stop
+      if (!s.endsWith('e')) return s + 'e';                                  // smiled→smile — actually return s
+      return s;
+    }],
+    // -ies: flies→fly, tries→try
+    [/(.{2,})ies$/, (m, s) => s + 'y'],
+    // -es: boxes→box, watches→watch, fixes→fix
+    [/(.{3,})(ch|sh|ss|x|z)es$/, (m, s, end) => s + end],
+    // -s: cats→cat, dogs→dog (but not -ss, -us endings)
+    [/(.{3,}[^su])s$/, (m, s) => s],
+    // -er: teacher→teach, runner→run
+    [/(.{3,})er$/, (m, s) => s],
+    // -est: fastest→fast
+    [/(.{3,})est$/, (m, s) => s],
+    // -ly: quickly→quick
+    [/(.{3,})ly$/, (m, s) => s],
+    // -ness: darkness→dark
+    [/(.{3,})ness$/, (m, s) => s],
+    // -tion/-sion: creation→create
+    [/(.{3,})(a?tion|sion)$/, (m, s) => s],
+    // -ment: movement→move
+    [/(.{3,})ment$/, (m, s) => s],
+    // -ful: powerful→power
+    [/(.{3,})ful$/, (m, s) => s],
+    // -less: powerless→power
+    [/(.{3,})less$/, (m, s) => s],
+  ];
 
-    if (error || data === null) {
-      // Fallback: word not in DB — return a low deterministic score
-      const hash = [...(g + a)].reduce((acc, c) => (acc * 31 + c.charCodeAt(0)) & 0xffff, 0);
-      const fallback = 4 + (hash % 22);
-      similarityCache[cacheKey] = fallback;
-      return fallback;
+  for (const [pattern, fn] of rules) {
+    const match = w.match(pattern);
+    if (match) {
+      const result = fn(...match);
+      if (result && result.length >= 2 && result !== w) return result;
     }
-
-    const score = parseFloat(data);
-    similarityCache[cacheKey] = score;
-    return score;
-
-  } catch (e) {
-    // Network error fallback
-    const hash = [...(g + a)].reduce((acc, c) => (acc * 31 + c.charCodeAt(0)) & 0xffff, 0);
-    return 4 + (hash % 22);
   }
+
+  return w; // return as-is if no rule matched
+}
+
+// ── LAYER 2: Supabase smart processor ──
+// Calls process_guess() which does:
+// fuzzy matching + vocabulary check + real similarity
+async function serverProcessGuess(guess, answer) {
+  const { data, error } = await db.rpc('process_guess', {
+    raw_guess: guess,
+    answer: answer
+  });
+  if (error || !data) return null;
+  return data;
+}
+
+// ── MAIN: Full pipeline ──
+async function processGuess(rawGuess, answer) {
+  const normalized = rawGuess.toLowerCase().replace(/[^a-z]/g, '').trim();
+  if (!normalized) return null;
+
+  // Exact match — skip all processing
+  if (normalized === answer.toLowerCase()) {
+    return { word: normalized, matched: normalized, similarity: 100, corrected: false };
+  }
+
+  // Check full result cache
+  const cacheKey = normalized + '|' + answer.toLowerCase();
+  if (guessCache[cacheKey]) return guessCache[cacheKey];
+
+  // Layer 1: browser lemmatize
+  const lemmatized = browserLemmatize(normalized);
+
+  // If lemmatized to a different word, check cache for that too
+  const lemmaCacheKey = lemmatized + '|' + answer.toLowerCase();
+  if (guessCache[lemmaCacheKey]) {
+    const cached = { ...guessCache[lemmaCacheKey], word: normalized, corrected: lemmatized !== normalized };
+    guessCache[cacheKey] = cached;
+    return cached;
+  }
+
+  // Layer 2: server processing
+  // Try lemmatized word first, then original if lemmatized not found
+  let result = await serverProcessGuess(lemmatized, answer);
+
+  // If lemmatized word not found and it differs from original, try original
+  if (result && result.error === 'word not found' && lemmatized !== normalized) {
+    const result2 = await serverProcessGuess(normalized, answer);
+    if (result2 && result2.error !== 'word not found') result = result2;
+  }
+
+  if (result) {
+    const wasCorrected = result.corrected || (result.matched !== normalized) || (lemmatized !== normalized);
+    const final = {
+      word:       normalized,
+      typed:      normalized,
+      matched:    result.matched || lemmatized,
+      similarity: result.similarity || 0,
+      corrected:  wasCorrected && result.matched !== normalized,
+      notFound:   result.error === 'word not found'
+    };
+    guessCache[cacheKey]      = final;
+    guessCache[lemmaCacheKey] = final;
+    return final;
+  }
+
+  // Fallback if server completely fails
+  const hash = [...(normalized + answer)].reduce((acc, c) => (acc * 31 + c.charCodeAt(0)) & 0xffff, 0);
+  return { word: normalized, typed: normalized, matched: normalized, similarity: 4 + (hash % 22), corrected: false, notFound: true };
 }
 
 function getHeatInfo(pct) {
@@ -1231,43 +1378,68 @@ async function submitGuess() {
   const input = document.getElementById('guess-input');
   const raw = input.value.trim();
   if (!raw) return;
-  const guess = raw.toLowerCase().replace(/[^a-z]/g, '');
-  if (!guess) return;
+  const normalized = raw.toLowerCase().replace(/[^a-z]/g, '').trim();
+  if (!normalized) return;
 
-  if (state.guesses.find(g => g.word === guess)) {
+  // Check duplicate (check both typed word and its lemma)
+  const lemma = browserLemmatize(normalized);
+  if (state.guesses.find(g => g.word === normalized || g.matched === normalized || g.matched === lemma)) {
     showFeedback('Already guessed!', 'error');
     input.classList.add('shake');
     setTimeout(() => input.classList.remove('shake'), 400);
     return;
   }
 
-  // Show loading state while fetching similarity
+  // Lock input while processing
   const submitBtn = document.querySelector('.submit-btn');
   submitBtn.textContent = '...';
   submitBtn.disabled = true;
   input.disabled = true;
+  input.value = '';
 
-  const similarity = await getSimilarity(guess, state.currentPuzzle.answer);
+  // Run full pipeline
+  const result = await processGuess(normalized, state.currentPuzzle.answer);
 
-  // Restore button
+  // Restore input
   submitBtn.textContent = 'Guess →';
   submitBtn.disabled = false;
   input.disabled = false;
   input.focus();
 
-  state.guesses.push({ word: guess, similarity });
+  if (!result) { showFeedback('Something went wrong. Try again.', 'error'); return; }
+
+  // Word not in vocabulary at all
+  if (result.notFound && result.similarity < 5) {
+    showFeedback(`"${normalized}" — not in vocabulary`, 'error');
+    input.classList.add('shake');
+    setTimeout(() => input.classList.remove('shake'), 400);
+    return;
+  }
+
+  // Store guess with full info
+  state.guesses.push({
+    word:      result.matched,   // display the matched/lemmatized word
+    typed:     normalized,       // what user actually typed
+    corrected: result.corrected || (result.matched !== normalized),
+    similarity: result.similarity
+  });
   state.guesses.sort((a, b) => b.similarity - a.similarity);
   state.guesses.forEach((g, i) => g.rank = i + 1);
   state.guessCount++;
-  state.bestSimilarity = Math.max(state.bestSimilarity, similarity);
+  state.bestSimilarity = Math.max(state.bestSimilarity, result.similarity);
 
   updateProgress(state.bestSimilarity);
   renderGuesses();
   document.getElementById('guess-count').textContent = state.guessCount + (state.hintsUsed ? ` +${state.hintsUsed}h` : '');
-  document.getElementById('feedback-msg').textContent = '';
-  input.value = '';
 
-  if (guess === state.currentPuzzle.answer.toLowerCase() || similarity >= 99.9) {
+  // Show correction feedback
+  if (result.corrected || result.matched !== normalized) {
+    showFeedback(`"${normalized}" → scored as "${result.matched}"`, 'suggest');
+  } else {
+    document.getElementById('feedback-msg').textContent = '';
+  }
+
+  if (result.matched === state.currentPuzzle.answer.toLowerCase() || result.similarity >= 99.9) {
     setTimeout(() => showWin(), 400);
   }
 }
@@ -1287,10 +1459,13 @@ function updateProgress(pct) {
 function renderGuesses() {
   document.getElementById('guess-list').innerHTML = state.guesses.map(g => {
     const h = getHeatInfo(g.similarity);
+    const corrLabel = (g.corrected && g.typed && g.typed !== g.word)
+      ? `<span style="font-size:10px;color:var(--muted);font-family:'DM Mono',monospace;margin-left:4px;">← ${g.typed}</span>`
+      : '';
     return `<div class="guess-item" style="--heat-color:${h.color}">
       <div class="guess-bar-fill" style="width:${g.similarity}%"></div>
       <span class="guess-rank">${g.rank}</span>
-      <span class="guess-word">${g.word}</span>
+      <span class="guess-word">${g.word}${corrLabel}</span>
       <span class="guess-pct" style="color:${h.color}">${g.similarity}%</span>
       <span class="guess-heat">${h.emoji}</span>
     </div>`;
