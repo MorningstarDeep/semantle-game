@@ -58,7 +58,7 @@
     flex-direction:column; gap:20px;
   }
   .loader-logo {
-    font-family:'Syne',sans-serif; font-size:48px; font-weight:800;
+    font-family:'Syne',sans-serif; font-size:clamp(32px,8vw,48px); font-weight:800;
     background: linear-gradient(135deg,#fff 40%, var(--accent) 100%);
     -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;
     letter-spacing:-2px;
@@ -82,12 +82,12 @@
   }
   .username-card {
     background:var(--card); border:1px solid var(--border);
-    border-radius:24px; padding:48px 40px; max-width:420px; width:100%;
+    border-radius:24px; padding:clamp(24px,5vw,48px) clamp(16px,5vw,40px); max-width:420px; width:100%;
     text-align:center; animation:fadeUp 0.6s ease both;
   }
   .username-icon { font-size:52px; margin-bottom:20px; }
   .username-title {
-    font-family:'Syne',sans-serif; font-size:28px; font-weight:800;
+    font-family:'Syne',sans-serif; font-size:clamp(20px,6vw,28px); font-weight:800;
     letter-spacing:-1px; margin-bottom:8px;
   }
   .username-sub { color:var(--secondary); font-size:14px; margin-bottom:32px; }
@@ -110,16 +110,16 @@
   .username-err { color:#ef4444; font-size:13px; margin-top:12px; font-family:'DM Mono',monospace; min-height:18px; }
 
   /* ── HOME ── */
-  #home { align-items:center; justify-content:center; padding:40px 20px; }
-  .home-inner { width:100%; max-width:480px; display:flex; flex-direction:column; align-items:center; gap:40px; }
+  #home { align-items:center; justify-content:center; padding:clamp(24px,5vw,40px) 16px; }
+  .home-inner { width:100%; max-width:480px; display:flex; flex-direction:column; align-items:center; gap:clamp(20px,4vw,40px); }
   .logo-block { text-align:center; animation:fadeUp 0.8s ease both; }
   .logo-eyebrow {
     font-family:'DM Mono',monospace; font-size:11px; letter-spacing:3px;
     text-transform:uppercase; color:var(--accent); margin-bottom:12px; opacity:0.8;
   }
   .logo-title {
-    font-family:'Syne',sans-serif; font-size:clamp(36px,10vw,80px); font-weight:800;
-    letter-spacing:-2px; line-height:1;
+    font-family:'Syne',sans-serif; font-size:clamp(32px,9vw,80px); font-weight:800;
+    letter-spacing:clamp(-1px,-0.5vw,-3px); line-height:1;
     background:linear-gradient(135deg,#fff 40%,var(--accent) 100%);
     -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;
     max-width:100%; overflow:hidden;
@@ -153,7 +153,7 @@
     flex-shrink:0; border:1px solid var(--border);
   }
   .mode-info { flex:1; }
-  .mode-name { font-family:'Syne',sans-serif; font-weight:700; font-size:17px; margin-bottom:3px; }
+  .mode-name { font-family:'Syne',sans-serif; font-weight:700; font-size:clamp(14px,4vw,17px); margin-bottom:3px; }
   .mode-desc { font-size:13px; color:var(--secondary); font-weight:300; }
   .mode-badge {
     font-family:'DM Mono',monospace; font-size:10px;
@@ -169,15 +169,15 @@
 
   .stats-row { display:flex; gap:24px; animation:fadeUp 0.8s 0.2s ease both; }
   .stat-chip { display:flex; flex-direction:column; align-items:center; gap:4px; }
-  .stat-num { font-family:'Syne',sans-serif; font-weight:700; font-size:22px; color:var(--accent); }
+  .stat-num { font-family:'Syne',sans-serif; font-weight:700; font-size:clamp(16px,5vw,22px); color:var(--accent); }
   .stat-label { font-size:11px; color:var(--muted); letter-spacing:1px; text-transform:uppercase; font-family:'DM Mono',monospace; }
   .stat-divider { width:1px; background:var(--border); align-self:stretch; }
 
   /* ── LEADERBOARD SCREEN ── */
-  #leaderboard-screen { padding:0 16px 40px; max-width:600px; margin:0 auto; width:100%; }
+  #leaderboard-screen { padding:0 12px 40px; max-width:600px; margin:0 auto; width:100%; box-sizing:border-box; }
   .lb-header { display:flex; align-items:center; gap:16px; padding:20px 0 24px; }
-  .lb-title { font-family:'Syne',sans-serif; font-size:28px; font-weight:800; letter-spacing:-1px; flex:1; }
-  .lb-tabs { display:flex; gap:8px; margin-bottom:20px; flex-wrap:wrap; }
+  .lb-title { font-family:'Syne',sans-serif; font-size:clamp(20px,6vw,28px); font-weight:800; letter-spacing:-1px; flex:1; }
+  .lb-tabs { display:flex; gap:6px; margin-bottom:16px; flex-wrap:wrap; }
   .lb-tab {
     padding:8px 16px; border-radius:8px; border:1px solid var(--border);
     background:var(--card); color:var(--secondary); font-family:'DM Mono',monospace;
@@ -199,19 +199,19 @@
   }
   .lb-row.me { border-color:var(--accent); background:var(--accent-glow); }
   .lb-rank {
-    font-family:'Syne',sans-serif; font-weight:800; font-size:18px;
+    font-family:'Syne',sans-serif; font-weight:800; font-size:clamp(14px,4vw,18px);
     width:28px; text-align:center; color:var(--muted);
   }
   .lb-rank.gold { color:#fbbf24; }
   .lb-rank.silver { color:#94a3b8; }
   .lb-rank.bronze { color:#c07841; }
   .lb-user { flex:1; font-family:'DM Mono',monospace; font-size:14px; }
-  .lb-guesses { font-family:'Syne',sans-serif; font-weight:700; font-size:16px; color:var(--accent); }
+  .lb-guesses { font-family:'Syne',sans-serif; font-weight:700; font-size:clamp(14px,3.5vw,16px); color:var(--accent); }
   .lb-time { font-family:'DM Mono',monospace; font-size:12px; color:var(--secondary); min-width:50px; text-align:right; }
   .lb-empty { text-align:center; color:var(--muted); font-family:'DM Mono',monospace; font-size:13px; padding:40px 0; }
 
   /* ── GAME SCREEN ── */
-  #game { flex-direction:column; max-width:600px; margin:0 auto; width:100%; padding:0 16px 40px; }
+  #game { flex-direction:column; max-width:600px; margin:0 auto; width:100%; padding:0 12px 80px; box-sizing:border-box; }
   .game-header {
     display:flex; align-items:center; justify-content:space-between;
     padding:20px 0 0; margin-bottom:20px;
@@ -252,7 +252,7 @@
     display:flex; align-items:center; gap:6px;
   }
   .riddle-label::after { content:''; flex:1; height:1px; background:linear-gradient(to right,var(--accent-glow),transparent); }
-  .riddle-text { font-family:'Syne',sans-serif; font-size:20px; font-weight:600; line-height:1.5; }
+  .riddle-text { font-family:'Syne',sans-serif; font-size:clamp(15px,4vw,20px); font-weight:600; line-height:1.5; word-break:break-word; }
   .diff-pips { display:flex; gap:4px; margin-top:14px; }
   .pip { width:20px; height:4px; border-radius:2px; background:var(--border); }
   .pip.active { background:var(--accent); }
@@ -268,7 +268,7 @@
   .guess-input {
     flex:1; background:var(--card); border:1.5px solid var(--border);
     border-radius:var(--radius); padding:14px 18px;
-    font-family:'DM Mono',monospace; font-size:16px; color:var(--text);
+    font-family:'DM Mono',monospace; font-size:clamp(14px,3.5vw,16px); color:var(--text);
     outline:none; transition:border-color 0.2s,box-shadow 0.2s; letter-spacing:0.5px;
   }
   .guess-input:focus { border-color:var(--accent); box-shadow:0 0 0 3px var(--accent-glow); }
@@ -286,7 +286,7 @@
 
   .guesses-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; animation:fadeUp 0.5s 0.2s ease both; }
   .guesses-count { font-family:'DM Mono',monospace; font-size:11px; letter-spacing:1.5px; text-transform:uppercase; color:var(--muted); }
-  .action-btns { display:flex; gap:8px; }
+  .action-btns { display:flex; gap:6px; flex-wrap:wrap; justify-content:flex-end; }
   .hint-btn, .giveup-btn {
     padding:6px 14px; border-radius:8px; font-family:'DM Sans',sans-serif;
     font-size:12px; cursor:pointer; transition:all 0.2s;
@@ -323,7 +323,7 @@
     opacity:0.06; pointer-events:none; z-index:0;
   }
   .guess-rank { font-family:'DM Mono',monospace; font-size:11px; color:var(--muted); width:20px; text-align:right; flex-shrink:0; position:relative; z-index:1; }
-  .guess-word { font-family:'Syne',sans-serif; font-weight:600; font-size:16px; flex:1; text-transform:capitalize; position:relative; z-index:1; }
+  .guess-word { font-family:'Syne',sans-serif; font-weight:600; font-size:clamp(13px,3.5vw,16px); flex:1; text-transform:capitalize; position:relative; z-index:1; word-break:break-word; }
   .guess-pct { font-family:'DM Mono',monospace; font-size:13px; font-weight:500; min-width:42px; text-align:right; position:relative; z-index:1; }
   .guess-heat { font-size:14px; min-width:80px; letter-spacing:1px; position:relative; z-index:1; }
 
@@ -340,16 +340,16 @@
     box-shadow:0 0 80px rgba(0,255,136,0.2); animation:popIn 0.5s cubic-bezier(0.34,1.56,0.64,1) both;
   }
   .win-emoji { font-size:56px; margin-bottom:16px; }
-  .win-title { font-family:'Syne',sans-serif; font-size:36px; font-weight:800; color:var(--accent); margin-bottom:8px; letter-spacing:-1px; }
+  .win-title { font-family:'Syne',sans-serif; font-size:clamp(24px,7vw,36px); font-weight:800; color:var(--accent); margin-bottom:8px; letter-spacing:-1px; }
   .win-subtitle { color:var(--secondary); font-size:14px; margin-bottom:10px; }
   .win-word {
-    font-family:'DM Mono',monospace; font-size:26px; color:var(--text); margin-bottom:24px;
+    font-family:'DM Mono',monospace; font-size:clamp(18px,5vw,26px); color:var(--text); margin-bottom:24px;
     background:var(--surface); padding:12px 24px; border-radius:10px;
     display:inline-block; border:1px solid var(--border);
   }
   .win-stats { display:flex; gap:20px; justify-content:center; margin-bottom:28px; }
   .win-stat { text-align:center; }
-  .win-stat-num { font-family:'Syne',sans-serif; font-size:26px; font-weight:700; color:var(--accent); }
+  .win-stat-num { font-family:'Syne',sans-serif; font-size:clamp(18px,5vw,26px); font-weight:700; color:var(--accent); }
   .win-stat-label { font-size:11px; color:var(--secondary); font-family:'DM Mono',monospace; text-transform:uppercase; letter-spacing:1px; }
   .win-actions { display:flex; flex-direction:column; gap:10px; }
   .win-btn { padding:14px; border-radius:12px; font-family:'Syne',sans-serif; font-weight:700; font-size:15px; cursor:pointer; transition:all 0.2s; }
@@ -382,13 +382,20 @@
   ══════════════════════════════════════════ */
   @media (max-width: 480px) {
 
+    /* ── Global overflow protection ── */
+    * { max-width: 100%; }
+    img, video, iframe { max-width: 100%; height: auto; }
+
     /* ── Logo ── */
+    .loader-logo { font-size: 32px !important; letter-spacing: -1px !important; }
     .logo-title {
-      font-size: clamp(36px, 15vw, 56px) !important;
-      letter-spacing: -2px !important;
+      font-size: clamp(28px, 12vw, 44px) !important;
+      letter-spacing: -1px !important;
+      word-break: keep-all !important;
+      white-space: nowrap !important;
     }
-    .logo-sub { font-size: 13px !important; }
-    .logo-eyebrow { font-size: 10px !important; letter-spacing: 2px !important; }
+    .logo-sub { font-size: 12px !important; margin-top: 8px !important; }
+    .logo-eyebrow { font-size: 9px !important; letter-spacing: 2px !important; }
 
     /* ── Home / Landing inner ── */
     .home-inner { gap: 24px !important; padding: 0 !important; }
@@ -515,7 +522,7 @@
 
 <!-- ══════════ LANDING PAGE ══════════ -->
 <div id="landing" class="screen">
-  <div style="max-width:520px;margin:0 auto;width:100%;padding:40px 16px;display:flex;flex-direction:column;align-items:center;gap:28px;min-height:100vh;justify-content:center;overflow-x:hidden;">
+  <div style="max-width:520px;margin:0 auto;width:100%;padding:clamp(20px,4vw,40px) 16px;box-sizing:border-box;overflow-x:hidden;display:flex;flex-direction:column;align-items:center;gap:28px;min-height:100vh;justify-content:center;overflow-x:hidden;">
 
     <!-- Logo -->
     <div style="text-align:center;animation:fadeUp 0.8s ease both;">
@@ -800,7 +807,7 @@
 
 <!-- ══════════ LEADERBOARD ══════════ -->
 <div id="leaderboard-screen" class="screen">
-  <div style="max-width:600px;margin:0 auto;width:100%;padding:0 16px 40px;">
+  <div style="max-width:600px;margin:0 auto;width:100%;padding:0 12px 40px;box-sizing:border-box;overflow-x:hidden;">
   <div class="lb-header">
     <button class="back-btn" onclick="showScreen('home')">← Back</button>
     <div class="lb-title">Leaderboard</div>
@@ -882,7 +889,7 @@
 <div id="confirm-overlay" style="display:none;position:fixed;inset:0;background:rgba(8,11,15,0.92);z-index:300;align-items:center;justify-content:center;backdrop-filter:blur(8px);">
   <div style="background:var(--card);border:1px solid var(--border);border-radius:20px;padding:36px;max-width:360px;width:90%;text-align:center;animation:popIn 0.35s cubic-bezier(0.34,1.56,0.64,1) both;">
     <div id="confirm-icon" style="font-size:40px;margin-bottom:12px;">⚠️</div>
-    <div id="confirm-title" style="font-family:'Syne',sans-serif;font-size:22px;font-weight:800;margin-bottom:10px;letter-spacing:-0.5px;"></div>
+    <div id="confirm-title" style="font-family:'Syne',sans-serif;font-size:clamp(16px,4.5vw,22px);font-weight:800;margin-bottom:10px;letter-spacing:-0.5px;"></div>
     <div id="confirm-body" style="font-size:14px;color:var(--secondary);line-height:1.6;margin-bottom:28px;"></div>
     <div style="display:flex;flex-direction:column;gap:10px;">
       <button id="confirm-ok" style="background:var(--accent);color:#000;border:none;border-radius:12px;padding:13px;font-family:'Syne',sans-serif;font-weight:700;font-size:15px;cursor:pointer;transition:all 0.2s;"></button>
@@ -904,9 +911,9 @@
     <!-- Status banner -->
     <div id="end-banner" style="border-radius:20px;padding:32px 28px;text-align:center;border:1px solid var(--border);">
       <div id="end-emoji" style="font-size:60px;margin-bottom:16px;"></div>
-      <div id="end-title" style="font-family:'Syne',sans-serif;font-size:36px;font-weight:800;letter-spacing:-1px;margin-bottom:8px;"></div>
+      <div id="end-title" style="font-family:'Syne',sans-serif;font-size:clamp(24px,7vw,36px);font-weight:800;letter-spacing:-1px;margin-bottom:8px;"></div>
       <div id="end-subtitle" style="font-size:14px;color:var(--secondary);margin-bottom:16px;"></div>
-      <div id="end-answer" style="font-family:'DM Mono',monospace;font-size:24px;padding:12px 28px;border-radius:10px;display:inline-block;background:var(--surface);border:1px solid var(--border);"></div>
+      <div id="end-answer" style="font-family:'DM Mono',monospace;font-size:clamp(16px,5vw,24px);padding:12px 28px;border-radius:10px;display:inline-block;background:var(--surface);border:1px solid var(--border);"></div>
     </div>
 
     <!-- Riddle / Theme context block -->
@@ -921,15 +928,15 @@
     <!-- Stats row -->
     <div id="end-stats" style="display:flex;gap:0;background:var(--card);border:1px solid var(--border);border-radius:16px;overflow:hidden;">
       <div style="flex:1;padding:20px;text-align:center;border-right:1px solid var(--border);">
-        <div id="end-guesses" style="font-family:'Syne',sans-serif;font-size:28px;font-weight:800;color:var(--accent);">—</div>
+        <div id="end-guesses" style="font-family:'Syne',sans-serif;font-size:clamp(20px,6vw,28px);font-weight:800;color:var(--accent);">—</div>
         <div style="font-family:'DM Mono',monospace;font-size:10px;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-top:4px;">Guesses</div>
       </div>
       <div style="flex:1;padding:20px;text-align:center;border-right:1px solid var(--border);">
-        <div id="end-hints" style="font-family:'Syne',sans-serif;font-size:28px;font-weight:800;color:var(--accent);">—</div>
+        <div id="end-hints" style="font-family:'Syne',sans-serif;font-size:clamp(20px,6vw,28px);font-weight:800;color:var(--accent);">—</div>
         <div style="font-family:'DM Mono',monospace;font-size:10px;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-top:4px;">Hints</div>
       </div>
       <div style="flex:1;padding:20px;text-align:center;">
-        <div id="end-time" style="font-family:'Syne',sans-serif;font-size:28px;font-weight:800;color:var(--accent);">—</div>
+        <div id="end-time" style="font-family:'Syne',sans-serif;font-size:clamp(20px,6vw,28px);font-weight:800;color:var(--accent);">—</div>
         <div style="font-family:'DM Mono',monospace;font-size:10px;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-top:4px;">Seconds</div>
       </div>
     </div>
@@ -982,7 +989,7 @@
 <div id="admin-pw-modal" style="display:none;position:fixed;inset:0;background:rgba(8,11,15,0.92);z-index:450;align-items:center;justify-content:center;backdrop-filter:blur(8px);">
   <div style="background:var(--card);border:1px solid rgba(255,170,0,0.3);border-radius:20px;padding:36px;max-width:380px;width:90%;text-align:center;animation:popIn 0.35s cubic-bezier(0.34,1.56,0.64,1) both;">
     <div style="font-size:40px;margin-bottom:12px;">🔐</div>
-    <div style="font-family:'Syne',sans-serif;font-size:22px;font-weight:800;margin-bottom:8px;">Change Admin Password</div>
+    <div style="font-family:'Syne',sans-serif;font-size:clamp(16px,4.5vw,22px);font-weight:800;margin-bottom:8px;">Change Admin Password</div>
     <div style="font-size:13px;color:var(--secondary);margin-bottom:24px;">This is the password to unlock the admin panel.</div>
     <input type="password" id="admin-new-pw" placeholder="New admin panel password"
       style="width:100%;background:var(--surface);border:1.5px solid var(--border);border-radius:10px;padding:12px;font-family:'DM Mono',monospace;font-size:14px;color:var(--text);outline:none;letter-spacing:2px;margin-bottom:10px;text-align:center;"
@@ -1003,7 +1010,7 @@
 <div id="admin-auth-overlay" style="display:none;position:fixed;inset:0;background:rgba(8,11,15,0.95);z-index:400;align-items:center;justify-content:center;backdrop-filter:blur(10px);">
   <div style="background:var(--card);border:1px solid rgba(255,170,0,0.3);border-radius:20px;padding:36px;max-width:360px;width:90%;text-align:center;animation:popIn 0.35s cubic-bezier(0.34,1.56,0.64,1) both;">
     <div style="font-size:40px;margin-bottom:12px;">🔐</div>
-    <div style="font-family:'Syne',sans-serif;font-size:22px;font-weight:800;margin-bottom:8px;letter-spacing:-0.5px;">Admin Access</div>
+    <div style="font-family:'Syne',sans-serif;font-size:clamp(16px,4.5vw,22px);font-weight:800;margin-bottom:8px;letter-spacing:-0.5px;">Admin Access</div>
     <div style="font-size:13px;color:var(--secondary);margin-bottom:24px;">Enter the admin password to continue.</div>
     <input type="password" id="admin-password-input" placeholder="Password"
       style="width:100%;background:var(--surface);border:1.5px solid var(--border);border-radius:10px;padding:13px 16px;font-family:'DM Mono',monospace;font-size:15px;color:var(--text);outline:none;text-align:center;letter-spacing:2px;margin-bottom:10px;transition:border-color 0.2s;"
@@ -1020,12 +1027,12 @@
 
 <!-- ══════════ ADMIN SCREEN ══════════ -->
 <div id="admin-screen" class="screen">
-  <div style="max-width:700px;margin:0 auto;width:100%;padding:20px 16px 60px;">
+  <div style="max-width:700px;margin:0 auto;width:100%;padding:20px 12px 60px;box-sizing:border-box;overflow-x:hidden;">
 
     <!-- Header -->
     <div style="display:flex;align-items:center;gap:10px;margin-bottom:28px;padding-top:4px;">
       <button class="back-btn" onclick="showScreen('home')">← Home</button>
-      <div style="font-family:'Syne',sans-serif;font-size:24px;font-weight:800;letter-spacing:-1px;flex:1;">⚙️ Admin Panel</div>
+      <div style="font-family:'Syne',sans-serif;font-size:clamp(18px,5vw,24px);font-weight:800;letter-spacing:-1px;flex:1;">⚙️ Admin Panel</div>
       <div style="font-family:'DM Mono',monospace;font-size:11px;color:#ffaa00;background:rgba(255,170,0,0.1);border:1px solid rgba(255,170,0,0.3);padding:4px 10px;border-radius:20px;">morningstardeep</div>
       <button onclick="openAdminPwModal()" title="Change admin password"
         style="background:rgba(255,170,0,0.1);border:1px solid rgba(255,170,0,0.3);color:#ffaa00;width:36px;height:36px;border-radius:50%;cursor:pointer;font-size:16px;transition:all 0.2s;display:flex;align-items:center;justify-content:center;flex-shrink:0;"
@@ -1034,21 +1041,21 @@
     </div>
 
     <!-- Stats cards -->
-    <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:10px;margin-bottom:24px;" id="admin-stats">
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(100px,1fr));gap:10px;margin-bottom:24px;" id="admin-stats">
       <div style="background:var(--card);border:1px solid var(--border);border-radius:14px;padding:16px;text-align:center;">
-        <div id="stat-easy" style="font-family:'Syne',sans-serif;font-size:28px;font-weight:800;color:var(--accent);">—</div>
+        <div id="stat-easy" style="font-family:'Syne',sans-serif;font-size:clamp(20px,6vw,28px);font-weight:800;color:var(--accent);">—</div>
         <div style="font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-top:4px;">Easy</div>
       </div>
       <div style="background:var(--card);border:1px solid var(--border);border-radius:14px;padding:16px;text-align:center;">
-        <div id="stat-medium" style="font-family:'Syne',sans-serif;font-size:28px;font-weight:800;color:#ffaa00;">—</div>
+        <div id="stat-medium" style="font-family:'Syne',sans-serif;font-size:clamp(20px,6vw,28px);font-weight:800;color:#ffaa00;">—</div>
         <div style="font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-top:4px;">Medium</div>
       </div>
       <div style="background:var(--card);border:1px solid var(--border);border-radius:14px;padding:16px;text-align:center;">
-        <div id="stat-hard" style="font-family:'Syne',sans-serif;font-size:28px;font-weight:800;color:#ef4444;">—</div>
+        <div id="stat-hard" style="font-family:'Syne',sans-serif;font-size:clamp(20px,6vw,28px);font-weight:800;color:#ef4444;">—</div>
         <div style="font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-top:4px;">Hard</div>
       </div>
       <div style="background:var(--card);border:1px solid var(--border);border-radius:14px;padding:16px;text-align:center;">
-        <div id="stat-themes" style="font-family:'Syne',sans-serif;font-size:28px;font-weight:800;color:#a78bfa;">—</div>
+        <div id="stat-themes" style="font-family:'Syne',sans-serif;font-size:clamp(20px,6vw,28px);font-weight:800;color:#a78bfa;">—</div>
         <div style="font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-top:4px;">Themes</div>
       </div>
     </div>
@@ -1784,7 +1791,7 @@ async function startGame(mode, difficulty) {
   } else if (mode === 'theme') {
     document.getElementById('riddle-label-text').textContent = `Today's Theme`;
     document.getElementById('riddle-text').innerHTML =
-      `<span style="font-size:22px;">${puzzle.theme?.theme_emoji || '🎯'} ${puzzle.theme?.theme_name || 'Unknown'}</span><br><span style="font-size:15px;font-weight:400;color:var(--secondary);font-family:'DM Sans',sans-serif;">Guess the hidden word associated with this theme!</span>`;
+      `<span style="font-size:clamp(16px,4.5vw,22px);">${puzzle.theme?.theme_emoji || '🎯'} ${puzzle.theme?.theme_name || 'Unknown'}</span><br><span style="font-size:15px;font-weight:400;color:var(--secondary);font-family:'DM Sans',sans-serif;">Guess the hidden word associated with this theme!</span>`;
     document.getElementById('diff-pips').innerHTML = '';
     document.getElementById('puzzle-card').style.display = 'block';
   } else {
@@ -2714,7 +2721,7 @@ async function loadThemesOverview() {
       <div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px 14px;">
         <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px;">
           <span style="font-size:18px;">${t.theme_emoji}</span>
-          <span style="font-family:'Syne',sans-serif;font-weight:600;font-size:15px;flex:1;">${t.theme_name}</span>
+          <span style="font-family:'Syne',sans-serif;font-weight:600;font-size:clamp(13px,3.5vw,15px);flex:1;">${t.theme_name}</span>
           <span style="font-family:'DM Mono',monospace;font-size:11px;color:var(--muted);">${wordCount} words · used ${used}×</span>
         </div>
         <div style="height:4px;background:var(--border);border-radius:2px;overflow:hidden;">
