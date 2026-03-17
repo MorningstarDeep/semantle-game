@@ -356,6 +356,19 @@
   .feedback-msg { text-align:center; font-family:'DM Mono',monospace; font-size:var(--fs-sm); color:var(--secondary); min-height:20px; margin-bottom:8px; transition:all 0.3s; }
   .feedback-msg.error { color:#ef4444; }
   .feedback-msg.success { color:var(--accent); }
+  .feedback-msg.suggest { color:var(--secondary); }
+  .did-you-mean {
+    text-align:center; margin-bottom:8px; font-size:13px;
+    color:var(--secondary); font-family:'DM Sans',sans-serif;
+    animation:fadeUp 0.2s ease both;
+  }
+  .did-you-mean span { color:var(--accent); }
+  .did-you-mean button {
+    background:none; border:1px solid var(--accent); color:var(--accent);
+    border-radius:6px; padding:2px 10px; cursor:pointer; font-size:12px;
+    font-family:'DM Mono',monospace; margin-left:8px; transition:all 0.15s;
+  }
+  .did-you-mean button:hover { background:var(--accent); color:#000; }
 
   /* Guesses header */
   .guesses-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; animation:fadeUp 0.5s 0.2s ease both; flex-wrap:wrap; gap:8px; }
@@ -863,7 +876,7 @@
         style="display:none;background:var(--card);border:1px solid var(--border);color:var(--secondary);padding:6px 12px;border-radius:8px;cursor:pointer;font-size:13px;font-family:'DM Sans',sans-serif;transition:all 0.2s;"
         onmouseover="this.style.borderColor='var(--accent)';this.style.color='var(--accent)'"
         onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--secondary)'">↺ New Word</button>
-      <div class="streak-badge" id="streak-badge">🔥 <span id="streak-count">0</span></div>
+      <div class="streak-badge">🔥 <span id="streak-count">0</span></div>
     </div>
   </div>
 
@@ -884,10 +897,12 @@
   <div class="input-row">
     <input type="text" class="guess-input" id="guess-input" placeholder="Type a word..."
       autocomplete="off" autocorrect="off" spellcheck="false"
-      onkeydown="if(event.key==='Enter') submitGuess()" />
+      onkeydown="if(event.key==='Enter') submitGuess()"
+      oninput="if(this.value===''){hideSuggestion();clearFeedback();}" />
     <button class="submit-btn" onclick="submitGuess()">Guess →</button>
   </div>
   <div class="feedback-msg" id="feedback-msg"></div>
+  <div class="did-you-mean" id="did-you-mean" style="display:none;"></div>
 
   <div class="guesses-header">
     <span class="guesses-count">Guesses: <span id="guess-count">0</span></span>
@@ -1737,6 +1752,8 @@ async function startGame(mode, difficulty) {
   state.solved = false;
   state.gaveUp = false;
   state.startTime = Date.now();
+  hideSuggestion();
+  clearFeedback();
 
   // Re-enable input
   const inp = document.getElementById('guess-input');
@@ -1789,12 +1806,11 @@ async function startGame(mode, difficulty) {
     }
 
   } else {
-    // Random mode — fast single row fetch
-    const { count } = await db.from('riddles').select('*', { count: 'exact', head: true });
-    if (count && count > 0) {
-      const offset = Math.floor(Math.random() * count);
-      const { data } = await db.from('riddles').select('*').range(offset, offset);
-      if (data && data.length) puzzle = { ...data[0], mode: 'random' };
+    // Random mode — pick from DB
+    const { data } = await db.from('riddles').select('*');
+    if (data && data.length) {
+      puzzle = data[Math.floor(Math.random() * data.length)];
+      puzzle.mode = 'random';
     }
   }
 
@@ -1804,13 +1820,6 @@ async function startGame(mode, difficulty) {
   // Build game UI
   const modeLabels = { riddle: 'Daily Riddle · ' + difficulty, theme: 'Daily Theme', random: 'Random Mode' };
   document.getElementById('mode-label').textContent = modeLabels[mode] || mode;
-
-  // Show streak badge only for daily modes when logged in
-  const streakBadge = document.getElementById('streak-badge');
-  if (streakBadge) {
-    const showStreak = mode !== 'random' && !!state.username;
-    streakBadge.style.display = showStreak ? 'flex' : 'none';
-  }
 
   // Puzzle card
   if (mode === 'riddle') {
@@ -1886,27 +1895,24 @@ function browserLemmatize(word) {
     'gave':'give','given':'give','giving':'give',
     'fell':'fall','fallen':'fall','falling':'fall',
     'felt':'feel','feeling':'feel',
-    // Note: irregular past tenses like left/leave, kept/keep etc are NOT
-    // lemmatized here because they are valid standalone words with their own
-    // vector embeddings. Only obvious -ing forms are mapped.
-    'leaving':'leave',
-    'keeping':'keep',
-    'meeting':'meet',
-    'sending':'send',
-    'building':'build',
-    'buying':'buy',
-    'bringing':'bring',
-    'catching':'catch',
-    'teaching':'teach',
-    'thinking':'think',
-    'fighting':'fight',
-    'seeking':'seek',
-    'finding':'find',
-    'binding':'bind',
-    'winding':'wind',
-    'holding':'hold',
-    'telling':'tell',
-    'selling':'sell',
+    'left':'leave','leaving':'leave',
+    'kept':'keep','keeping':'keep',
+    'met':'meet','meeting':'meet',
+    'sent':'send','sending':'send',
+    'built':'build','building':'build',
+    'bought':'buy','buying':'buy',
+    'brought':'bring','bringing':'bring',
+    'caught':'catch','catching':'catch',
+    'taught':'teach','teaching':'teach',
+    'thought':'think','thinking':'think',
+    'fought':'fight','fighting':'fight',
+    'sought':'seek','seeking':'seek',
+    'found':'find','finding':'find',
+    'bound':'bind','binding':'bind',
+    'wound':'wind','winding':'wind',
+    'held':'hold','holding':'hold',
+    'told':'tell','telling':'tell',
+    'sold':'sell','selling':'sell',
     'children':'child','mice':'mouse','geese':'goose',
     'feet':'foot','teeth':'tooth','men':'man','women':'woman',
     'people':'person','oxen':'ox','sheep':'sheep','fish':'fish',
@@ -1991,7 +1997,7 @@ async function processGuess(rawGuess, answer) {
   const normalized = rawGuess.toLowerCase().replace(/[^a-z]/g, '').trim();
   if (!normalized) return null;
 
-  // Exact match — skip all processing, never lemmatize the answer word
+  // Exact match — skip all processing
   if (normalized === answer.toLowerCase()) {
     return { word: normalized, matched: normalized, similarity: 100, corrected: false };
   }
@@ -2001,8 +2007,7 @@ async function processGuess(rawGuess, answer) {
   if (guessCache[cacheKey]) return guessCache[cacheKey];
 
   // Layer 1: browser lemmatize
-  // IMPORTANT: never lemmatize if the word IS the answer — left should stay left not become leave
-  const lemmatized = normalized === answer.toLowerCase() ? normalized : browserLemmatize(normalized);
+  const lemmatized = browserLemmatize(normalized);
 
   // If lemmatized to a different word, check cache for that too
   const lemmaCacheKey = lemmatized + '|' + answer.toLowerCase();
@@ -2093,33 +2098,47 @@ async function submitGuess() {
 
   if (!result) { showFeedback('Something went wrong. Try again.', 'error'); return; }
 
-  // Word not in vocabulary at all
-  if (result.notFound && result.similarity < 5) {
-    showFeedback(`"${normalized}" — not in vocabulary`, 'error');
+  // ── Word not in vocabulary ──
+  if (result.notFound || result.similarity === 0 || result.error === 'word not found') {
+    showFeedback(`"${normalized}" is not in our dictionary`, 'error');
+    hideSuggestion();
     input.classList.add('shake');
     setTimeout(() => input.classList.remove('shake'), 400);
     return;
   }
 
-  // Resolve the final display word (lemmatized base form)
-  const finalWord  = result.matched;
-  const finalLemma = browserLemmatize(finalWord);
-  const displayWord = (finalLemma.length >= 2) ? finalLemma : finalWord;
+  // ── Fuzzy match detected — DON'T autocorrect, show suggestion instead ──
+  // If server corrected the word (watre→water, birght→bright), reject the guess
+  // and show "Did you mean X?" — user must type the correct spelling themselves
+  if (result.corrected && result.matched !== normalized) {
+    showFeedback(`"${normalized}" is not in our dictionary`, 'error');
+    showSuggestion(normalized, result.matched);
+    input.classList.add('shake');
+    setTimeout(() => input.classList.remove('shake'), 400);
+    input.value = normalized; // restore what they typed
+    return;
+  }
 
-  // Post-processing duplicate check:
-  // Compare displayWord against every already-stored guess's displayWord
-  // This catches: run+running, cat+cats, ran+run, etc.
-  const postDuplicate = state.guesses.find(g => g.word === displayWord);
-  if (postDuplicate) {
-    showFeedback(`Already guessed "${postDuplicate.word}"!`, 'error');
+  // ── Valid word — proceed with guess ──
+  hideSuggestion();
+  clearFeedback();
+
+  // Use matched word (handles suffix stripping: dogs→dog, jumping→jump)
+  const displayWord = result.matched || normalized;
+
+  // Duplicate check
+  const isDup = state.guesses.find(g => g.word === displayWord || g.word === normalized);
+  if (isDup) {
+    showFeedback(`Already guessed "${isDup.word}"!`, 'error');
     input.classList.add('shake');
     setTimeout(() => input.classList.remove('shake'), 400);
     return;
   }
+
   state.guesses.push({
-    word:      displayWord,      // lemmatized display word (cats→cat)
-    typed:     normalized,       // what user actually typed
-    corrected: result.corrected || (displayWord !== normalized),
+    word:       displayWord,
+    typed:      normalized,
+    corrected:  false,        // no silent correction — word was typed correctly
     similarity: result.similarity
   });
   state.guesses.sort((a, b) => b.similarity - a.similarity);
@@ -2131,15 +2150,36 @@ async function submitGuess() {
   renderGuesses();
   document.getElementById('guess-count').textContent = state.guessCount + (state.hintsUsed ? ` +${state.hintsUsed}h` : '');
 
-  // Show correction feedback
-  if (result.corrected || result.matched !== normalized) {
-    showFeedback(`"${normalized}" → scored as "${result.matched}"`, 'suggest');
-  } else {
-    document.getElementById('feedback-msg').textContent = '';
-  }
-
   if (result.matched === state.currentPuzzle.answer.toLowerCase() || result.similarity >= 99.9) {
     setTimeout(() => showWin(), 400);
+  }
+}
+
+// ── Did You Mean helpers ──
+function showSuggestion(typed, suggested) {
+  const el = document.getElementById('did-you-mean');
+  if (!el) return;
+  const cap = suggested.charAt(0).toUpperCase() + suggested.slice(1);
+  el.innerHTML = `"${typed}" not found. Did you mean <span>"${cap}"</span>?
+    <button onclick="useSuggestion('${suggested}')">Use it</button>`;
+  el.style.display = 'block';
+}
+function hideSuggestion() {
+  const el = document.getElementById('did-you-mean');
+  if (el) el.style.display = 'none';
+}
+function clearFeedback() {
+  const el = document.getElementById('feedback-msg');
+  if (el) { el.textContent = ''; el.className = 'feedback-msg'; }
+}
+function useSuggestion(word) {
+  // User clicked "Use it" — fill input with suggested word and submit
+  const input = document.getElementById('guess-input');
+  if (input) {
+    input.value = word;
+    hideSuggestion();
+    clearFeedback();
+    submitGuess();
   }
 }
 
