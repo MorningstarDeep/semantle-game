@@ -762,6 +762,7 @@
       <button class="admin-tab active" onclick="switchAdminTab('riddles',this)" style="flex:1;padding:10px;border-radius:10px;border:1px solid var(--accent);background:var(--accent-glow);color:var(--accent);font-family:'DM Mono',monospace;font-size:11px;letter-spacing:1px;text-transform:uppercase;cursor:pointer;transition:all 0.2s;">Riddles</button>
       <button class="admin-tab" onclick="switchAdminTab('themes',this)" style="flex:1;padding:10px;border-radius:10px;border:1px solid var(--border);background:var(--card);color:var(--secondary);font-family:'DM Mono',monospace;font-size:11px;letter-spacing:1px;text-transform:uppercase;cursor:pointer;transition:all 0.2s;">Themes</button>
       <button class="admin-tab" onclick="switchAdminTab('schedule',this)" style="flex:1;padding:10px;border-radius:10px;border:1px solid var(--border);background:var(--card);color:var(--secondary);font-family:'DM Mono',monospace;font-size:11px;letter-spacing:1px;text-transform:uppercase;cursor:pointer;transition:all 0.2s;">Schedule</button>
+      <button class="admin-tab" onclick="switchAdminTab('bulk',this)" style="flex:1;padding:10px;border-radius:10px;border:1px solid var(--border);background:var(--card);color:var(--secondary);font-family:'DM Mono',monospace;font-size:11px;letter-spacing:1px;text-transform:uppercase;cursor:pointer;transition:all 0.2s;">Bulk</button>
     </div>
 
     <!-- RIDDLES TAB -->
@@ -848,6 +849,101 @@
         <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:16px;margin-bottom:14px;">🗓️ Recent & Upcoming Puzzles</div>
         <div id="schedule-list" style="display:flex;flex-direction:column;gap:8px;max-height:400px;overflow-y:auto;"></div>
       </div>
+    </div>
+
+    <!-- BULK IMPORT TAB -->
+    <div id="admin-bulk" class="admin-panel" style="display:none;">
+
+      <!-- Format toggle -->
+      <div style="display:flex;gap:8px;margin-bottom:16px;">
+        <button id="bulk-fmt-json" onclick="switchBulkFormat('json',this)"
+          style="flex:1;padding:9px;border-radius:9px;border:1px solid var(--accent);background:var(--accent-glow);color:var(--accent);font-family:'DM Mono',monospace;font-size:11px;letter-spacing:1px;text-transform:uppercase;cursor:pointer;transition:all 0.2s;">JSON</button>
+        <button id="bulk-fmt-sql" onclick="switchBulkFormat('sql',this)"
+          style="flex:1;padding:9px;border-radius:9px;border:1px solid var(--border);background:var(--card);color:var(--secondary);font-family:'DM Mono',monospace;font-size:11px;letter-spacing:1px;text-transform:uppercase;cursor:pointer;transition:all 0.2s;">SQL</button>
+      </div>
+
+      <!-- JSON format panel -->
+      <div id="bulk-json-panel" style="background:var(--card);border:1px solid var(--border);border-radius:16px;padding:20px;margin-bottom:16px;">
+        <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:16px;margin-bottom:6px;">📥 Bulk Import — JSON</div>
+        <div style="font-family:'DM Mono',monospace;font-size:11px;color:var(--muted);margin-bottom:14px;line-height:1.6;">
+          Paste an array of riddle objects. Each object needs:<br>
+          <span style="color:var(--accent);">text</span>, <span style="color:var(--accent);">answer</span>, <span style="color:var(--accent);">difficulty</span> (easy/medium/hard)<br>
+          Optional: <span style="color:var(--secondary);">category</span>, <span style="color:var(--secondary);">definition</span>, <span style="color:var(--secondary);">synonyms</span> (array)
+        </div>
+
+        <!-- Example -->
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px;margin-bottom:12px;font-family:'DM Mono',monospace;font-size:11px;color:var(--muted);line-height:1.7;">
+[<br>
+&nbsp;&nbsp;{<br>
+&nbsp;&nbsp;&nbsp;&nbsp;"text": "I have hands but cannot clap.",<br>
+&nbsp;&nbsp;&nbsp;&nbsp;"answer": "clock",<br>
+&nbsp;&nbsp;&nbsp;&nbsp;"difficulty": "easy",<br>
+&nbsp;&nbsp;&nbsp;&nbsp;"category": "object",<br>
+&nbsp;&nbsp;&nbsp;&nbsp;"definition": "A device that tells time",<br>
+&nbsp;&nbsp;&nbsp;&nbsp;"synonyms": ["watch","timer"]<br>
+&nbsp;&nbsp;},<br>
+&nbsp;&nbsp;{ "text": "...", "answer": "...", "difficulty": "medium" }<br>
+]
+        </div>
+
+        <textarea id="bulk-json-input" placeholder="Paste your JSON array here..." rows="10"
+          style="width:100%;background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px;font-family:'DM Mono',monospace;font-size:12px;color:var(--text);resize:vertical;outline:none;margin-bottom:10px;line-height:1.5;"></textarea>
+
+        <div style="display:flex;gap:10px;">
+          <button onclick="previewBulkJSON()" style="flex:1;background:var(--surface);border:1px solid var(--border);color:var(--secondary);border-radius:10px;padding:12px;font-family:'Syne',sans-serif;font-weight:700;font-size:14px;cursor:pointer;transition:all 0.2s;">👁 Preview</button>
+          <button onclick="importBulkJSON()" style="flex:2;background:var(--accent);color:#000;border:none;border-radius:10px;padding:12px;font-family:'Syne',sans-serif;font-weight:700;font-size:14px;cursor:pointer;transition:all 0.2s;">⬆ Import All</button>
+        </div>
+        <div id="bulk-json-msg" style="font-family:'DM Mono',monospace;font-size:12px;margin-top:10px;min-height:16px;text-align:center;"></div>
+
+        <!-- Preview table -->
+        <div id="bulk-json-preview" style="margin-top:16px;display:none;">
+          <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:14px;margin-bottom:10px;">Preview</div>
+          <div id="bulk-preview-list" style="display:flex;flex-direction:column;gap:6px;max-height:300px;overflow-y:auto;"></div>
+        </div>
+      </div>
+
+      <!-- SQL format panel -->
+      <div id="bulk-sql-panel" style="display:none;background:var(--card);border:1px solid var(--border);border-radius:16px;padding:20px;margin-bottom:16px;">
+        <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:16px;margin-bottom:6px;">📥 Bulk Import — SQL</div>
+        <div style="font-family:'DM Mono',monospace;font-size:11px;color:var(--muted);margin-bottom:14px;line-height:1.6;">
+          Paste INSERT statements for the riddles table.<br>
+          <span style="color:#ffaa00;">⚠ SQL runs directly on your database. Double-check before importing.</span>
+        </div>
+
+        <!-- Example -->
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px;margin-bottom:12px;font-family:'DM Mono',monospace;font-size:11px;color:var(--muted);line-height:1.7;">
+INSERT INTO riddles (difficulty, riddle_text, answer, category, definition, synonyms) VALUES<br>
+('easy', 'I have hands but cannot clap.', 'clock', 'object', 'A timing device', ARRAY['watch','timer']),<br>
+('medium', 'What flies but has no wings?', 'time', 'concept', 'Passage of moments', ARRAY['hours','duration']);
+        </div>
+
+        <textarea id="bulk-sql-input" placeholder="Paste your INSERT SQL here..." rows="10"
+          style="width:100%;background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px;font-family:'DM Mono',monospace;font-size:12px;color:var(--text);resize:vertical;outline:none;margin-bottom:10px;line-height:1.5;"></textarea>
+
+        <div style="background:rgba(239,68,68,0.08);border:1px solid rgba(239,68,68,0.2);border-radius:10px;padding:12px;margin-bottom:12px;font-family:'DM Mono',monospace;font-size:11px;color:#ef4444;line-height:1.6;">
+          ⚠ SQL import runs via Supabase RPC. Make sure your SQL is correct before running.<br>
+          Only INSERT INTO riddles statements are supported here.
+        </div>
+
+        <button onclick="importBulkSQL()" style="width:100%;background:#ffaa00;color:#000;border:none;border-radius:10px;padding:13px;font-family:'Syne',sans-serif;font-weight:700;font-size:14px;cursor:pointer;transition:all 0.2s;">⬆ Run SQL Import</button>
+        <div id="bulk-sql-msg" style="font-family:'DM Mono',monospace;font-size:12px;margin-top:10px;min-height:16px;text-align:center;"></div>
+      </div>
+
+      <!-- Theme words bulk import -->
+      <div style="background:var(--card);border:1px solid var(--border);border-radius:16px;padding:20px;">
+        <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:16px;margin-bottom:6px;">🎯 Bulk Add Theme Words</div>
+        <div style="font-family:'DM Mono',monospace;font-size:11px;color:var(--muted);margin-bottom:14px;">
+          Select a theme and paste words — one per line or comma separated.
+        </div>
+        <select id="bulk-theme-select" style="width:100%;background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px;font-family:'DM Sans',sans-serif;font-size:14px;color:var(--text);outline:none;cursor:pointer;margin-bottom:10px;">
+          <option value="">Select theme...</option>
+        </select>
+        <textarea id="bulk-theme-words" placeholder="dolphin, coral, reef&#10;tide&#10;current, kelp, wave" rows="6"
+          style="width:100%;background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px;font-family:'DM Mono',monospace;font-size:13px;color:var(--text);resize:vertical;outline:none;margin-bottom:10px;line-height:1.5;"></textarea>
+        <button onclick="bulkAddThemeWords()" style="width:100%;background:var(--accent);color:#000;border:none;border-radius:10px;padding:13px;font-family:'Syne',sans-serif;font-weight:700;font-size:14px;cursor:pointer;">⬆ Add Words to Theme</button>
+        <div id="bulk-theme-msg" style="font-family:'DM Mono',monospace;font-size:12px;margin-top:10px;min-height:16px;text-align:center;"></div>
+      </div>
+
     </div>
 
   </div>
@@ -2096,6 +2192,7 @@ async function verifyAdminPassword() {
   await loadRiddles();
   await loadThemesOverview();
   await loadSchedule();
+  await loadBulkThemeSelect();
   document.getElementById('puzzle-date').value = new Date().toISOString().split('T')[0];
 }
 
@@ -2317,6 +2414,137 @@ async function deletePuzzle(date) {
     await loadSchedule();
     toast('Puzzle deleted', 'red');
   }, '🗑️');
+}
+
+// ══════════════════════════════════════════════════
+// BULK IMPORT
+// ══════════════════════════════════════════════════
+
+function switchBulkFormat(fmt, el) {
+  document.getElementById('bulk-json-panel').style.display = fmt === 'json' ? 'block' : 'none';
+  document.getElementById('bulk-sql-panel').style.display  = fmt === 'sql'  ? 'block' : 'none';
+  document.querySelectorAll('#bulk-fmt-json, #bulk-fmt-sql').forEach(b => {
+    b.style.borderColor = 'var(--border)';
+    b.style.background  = 'var(--card)';
+    b.style.color       = 'var(--secondary)';
+  });
+  el.style.borderColor = 'var(--accent)';
+  el.style.background  = 'var(--accent-glow)';
+  el.style.color       = 'var(--accent)';
+}
+
+async function loadBulkThemeSelect() {
+  const { data: themes } = await db.from('themes').select('id, theme_name, theme_emoji').order('theme_name');
+  if (!themes) return;
+  const opts = '<option value="">Select theme...</option>' +
+    themes.map(t => `<option value="${t.id}">${t.theme_emoji} ${t.theme_name}</option>`).join('');
+  const sel = document.getElementById('bulk-theme-select');
+  if (sel) sel.innerHTML = opts;
+}
+
+function parseBulkJSON() {
+  const raw = document.getElementById('bulk-json-input').value.trim();
+  if (!raw) return null;
+  try {
+    const parsed = JSON.parse(raw);
+    if (!Array.isArray(parsed)) throw new Error('Must be a JSON array [ ... ]');
+    return parsed;
+  } catch (e) { return { error: e.message }; }
+}
+
+function previewBulkJSON() {
+  const msg     = document.getElementById('bulk-json-msg');
+  const preview = document.getElementById('bulk-json-preview');
+  const list    = document.getElementById('bulk-preview-list');
+  const result  = parseBulkJSON();
+  if (!result) { msg.style.color = '#ef4444'; msg.textContent = 'Nothing to preview.'; return; }
+  if (result.error) { msg.style.color = '#ef4444'; msg.textContent = '❌ JSON Error: ' + result.error; return; }
+  const diffColors = { easy: 'var(--accent)', medium: '#ffaa00', hard: '#ef4444' };
+  list.innerHTML = result.map((r, i) => {
+    const valid = r.text && r.answer && ['easy','medium','hard'].includes(r.difficulty);
+    return `<div style="background:var(--surface);border:1px solid ${valid ? 'var(--border)' : '#ef4444'};border-radius:8px;padding:10px 12px;display:flex;gap:10px;align-items:flex-start;">
+      <span style="font-family:'DM Mono',monospace;font-size:10px;color:${diffColors[r.difficulty]||'#ef4444'};background:rgba(0,0,0,0.3);border:1px solid ${diffColors[r.difficulty]||'#ef4444'}33;padding:2px 7px;border-radius:6px;flex-shrink:0;">${r.difficulty||'?'}</span>
+      <div style="flex:1;">
+        <div style="font-size:12px;color:var(--text);margin-bottom:3px;">${r.text||'missing text'}</div>
+        <div style="font-family:'DM Mono',monospace;font-size:11px;color:${diffColors[r.difficulty]||'#ef4444'};">→ ${r.answer||'missing answer'}</div>
+        ${!valid ? '<div style="font-size:10px;color:#ef4444;margin-top:2px;">⚠ Missing required fields</div>' : ''}
+      </div>
+    </div>`;
+  }).join('');
+  const validCount = result.filter(r => r.text && r.answer && ['easy','medium','hard'].includes(r.difficulty)).length;
+  msg.style.color = validCount === result.length ? 'var(--accent)' : '#ffaa00';
+  msg.textContent = `${validCount}/${result.length} valid riddles ready to import`;
+  preview.style.display = 'block';
+}
+
+async function importBulkJSON() {
+  const msg    = document.getElementById('bulk-json-msg');
+  const result = parseBulkJSON();
+  if (!result) { msg.style.color = '#ef4444'; msg.textContent = 'Nothing to import.'; return; }
+  if (result.error) { msg.style.color = '#ef4444'; msg.textContent = '❌ JSON Error: ' + result.error; return; }
+  const rows = []; const errors = [];
+  result.forEach((r, i) => {
+    if (!r.text || !r.answer || !['easy','medium','hard'].includes(r.difficulty)) {
+      errors.push(`Row ${i+1}: missing text, answer, or invalid difficulty`); return;
+    }
+    rows.push({ riddle_text: r.text.trim(), answer: r.answer.trim().toLowerCase(),
+      difficulty: r.difficulty, category: r.category||null,
+      definition: r.definition||null, synonyms: Array.isArray(r.synonyms) ? r.synonyms : null });
+  });
+  if (errors.length) { msg.style.color = '#ef4444'; msg.textContent = `❌ ${errors[0]}${errors.length>1?` (+${errors.length-1} more)`:''}`;return; }
+  msg.style.color = 'var(--muted)'; msg.textContent = `Importing ${rows.length} riddles...`;
+  let imported = 0;
+  for (let i = 0; i < rows.length; i += 50) {
+    const batch = rows.slice(i, i+50);
+    const { error } = await db.from('riddles').insert(batch);
+    if (error) { msg.style.color='#ef4444'; msg.textContent=`❌ Error at row ${i+1}: ${error.message}`; return; }
+    imported += batch.length;
+    msg.textContent = `Importing... ${imported}/${rows.length}`;
+  }
+  msg.style.color = 'var(--accent)';
+  msg.textContent = `✅ Successfully imported ${imported} riddles!`;
+  document.getElementById('bulk-json-input').value = '';
+  document.getElementById('bulk-json-preview').style.display = 'none';
+  await loadAdminStats();
+}
+
+async function importBulkSQL() {
+  const msg = document.getElementById('bulk-sql-msg');
+  const sql = document.getElementById('bulk-sql-input').value.trim();
+  if (!sql) { msg.style.color = '#ef4444'; msg.textContent = 'Nothing to import.'; return; }
+  const safeSQL = sql.toLowerCase();
+  if (!safeSQL.includes('insert into riddles')) {
+    msg.style.color = '#ef4444'; msg.textContent = '❌ Only INSERT INTO riddles statements allowed.'; return; }
+  if (safeSQL.includes('drop')||safeSQL.includes('delete')||safeSQL.includes('truncate')||safeSQL.includes('update')) {
+    msg.style.color = '#ef4444'; msg.textContent = '❌ Destructive SQL not allowed here.'; return; }
+  showConfirm('Run SQL Import?', 'This executes SQL directly on your database. Make sure it is correct.', 'Yes, Run It', async () => {
+    msg.style.color = 'var(--muted)'; msg.textContent = 'Running SQL...';
+    const { error } = await db.rpc('exec_admin_sql', { sql_text: sql });
+    if (error) { msg.style.color='#ef4444'; msg.textContent='❌ SQL Error: '+error.message; return; }
+    msg.style.color = 'var(--accent)'; msg.textContent = '✅ SQL executed successfully!';
+    document.getElementById('bulk-sql-input').value = '';
+    await loadAdminStats(); await loadRiddles();
+  }, '⚠️');
+}
+
+async function bulkAddThemeWords() {
+  const themeId  = document.getElementById('bulk-theme-select').value;
+  const rawWords = document.getElementById('bulk-theme-words').value;
+  const msg      = document.getElementById('bulk-theme-msg');
+  if (!themeId) { msg.style.color = '#ef4444'; msg.textContent = 'Please select a theme.'; return; }
+  const newWords = rawWords.split(/[\n,]+/).map(w => w.trim().toLowerCase()).filter(w => w.length > 0 && /^[a-z ]+$/.test(w));
+  if (!newWords.length) { msg.style.color = '#ef4444'; msg.textContent = 'No valid words found.'; return; }
+  msg.style.color = 'var(--muted)'; msg.textContent = 'Adding words...';
+  const { data: theme } = await db.from('themes').select('word_pool').eq('id', themeId).single();
+  const existing = theme?.word_pool || [];
+  const merged   = [...new Set([...existing, ...newWords])];
+  const added    = merged.length - existing.length;
+  const { error } = await db.from('themes').update({ word_pool: merged }).eq('id', themeId);
+  if (error) { msg.style.color = '#ef4444'; msg.textContent = '❌ Error: ' + error.message; return; }
+  msg.style.color = 'var(--accent)';
+  msg.textContent = `✅ Added ${added} new words! (${newWords.length - added} were duplicates)`;
+  document.getElementById('bulk-theme-words').value = '';
+  await loadThemesOverview();
 }
 
 // ── START ──
