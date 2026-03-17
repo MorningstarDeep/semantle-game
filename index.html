@@ -468,6 +468,9 @@
         No account? <span onclick="showScreen('register-screen')" style="color:var(--accent);cursor:pointer;font-weight:600;">Register here</span>
       </div>
       <div style="margin-top:10px;font-size:13px;color:var(--secondary);text-align:center;">
+        Existing account without password? <span onclick="showSetPasswordScreen()" style="color:#ffaa00;cursor:pointer;font-weight:600;">Set password</span>
+      </div>
+      <div style="margin-top:10px;font-size:13px;color:var(--secondary);text-align:center;">
         <span onclick="showScreen('landing')" style="color:var(--muted);cursor:pointer;">← Back to landing</span>
       </div>
     </div>
@@ -497,6 +500,30 @@
       </div>
       <div style="margin-top:10px;font-size:13px;color:var(--secondary);text-align:center;">
         <span onclick="showScreen('landing')" style="color:var(--muted);cursor:pointer;">← Back to landing</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════ SET PASSWORD SCREEN (for existing accounts without password) ══════════ -->
+<div id="set-password-screen" class="screen">
+  <div style="max-width:420px;margin:0 auto;width:100%;padding:40px 20px;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;">
+    <div class="username-card" style="width:100%;">
+      <div class="username-icon">🔑</div>
+      <div class="username-title">Set Your Password</div>
+      <div class="username-sub">Your account exists but has no password yet. Enter your username and choose a password.</div>
+      <input type="text" class="username-input" id="setpw-username" placeholder="your username" maxlength="15"
+        oninput="this.value=this.value.toLowerCase()" autocomplete="off" spellcheck="false"
+        onkeydown="if(event.key==='Enter') document.getElementById('setpw-password').focus()" style="margin-bottom:10px;" />
+      <input type="password" class="username-input" id="setpw-password" placeholder="new password (min 6 chars)"
+        onkeydown="if(event.key==='Enter') document.getElementById('setpw-confirm').focus()" style="margin-bottom:10px;letter-spacing:2px;" />
+      <input type="password" class="username-input" id="setpw-confirm" placeholder="confirm password"
+        onkeydown="if(event.key==='Enter') doSetPassword()" style="margin-bottom:12px;letter-spacing:2px;" />
+      <button class="username-btn" onclick="doSetPassword()">Set Password & Log In →</button>
+      <div class="username-err" id="setpw-err"></div>
+      <div id="setpw-status" style="margin-top:12px;font-family:'DM Mono',monospace;font-size:12px;color:var(--muted);min-height:16px;text-align:center;"></div>
+      <div style="margin-top:20px;font-size:13px;color:var(--secondary);text-align:center;">
+        <span onclick="showScreen('login-screen')" style="color:var(--muted);cursor:pointer;">← Back to login</span>
       </div>
     </div>
   </div>
@@ -826,6 +853,27 @@
   </div>
 </div>
 
+<!-- ══════════ CHANGE ADMIN PANEL PASSWORD MODAL ══════════ -->
+<div id="admin-pw-modal" style="display:none;position:fixed;inset:0;background:rgba(8,11,15,0.92);z-index:450;align-items:center;justify-content:center;backdrop-filter:blur(8px);">
+  <div style="background:var(--card);border:1px solid rgba(255,170,0,0.3);border-radius:20px;padding:36px;max-width:380px;width:90%;text-align:center;animation:popIn 0.35s cubic-bezier(0.34,1.56,0.64,1) both;">
+    <div style="font-size:40px;margin-bottom:12px;">🔐</div>
+    <div style="font-family:'Syne',sans-serif;font-size:22px;font-weight:800;margin-bottom:8px;">Change Admin Password</div>
+    <div style="font-size:13px;color:var(--secondary);margin-bottom:24px;">This is the password to unlock the admin panel.</div>
+    <input type="password" id="admin-new-pw" placeholder="New admin panel password"
+      style="width:100%;background:var(--surface);border:1.5px solid var(--border);border-radius:10px;padding:12px;font-family:'DM Mono',monospace;font-size:14px;color:var(--text);outline:none;letter-spacing:2px;margin-bottom:10px;text-align:center;"
+      onfocus="this.style.borderColor='rgba(255,170,0,0.6)'" onblur="this.style.borderColor='var(--border)'" />
+    <input type="password" id="admin-confirm-pw" placeholder="Confirm new password"
+      onkeydown="if(event.key==='Enter') changeAdminPassword()"
+      style="width:100%;background:var(--surface);border:1.5px solid var(--border);border-radius:10px;padding:12px;font-family:'DM Mono',monospace;font-size:14px;color:var(--text);outline:none;letter-spacing:2px;margin-bottom:14px;text-align:center;"
+      onfocus="this.style.borderColor='rgba(255,170,0,0.6)'" onblur="this.style.borderColor='var(--border)'" />
+    <div id="admin-pw-msg" style="font-family:'DM Mono',monospace;font-size:12px;min-height:16px;margin-bottom:14px;"></div>
+    <div style="display:flex;flex-direction:column;gap:8px;">
+      <button onclick="changeAdminPassword()" style="background:#ffaa00;color:#000;border:none;border-radius:12px;padding:13px;font-family:'Syne',sans-serif;font-weight:700;font-size:15px;cursor:pointer;">Update Password</button>
+      <button onclick="closeAdminPwModal()" style="background:transparent;border:1px solid var(--border);color:var(--secondary);border-radius:12px;padding:12px;font-family:'Syne',sans-serif;font-weight:600;font-size:14px;cursor:pointer;">Cancel</button>
+    </div>
+  </div>
+</div>
+
 <!-- ══════════ ADMIN PASSWORD MODAL ══════════ -->
 <div id="admin-auth-overlay" style="display:none;position:fixed;inset:0;background:rgba(8,11,15,0.95);z-index:400;align-items:center;justify-content:center;backdrop-filter:blur(10px);">
   <div style="background:var(--card);border:1px solid rgba(255,170,0,0.3);border-radius:20px;padding:36px;max-width:360px;width:90%;text-align:center;animation:popIn 0.35s cubic-bezier(0.34,1.56,0.64,1) both;">
@@ -850,10 +898,14 @@
   <div style="max-width:700px;margin:0 auto;width:100%;padding:20px 16px 60px;">
 
     <!-- Header -->
-    <div style="display:flex;align-items:center;gap:16px;margin-bottom:28px;padding-top:4px;">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:28px;padding-top:4px;">
       <button class="back-btn" onclick="showScreen('home')">← Home</button>
       <div style="font-family:'Syne',sans-serif;font-size:24px;font-weight:800;letter-spacing:-1px;flex:1;">⚙️ Admin Panel</div>
       <div style="font-family:'DM Mono',monospace;font-size:11px;color:#ffaa00;background:rgba(255,170,0,0.1);border:1px solid rgba(255,170,0,0.3);padding:4px 10px;border-radius:20px;">morningstardeep</div>
+      <button onclick="openAdminPwModal()" title="Change admin password"
+        style="background:rgba(255,170,0,0.1);border:1px solid rgba(255,170,0,0.3);color:#ffaa00;width:36px;height:36px;border-radius:50%;cursor:pointer;font-size:16px;transition:all 0.2s;display:flex;align-items:center;justify-content:center;flex-shrink:0;"
+        onmouseover="this.style.background='rgba(255,170,0,0.2)'"
+        onmouseout="this.style.background='rgba(255,170,0,0.1)'">🔐</button>
     </div>
 
     <!-- Stats cards -->
@@ -959,19 +1011,6 @@
             style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px;font-family:'DM Mono',monospace;font-size:13px;color:var(--text);resize:vertical;outline:none;"></textarea>
           <button onclick="addNewTheme()" style="background:var(--accent);color:#000;border:none;border-radius:10px;padding:13px;font-family:'Syne',sans-serif;font-weight:700;font-size:14px;cursor:pointer;">Create Theme</button>
           <div id="new-theme-msg" style="font-family:'DM Mono',monospace;font-size:12px;text-align:center;min-height:16px;"></div>
-        </div>
-      </div>
-
-      <!-- Change admin panel password -->
-      <div style="background:var(--card);border:1px solid rgba(255,170,0,0.2);border-radius:16px;padding:20px;margin-bottom:16px;">
-        <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:16px;margin-bottom:16px;">🔐 Change Admin Panel Password</div>
-        <div style="display:flex;flex-direction:column;gap:10px;">
-          <input type="password" id="admin-new-pw" placeholder="New admin panel password"
-            style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px;font-family:'DM Mono',monospace;font-size:14px;color:var(--text);outline:none;letter-spacing:2px;" />
-          <input type="password" id="admin-confirm-pw" placeholder="Confirm new password"
-            style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px;font-family:'DM Mono',monospace;font-size:14px;color:var(--text);outline:none;letter-spacing:2px;" />
-          <button onclick="changeAdminPassword()" style="background:#ffaa00;color:#000;border:none;border-radius:10px;padding:13px;font-family:'Syne',sans-serif;font-weight:700;font-size:14px;cursor:pointer;">Update Admin Password</button>
-          <div id="admin-pw-msg" style="font-family:'DM Mono',monospace;font-size:12px;text-align:center;min-height:16px;"></div>
         </div>
       </div>
 
@@ -1262,6 +1301,48 @@ function logOut() {
     showScreen('landing');
     toast('Logged out. See you soon!');
   });
+}
+
+// ── SET PASSWORD (for existing accounts without password) ──
+function showSetPasswordScreen() {
+  ['setpw-username','setpw-password','setpw-confirm'].forEach(id => {
+    const el = document.getElementById(id); if (el) el.value = '';
+  });
+  document.getElementById('setpw-err').textContent = '';
+  document.getElementById('setpw-status').textContent = '';
+  showScreen('set-password-screen');
+}
+
+async function doSetPassword() {
+  const username = document.getElementById('setpw-username').value.trim().toLowerCase();
+  const password = document.getElementById('setpw-password').value;
+  const confirm  = document.getElementById('setpw-confirm').value;
+  const err      = document.getElementById('setpw-err');
+  const status   = document.getElementById('setpw-status');
+  err.textContent = ''; status.textContent = '';
+
+  if (!username) { err.textContent = 'Please enter your username.'; return; }
+  if (password.length < 6) { err.textContent = 'Password must be at least 6 characters.'; return; }
+  if (password !== confirm) { err.textContent = 'Passwords do not match.'; return; }
+
+  status.textContent = 'Checking account...';
+
+  // Check account exists
+  const { data: user } = await db.from('users').select('username, password_hash').eq('username', username).single();
+  if (!user) { err.textContent = 'Username not found.'; status.textContent = ''; return; }
+  if (user.password_hash) {
+    err.textContent = 'This account already has a password. Please log in normally.';
+    status.textContent = ''; return;
+  }
+
+  // Set password
+  status.textContent = 'Setting password...';
+  const hash = await hashPassword(password);
+  const { error } = await db.from('users').update({ password_hash: hash }).eq('username', username);
+  if (error) { err.textContent = 'Error setting password. Try again.'; status.textContent = ''; return; }
+
+  status.textContent = 'Password set! Logging you in...';
+  await createSession(username);
 }
 
 // ── CHANGE PASSWORD ──
@@ -2735,6 +2816,18 @@ async function bulkAddThemeWords() {
   await loadThemesOverview();
 }
 
+// ── ADMIN PW MODAL ──
+function openAdminPwModal() {
+  document.getElementById('admin-new-pw').value = '';
+  document.getElementById('admin-confirm-pw').value = '';
+  document.getElementById('admin-pw-msg').textContent = '';
+  document.getElementById('admin-pw-modal').style.display = 'flex';
+  setTimeout(() => document.getElementById('admin-new-pw').focus(), 100);
+}
+function closeAdminPwModal() {
+  document.getElementById('admin-pw-modal').style.display = 'none';
+}
+
 // ── ADD NEW THEME ──
 async function addNewTheme() {
   const emoji = document.getElementById('new-theme-emoji').value.trim();
@@ -2790,9 +2883,8 @@ async function changeAdminPassword() {
   state.adminPasswordHash = hash;
 
   msg.style.color = 'var(--accent)';
-  msg.textContent = '✅ Admin panel password updated!';
-  document.getElementById('admin-new-pw').value     = '';
-  document.getElementById('admin-confirm-pw').value = '';
+  msg.textContent = '✅ Updated!';
+  setTimeout(() => closeAdminPwModal(), 1000);
 }
 
 // ── START ──
