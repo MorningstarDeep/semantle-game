@@ -38,7 +38,7 @@
     --fs-2xl: clamp(20px, 2.8vw, 28px);
     --fs-3xl: clamp(24px, 3.6vw, 36px);
     /* Logo: never overflows on any device */
-    --fs-logo: clamp(28px, 10.5vw, 80px);
+    --fs-logo: clamp(28px, 10.5vw, 72px);
   }
 
   /* ══════════════════════════════════════════════════
@@ -141,7 +141,7 @@
   /* ══════════════════════════════════════════════════
      LOGO BLOCK (shared between landing + home)
   ══════════════════════════════════════════════════ */
-  .logo-block { text-align:center; animation:fadeUp 0.8s ease both; width:100%; overflow:visible; }
+  .logo-block { text-align:center; animation:fadeUp 0.8s ease both; width:100%; overflow:visible; padding: 0 4px; }
   .logo-eyebrow {
     font-family:'DM Mono',monospace; font-size:var(--fs-xs);
     letter-spacing: clamp(1px,0.5vw,3px);
@@ -151,7 +151,7 @@
     font-family:'Syne',sans-serif;
     font-size: var(--fs-logo);
     font-weight:800;
-    letter-spacing: -2px;
+    letter-spacing: -1px;
     line-height:1;
     background:linear-gradient(135deg,#fff 40%,var(--accent) 100%);
     -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;
@@ -168,7 +168,7 @@
   /* ══════════════════════════════════════════════════
      HOME SCREEN
   ══════════════════════════════════════════════════ */
-  #home { align-items:center; justify-content:center; padding: 40px 20px; }
+  #home { align-items:center; justify-content:center; padding: 40px 20px; overflow-x: visible; }
   .home-inner { width:100%; max-width:560px; display:flex; flex-direction:column; align-items:center; gap:40px; }
 
   /* User topbar */
