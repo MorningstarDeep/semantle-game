@@ -2795,9 +2795,9 @@ async function changeAdminPassword() {
 // ── START ──
 init().catch(err => {
   console.error('Init failed:', err);
-  // Don't leave user stuck on loading — send to login
+  // Don't leave user stuck on loading — send to landing
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-  document.getElementById('username-screen').classList.add('active');
+  document.getElementById('landing').classList.add('active');
 });
 </script>
 </body>
