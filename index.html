@@ -439,17 +439,6 @@
   /* ══════════════════════════════════════════════════
      ANIMATIONS
   ══════════════════════════════════════════════════ */
-  /* Topbar */
-  .topbar-label { display:inline; }
-  .dd-item {
-    width:100%; background:none; border:none; color:var(--text);
-    padding:10px 14px; border-radius:10px; cursor:pointer;
-    font-family:'DM Sans',sans-serif; font-size:14px;
-    text-align:left; display:block; transition:background 0.15s;
-  }
-  .dd-item:hover { background:var(--surface); }
-  .dd-item.danger { color:#ef4444; }
-
   @keyframes fadeUp { from{opacity:0;transform:translateY(16px)} to{opacity:1;transform:translateY(0)} }
   @keyframes slideIn { from{opacity:0;transform:translateX(-12px)} to{opacity:1;transform:translateX(0)} }
   @keyframes popIn { from{opacity:0;transform:scale(0.85)} to{opacity:1;transform:scale(1)} }
@@ -493,8 +482,9 @@
     .stats-row { gap: 14px; }
     .stat-num { font-size: 18px; }
     #user-topbar { top:10px; right:10px; gap:6px; }
-    .topbar-label { display:none; }
-    #profile-btn { padding:0 8px 0 5px !important; }
+    #user-topbar > div { padding:5px 10px 5px 6px; }
+    #user-topbar > div span:last-of-type { display:none; }
+    #user-topbar button { width:30px !important; height:30px !important; font-size:13px !important; }
     .username-card { padding: 28px 18px; border-radius: 18px; }
     .username-icon { font-size: 40px; margin-bottom: 14px; }
     .username-input { font-size: 15px; padding: 11px 14px; }
@@ -579,18 +569,6 @@
       </div>
     </div>
 
-    <!-- How it works inline -->
-    <div style="width:100%;animation:fadeUp 0.8s 0.15s ease both;">
-      <div style="background:var(--card);border:1px solid var(--border);border-radius:14px;padding:16px 18px;">
-        <div style="font-family:'DM Mono',monospace;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--accent);margin-bottom:10px;opacity:0.8;">How it works</div>
-        <div style="display:flex;flex-direction:column;gap:7px;">
-          <div style="font-size:13px;color:var(--secondary);line-height:1.5;display:flex;gap:8px;"><span style="color:var(--accent);font-family:'DM Mono',monospace;flex-shrink:0;">1.</span>A secret word is hidden. Guess any word to see how semantically close you are.</div>
-          <div style="font-size:13px;color:var(--secondary);line-height:1.5;display:flex;gap:8px;"><span style="color:var(--accent);font-family:'DM Mono',monospace;flex-shrink:0;">2.</span>Scores from ❄️ 0% (cold) to 🔥🔥🔥🔥🔥 100% (got it!).</div>
-          <div style="font-size:13px;color:var(--secondary);line-height:1.5;display:flex;gap:8px;"><span style="color:var(--accent);font-family:'DM Mono',monospace;flex-shrink:0;">3.</span>Meaning matters — "ocean" scores higher than "sea" if the answer is "water".</div>
-        </div>
-      </div>
-    </div>
-
     <!-- Divider with members section -->
     <div style="width:100%;animation:fadeUp 0.8s 0.2s ease both;">
       <div style="display:flex;align-items:center;gap:14px;margin-bottom:16px;">
@@ -613,11 +591,11 @@
           </div>
         </div>
         <!-- Lock overlay -->
-        <div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;background:rgba(8,11,15,0.65);backdrop-filter:blur(2px);border-radius:var(--radius-lg);padding:24px 20px;">
-          <div style="font-size:28px;">🔒</div>
+        <div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;background:rgba(8,11,15,0.6);backdrop-filter:blur(2px);border-radius:var(--radius-lg);">
+          <div style="font-size:32px;">🔒</div>
           <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:16px;text-align:center;">Sign in to unlock</div>
-          <div style="font-size:13px;color:var(--secondary);text-align:center;max-width:240px;line-height:1.5;">Daily riddles, themes, leaderboards and streaks — all free.</div>
-          <div style="display:flex;gap:10px;margin-top:8px;margin-bottom:4px;flex-wrap:wrap;justify-content:center;">
+          <div style="font-size:13px;color:var(--secondary);text-align:center;max-width:240px;">Daily riddles, themes, leaderboards and streaks — all free.</div>
+          <div style="display:flex;gap:10px;margin-top:4px;">
             <button onclick="showScreen('login-screen')" style="background:var(--accent);color:#000;border:none;border-radius:10px;padding:11px 22px;font-family:'Syne',sans-serif;font-weight:700;font-size:14px;cursor:pointer;transition:all 0.2s;">Log In</button>
             <button onclick="showScreen('register-screen')" style="background:transparent;border:1.5px solid var(--accent);color:var(--accent);border-radius:10px;padding:11px 22px;font-family:'Syne',sans-serif;font-weight:700;font-size:14px;cursor:pointer;transition:all 0.2s;">Register</button>
           </div>
@@ -753,35 +731,24 @@
       <div class="logo-sub">Guess the word — not by spelling, but by meaning.</div>
     </div>
 
-    <!-- Top-right: Rules + Profile -->
-    <div id="user-topbar" style="position:fixed;top:14px;right:14px;z-index:200;display:flex;align-items:center;gap:8px;">
-      <button onclick="showRules()"
-        style="background:var(--card);border:1px solid var(--border);color:var(--secondary);height:36px;padding:0 12px;border-radius:18px;cursor:pointer;font-size:12px;font-family:'DM Mono',monospace;transition:all 0.2s;display:flex;align-items:center;gap:5px;white-space:nowrap;"
-        onmouseover="this.style.borderColor='var(--accent)';this.style.color='var(--accent)'"
-        onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--secondary)'">
-        📖 <span class="topbar-label">Rules</span>
-      </button>
-      <div style="position:relative;z-index:201;">
-        <button onclick="toggleProfileMenu()" id="profile-btn"
-          style="background:var(--card);border:1px solid var(--border);height:36px;padding:0 10px 0 6px;border-radius:18px;cursor:pointer;display:flex;align-items:center;gap:7px;transition:all 0.2s;"
-          onmouseover="this.style.borderColor='var(--accent)'"
-          onmouseout="this.style.borderColor='var(--border)'">
-          <div class="user-avatar" id="home-avatar" style="width:26px;height:26px;font-size:11px;">?</div>
-          <span class="topbar-label" id="home-username" style="font-size:12px;font-family:'DM Mono',monospace;color:var(--text);max-width:100px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">...</span>
-          <span style="color:var(--muted);font-size:9px;">▾</span>
-        </button>
-        <div id="profile-dropdown" style="display:none;position:fixed;top:58px;right:14px;background:var(--card);border:1px solid var(--border);border-radius:16px;padding:6px;min-width:200px;box-shadow:0 12px 40px rgba(0,0,0,0.5);z-index:500;">
-          <div style="padding:10px 14px;border-bottom:1px solid var(--border);margin-bottom:4px;">
-            <div style="font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:3px;">Signed in as</div>
-            <div id="dropdown-username" style="font-family:'Syne',sans-serif;font-weight:700;font-size:16px;color:var(--accent);">...</div>
-          </div>
-          <button onclick="closeProfileMenu();openRenameModal()" class="dd-item">✎ &nbsp;Change Username</button>
-          <button onclick="closeProfileMenu();openChangePasswordModal()" class="dd-item">🔑 &nbsp;Change Password</button>
-          <button onclick="closeProfileMenu();showAdmin()" id="dropdown-admin-btn" class="dd-item" style="display:none;color:#ffaa00;">⚙️ &nbsp;Admin Panel</button>
-          <div style="height:1px;background:var(--border);margin:4px 2px;"></div>
-          <button onclick="closeProfileMenu();logOut()" class="dd-item danger">🚪 &nbsp;Log Out</button>
-        </div>
+    <!-- Top-right user controls — fixed position -->
+    <div id="user-topbar" style="position:fixed;top:16px;right:16px;z-index:50;display:flex;align-items:center;gap:8px;">
+      <div style="display:flex;align-items:center;gap:8px;background:var(--card);border:1px solid var(--border);border-radius:30px;padding:6px 14px 6px 8px;">
+        <div class="user-avatar" id="home-avatar">?</div>
+        <span class="user-name" id="home-username" style="font-size:13px;font-family:'DM Mono',monospace;">loading...</span>
       </div>
+      <button onclick="openRenameModal()" title="Change username"
+        style="background:var(--card);border:1px solid var(--border);color:var(--secondary);width:36px;height:36px;border-radius:50%;cursor:pointer;font-size:15px;transition:all 0.2s;display:flex;align-items:center;justify-content:center;"
+        onmouseover="this.style.borderColor='var(--accent)';this.style.color='var(--accent)'"
+        onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--secondary)'">✎</button>
+      <button onclick="openChangePasswordModal()" title="Change password"
+        style="background:var(--card);border:1px solid var(--border);color:var(--secondary);width:36px;height:36px;border-radius:50%;cursor:pointer;font-size:15px;transition:all 0.2s;display:flex;align-items:center;justify-content:center;"
+        onmouseover="this.style.borderColor='var(--accent)';this.style.color='var(--accent)'"
+        onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--secondary)'">🔑</button>
+      <button onclick="logOut()" title="Log out"
+        style="background:var(--card);border:1px solid var(--border);color:var(--secondary);width:36px;height:36px;border-radius:50%;cursor:pointer;font-size:15px;transition:all 0.2s;display:flex;align-items:center;justify-content:center;"
+        onmouseover="this.style.borderColor='#ef4444';this.style.color='#ef4444'"
+        onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--secondary)'">⏏</button>
     </div>
 
     <div class="mode-cards">
@@ -840,7 +807,7 @@
       </div>
     </div>
 
-    <div style="display:flex;flex-direction:column;align-items:center;gap:12px;width:100%;">
+    <div style="display:flex;gap:16px;align-items:center;">
       <div class="stats-row">
         <div class="stat-chip">
           <span class="stat-num" id="stat-streak">0</span>
@@ -857,9 +824,8 @@
           <span class="stat-label">Solved</span>
         </div>
       </div>
-      <div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:center;">
-        <button onclick="showLeaderboard()" style="background:var(--card);border:1px solid var(--border);color:var(--secondary);padding:10px 16px;border-radius:10px;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:13px;transition:all 0.2s;white-space:nowrap;" onmouseover="this.style.borderColor='var(--accent)';this.style.color='var(--accent)'" onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--secondary)'">🏆 Leaderboard</button>
-      </div>
+      <button onclick="showLeaderboard()" style="background:var(--card);border:1px solid var(--border);color:var(--secondary);padding:10px 16px;border-radius:10px;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:13px;transition:all 0.2s;" onmouseover="this.style.borderColor='var(--accent)';this.style.color='var(--accent)'" onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--secondary)'">🏆 Leaderboard</button>
+      <button id="admin-btn" onclick="showAdmin()" style="display:none;background:var(--card);border:1px solid rgba(255,170,0,0.4);color:#ffaa00;padding:10px 16px;border-radius:10px;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:13px;transition:all 0.2s;" onmouseover="this.style.borderColor='#ffaa00'" onmouseout="this.style.borderColor='rgba(255,170,0,0.4)'">⚙️ Admin</button>
     </div>
   </div>
 </div>
@@ -897,7 +863,7 @@
         style="display:none;background:var(--card);border:1px solid var(--border);color:var(--secondary);padding:6px 12px;border-radius:8px;cursor:pointer;font-size:13px;font-family:'DM Sans',sans-serif;transition:all 0.2s;"
         onmouseover="this.style.borderColor='var(--accent)';this.style.color='var(--accent)'"
         onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--secondary)'">↺ New Word</button>
-      <div class="streak-badge">🔥 <span id="streak-count">0</span></div>
+      <div class="streak-badge" id="streak-badge">🔥 <span id="streak-count">0</span></div>
     </div>
   </div>
 
@@ -1328,55 +1294,6 @@ INSERT INTO riddles (difficulty, riddle_text, answer, category, definition, syno
   </div>
 </div>
 
-<!-- ══════════ RULES MODAL ══════════ -->
-<div id="rules-overlay" style="display:none;position:fixed;inset:0;background:rgba(8,11,15,0.95);z-index:600;align-items:center;justify-content:center;backdrop-filter:blur(10px);padding:16px;">
-  <div style="background:var(--card);border:1px solid var(--border);border-radius:20px;padding:28px;max-width:500px;width:100%;max-height:90vh;overflow-y:auto;animation:popIn 0.3s ease both;">
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;">
-      <div style="font-family:'Syne',sans-serif;font-size:22px;font-weight:800;letter-spacing:-0.5px;">📖 How to Play</div>
-      <button onclick="closeRules()" style="background:none;border:1px solid var(--border);color:var(--muted);width:32px;height:32px;border-radius:50%;cursor:pointer;font-size:14px;">✕</button>
-    </div>
-    <div style="background:var(--accent-glow);border:1px solid rgba(0,255,136,0.25);border-radius:12px;padding:14px;margin-bottom:16px;">
-      <div style="font-family:'Syne',sans-serif;font-weight:700;color:var(--accent);margin-bottom:6px;">🧠 The Idea</div>
-      <div style="font-size:13px;color:var(--text);line-height:1.6;">Guess the secret word by <strong>meaning</strong>, not spelling. Each guess gets a similarity score. 100% = you found it!</div>
-    </div>
-    <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:14px;margin-bottom:10px;color:var(--text);">🎮 Modes</div>
-    <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:16px;">
-      <div style="background:var(--surface);border-radius:10px;padding:12px;font-size:13px;">
-        <span style="font-weight:700;">🎭 Daily Riddle</span> <span style="color:var(--accent);font-size:11px;font-family:'DM Mono',monospace;">[login]</span><br>
-        <span style="color:var(--secondary);">Solve a riddle to find the hidden word. 3 difficulties. One try per day. Builds streak.</span>
-      </div>
-      <div style="background:var(--surface);border-radius:10px;padding:12px;font-size:13px;">
-        <span style="font-weight:700;">🌊 Daily Theme</span> <span style="color:var(--accent);font-size:11px;font-family:'DM Mono',monospace;">[login]</span><br>
-        <span style="color:var(--secondary);">A theme is shown. Guess the specific hidden word. One try per day. Builds streak.</span>
-      </div>
-      <div style="background:var(--surface);border-radius:10px;padding:12px;font-size:13px;">
-        <span style="font-weight:700;">♾️ Random Mode</span> <span style="color:var(--muted);font-size:11px;font-family:'DM Mono',monospace;">[free]</span><br>
-        <span style="color:var(--secondary);">Unlimited practice. No streak. Adds to Total Solved. Play anytime.</span>
-      </div>
-    </div>
-    <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:14px;margin-bottom:10px;color:var(--text);">🌡️ Score Guide</div>
-    <div style="display:flex;flex-direction:column;gap:4px;margin-bottom:16px;font-size:12px;">
-      <div style="display:flex;gap:10px;align-items:center;background:var(--surface);border-radius:8px;padding:8px 12px;"><span style="min-width:70px;font-family:'DM Mono',monospace;color:#ff4444;">🔥🔥🔥🔥🔥 90%+</span><span style="color:var(--secondary);">Extremely close!</span></div>
-      <div style="display:flex;gap:10px;align-items:center;background:var(--surface);border-radius:8px;padding:8px 12px;"><span style="min-width:70px;font-family:'DM Mono',monospace;color:#ff7700;">🔥🔥🔥🔥 75%+</span><span style="color:var(--secondary);">Very warm</span></div>
-      <div style="display:flex;gap:10px;align-items:center;background:var(--surface);border-radius:8px;padding:8px 12px;"><span style="min-width:70px;font-family:'DM Mono',monospace;color:#ffaa00;">🔥🔥🔥 60%+</span><span style="color:var(--secondary);">Warm</span></div>
-      <div style="display:flex;gap:10px;align-items:center;background:var(--surface);border-radius:8px;padding:8px 12px;"><span style="min-width:70px;font-family:'DM Mono',monospace;color:#ffcc44;">🔥🔥 40%+</span><span style="color:var(--secondary);">Lukewarm</span></div>
-      <div style="display:flex;gap:10px;align-items:center;background:var(--surface);border-radius:8px;padding:8px 12px;"><span style="min-width:70px;font-family:'DM Mono',monospace;color:#88aaff;">🔥 20%+</span><span style="color:var(--secondary);">Cold</span></div>
-      <div style="display:flex;gap:10px;align-items:center;background:var(--surface);border-radius:8px;padding:8px 12px;"><span style="min-width:70px;font-family:'DM Mono',monospace;color:#3b82f6;">❄️ 0–19%</span><span style="color:var(--secondary);">Freezing</span></div>
-    </div>
-    <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:14px;margin-bottom:10px;color:var(--text);">📜 Rules</div>
-    <div style="display:flex;flex-direction:column;gap:6px;margin-bottom:20px;font-size:13px;color:var(--secondary);">
-      <div>✅ Type any word → see how close it is to the answer</div>
-      <div>✅ Guesses sorted by similarity (highest first)</div>
-      <div>✅ Up to 5 hints: letter count, first letter, category, definition, synonym</div>
-      <div>✅ Daily modes: 1 attempt/day. Give up = streak resets, answer revealed</div>
-      <div>✅ Random mode: unlimited, no streak impact</div>
-      <div>✅ Words matched by AI — similar forms like run/running recognized</div>
-      <div>❌ Gibberish or unknown words → "not in vocabulary"</div>
-    </div>
-    <button onclick="closeRules()" style="width:100%;background:var(--accent);color:#000;border:none;border-radius:12px;padding:13px;font-family:'Syne',sans-serif;font-weight:700;font-size:15px;cursor:pointer;">Got it! 🎮</button>
-  </div>
-</div>
-
 <!-- ══════════════════════════════ SCRIPT ══════════════════════════════ -->
 <script>
 // ── SUPABASE INIT ──
@@ -1447,37 +1364,23 @@ async function init() {
 
   if (storedToken && storedUsername) {
     setLoaderText('Verifying session...');
-
-    // Timeout after 6 seconds — don't hang forever
-    const sessionPromise = db.from('sessions')
+    const { data: session } = await db.from('sessions')
       .select('username').eq('token', storedToken).eq('username', storedUsername).single();
-    const timeoutPromise = new Promise((_, reject) =>
-      setTimeout(() => reject(new Error('timeout')), 6000)
-    );
-
-    try {
-      const { data: session } = await Promise.race([sessionPromise, timeoutPromise]);
-      if (session) {
-        state.username = storedUsername;
-        setLoaderText('Fetching your stats...');
-        // Run stats + puzzle in parallel for speed
-        await Promise.all([loadUserStats(), loadDailyPuzzle()]);
-        setLoaderText('Ready!');
-        setTimeout(() => { showScreen('home'); refreshHomeUI(); }, 400);
-      } else {
-        localStorage.removeItem('semantle_token');
-        localStorage.removeItem('semantle_username');
-        setTimeout(() => showScreen('landing'), 400);
-      }
-    } catch (e) {
-      // Timeout or error — go to landing, don't hang
-      console.warn('Session check failed:', e.message);
+    if (session) {
+      state.username = storedUsername;
+      setLoaderText('Fetching your stats...');
+      await loadUserStats();
+      setLoaderText("Loading today's puzzle...");
+      await loadDailyPuzzle();
+      setLoaderText('Ready!');
+      setTimeout(() => { showScreen('home'); refreshHomeUI(); }, 600);
+    } else {
       localStorage.removeItem('semantle_token');
       localStorage.removeItem('semantle_username');
-      setTimeout(() => showScreen('landing'), 400);
+      setTimeout(() => showScreen('landing'), 800);
     }
   } else {
-    setTimeout(() => showScreen('landing'), 400);
+    setTimeout(() => showScreen('landing'), 800);
   }
 }
 
@@ -1792,11 +1695,9 @@ function refreshHomeUI() {
     riddleBadge.textContent = 'Daily';
   }
 
-  // Update dropdown username + admin visibility
-  const ddUsername = document.getElementById('dropdown-username');
-  if (ddUsername) ddUsername.textContent = state.username || '';
-  const ddAdmin = document.getElementById('dropdown-admin-btn');
-  if (ddAdmin) ddAdmin.style.display = state.username === ADMIN_USERNAME ? 'block' : 'none';
+  // Show admin button only for admin user
+  const adminBtn = document.getElementById('admin-btn');
+  if (adminBtn) adminBtn.style.display = state.username === ADMIN_USERNAME ? 'block' : 'none';
 
   // Update theme card icon/desc
   if (state.dailyPuzzle?.theme) {
@@ -1888,7 +1789,7 @@ async function startGame(mode, difficulty) {
     }
 
   } else {
-    // Random mode — fast: get count then fetch one random row
+    // Random mode — fast single row fetch
     const { count } = await db.from('riddles').select('*', { count: 'exact', head: true });
     if (count && count > 0) {
       const offset = Math.floor(Math.random() * count);
@@ -1903,6 +1804,13 @@ async function startGame(mode, difficulty) {
   // Build game UI
   const modeLabels = { riddle: 'Daily Riddle · ' + difficulty, theme: 'Daily Theme', random: 'Random Mode' };
   document.getElementById('mode-label').textContent = modeLabels[mode] || mode;
+
+  // Show streak badge only for daily modes when logged in
+  const streakBadge = document.getElementById('streak-badge');
+  if (streakBadge) {
+    const showStreak = mode !== 'random' && !!state.username;
+    streakBadge.style.display = showStreak ? 'flex' : 'none';
+  }
 
   // Puzzle card
   if (mode === 'riddle') {
@@ -1978,24 +1886,27 @@ function browserLemmatize(word) {
     'gave':'give','given':'give','giving':'give',
     'fell':'fall','fallen':'fall','falling':'fall',
     'felt':'feel','feeling':'feel',
-    'left':'leave','leaving':'leave',
-    'kept':'keep','keeping':'keep',
-    'met':'meet','meeting':'meet',
-    'sent':'send','sending':'send',
-    'built':'build','building':'build',
-    'bought':'buy','buying':'buy',
-    'brought':'bring','bringing':'bring',
-    'caught':'catch','catching':'catch',
-    'taught':'teach','teaching':'teach',
-    'thought':'think','thinking':'think',
-    'fought':'fight','fighting':'fight',
-    'sought':'seek','seeking':'seek',
-    'found':'find','finding':'find',
-    'bound':'bind','binding':'bind',
-    'wound':'wind','winding':'wind',
-    'held':'hold','holding':'hold',
-    'told':'tell','telling':'tell',
-    'sold':'sell','selling':'sell',
+    // Note: irregular past tenses like left/leave, kept/keep etc are NOT
+    // lemmatized here because they are valid standalone words with their own
+    // vector embeddings. Only obvious -ing forms are mapped.
+    'leaving':'leave',
+    'keeping':'keep',
+    'meeting':'meet',
+    'sending':'send',
+    'building':'build',
+    'buying':'buy',
+    'bringing':'bring',
+    'catching':'catch',
+    'teaching':'teach',
+    'thinking':'think',
+    'fighting':'fight',
+    'seeking':'seek',
+    'finding':'find',
+    'binding':'bind',
+    'winding':'wind',
+    'holding':'hold',
+    'telling':'tell',
+    'selling':'sell',
     'children':'child','mice':'mouse','geese':'goose',
     'feet':'foot','teeth':'tooth','men':'man','women':'woman',
     'people':'person','oxen':'ox','sheep':'sheep','fish':'fish',
@@ -2034,8 +1945,8 @@ function browserLemmatize(word) {
     [/(.{3,})(ch|sh|ss|x|z)es$/, (m, s, end) => s + end],
     // -s: cats→cat, dogs→dog (but not -ss, -us endings)
     [/(.{2,}[^su])s$/, (m, s) => s],
-    // -er: only strip if base ends in vowel (teacher→teach, NOT water→wat)
-    [/(.{4,}[aeiou])er$/, (m, s) => s],
+    // -er: teacher→teach, runner→run
+    [/(.{3,})er$/, (m, s) => s],
     // -est: fastest→fast
     [/(.{3,})est$/, (m, s) => s],
     // -ly: quickly→quick
@@ -2080,7 +1991,7 @@ async function processGuess(rawGuess, answer) {
   const normalized = rawGuess.toLowerCase().replace(/[^a-z]/g, '').trim();
   if (!normalized) return null;
 
-  // Exact match — skip all processing
+  // Exact match — skip all processing, never lemmatize the answer word
   if (normalized === answer.toLowerCase()) {
     return { word: normalized, matched: normalized, similarity: 100, corrected: false };
   }
@@ -2090,7 +2001,8 @@ async function processGuess(rawGuess, answer) {
   if (guessCache[cacheKey]) return guessCache[cacheKey];
 
   // Layer 1: browser lemmatize
-  const lemmatized = browserLemmatize(normalized);
+  // IMPORTANT: never lemmatize if the word IS the answer — left should stay left not become leave
+  const lemmatized = normalized === answer.toLowerCase() ? normalized : browserLemmatize(normalized);
 
   // If lemmatized to a different word, check cache for that too
   const lemmaCacheKey = lemmatized + '|' + answer.toLowerCase();
@@ -2125,8 +2037,9 @@ async function processGuess(rawGuess, answer) {
     return final;
   }
 
-  // Fallback if server completely fails — word not found
-  return { word: normalized, typed: normalized, matched: normalized, similarity: 0, corrected: false, notFound: true, error: 'word not found' };
+  // Fallback if server completely fails
+  const hash = [...(normalized + answer)].reduce((acc, c) => (acc * 31 + c.charCodeAt(0)) & 0xffff, 0);
+  return { word: normalized, typed: normalized, matched: normalized, similarity: 4 + (hash % 22), corrected: false, notFound: true };
 }
 
 function getHeatInfo(pct) {
@@ -2180,9 +2093,9 @@ async function submitGuess() {
 
   if (!result) { showFeedback('Something went wrong. Try again.', 'error'); return; }
 
-  // Word not in vocabulary
-  if (result.notFound || result.similarity === 0) {
-    showFeedback(`"${normalized}" is not in our vocabulary`, 'error');
+  // Word not in vocabulary at all
+  if (result.notFound && result.similarity < 5) {
+    showFeedback(`"${normalized}" — not in vocabulary`, 'error');
     input.classList.add('shake');
     setTimeout(() => input.classList.remove('shake'), 400);
     return;
@@ -3141,33 +3054,6 @@ async function changeAdminPassword() {
   msg.style.color = 'var(--accent)';
   msg.textContent = '✅ Updated!';
   setTimeout(() => closeAdminPwModal(), 1000);
-}
-
-// ── PROFILE DROPDOWN ──
-function toggleProfileMenu() {
-  const dd = document.getElementById('profile-dropdown');
-  if (!dd) return;
-  dd.style.display = dd.style.display === 'none' ? 'block' : 'none';
-}
-function closeProfileMenu() {
-  const dd = document.getElementById('profile-dropdown');
-  if (dd) dd.style.display = 'none';
-}
-document.addEventListener('click', (e) => {
-  const btn = document.getElementById('profile-btn');
-  const dd  = document.getElementById('profile-dropdown');
-  if (dd && btn && !btn.contains(e.target) && !dd.contains(e.target)) {
-    dd.style.display = 'none';
-  }
-});
-
-// ── RULES ──
-function showRules() {
-  closeProfileMenu();
-  document.getElementById('rules-overlay').style.display = 'flex';
-}
-function closeRules() {
-  document.getElementById('rules-overlay').style.display = 'none';
 }
 
 // ── START ──
