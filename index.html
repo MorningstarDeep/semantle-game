@@ -861,9 +861,6 @@ const SUPABASE_URL = 'https://kpqvhdzoxobacdlvjcnx.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtwcXZoZHpveG9iYWNkbHZqY254Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM2ODEzMzQsImV4cCI6MjA4OTI1NzMzNH0.CT9D2C4FroN7R7O-ijtCcIAJc63hcU0PJn-KE3G-7eQ';
 const db = createClient(SUPABASE_URL, SUPABASE_KEY);
 const ADMIN_USERNAME = 'morningstardeep';
-// Admin password stored as a SHA-256 hash — never stored as plaintext
-// To change password, generate new hash with: crypto.subtle.digest('SHA-256', ...)
-// Password is hashed with SHA-256 — actual password is never in source code
 const ADMIN_PASSWORD_HASH = 'a79748fb0bae49272a7ef9168652eec8417ee763b384b5c1e773519a9f07fabf';
 
 // ── STATE ──
@@ -1786,7 +1783,7 @@ async function loadLeaderboardData() {
       .select('username, streak, best_streak, total_solved')
       .order('streak', { ascending: false })
       .limit(20);
-    if (!data || !data.length) { table.innerHTML = '<div class="lb-empty">No players yet. Be the first! 🏆</div>'; return; }
+    if (!data || !data.length) { table.innerHTML = `<div class="lb-empty">No players yet. Be the first! 🏆</div>`; return; }
     const rankColors = ['gold','silver','bronze'];
     table.innerHTML = data.map((row, i) => `
       <div class="lb-row ${row.username === state.username ? 'me' : ''}">
@@ -1804,7 +1801,7 @@ async function loadLeaderboardData() {
       .order('guesses', { ascending: true })
       .order('time_seconds', { ascending: true })
       .limit(20);
-    if (!data || !data.length) { table.innerHTML = '<div class="lb-empty">No entries yet today. Be the first! 🏆</div>'; return; }
+    if (!data || !data.length) { table.innerHTML = `<div class="lb-empty">No entries yet today. Be the first! 🏆</div>`; return; }
     const rankColors = ['gold','silver','bronze'];
     table.innerHTML = data.map((row, i) => `
       <div class="lb-row ${row.username === state.username ? 'me' : ''}">
@@ -1821,7 +1818,7 @@ async function loadLeaderboardData() {
       .order('guesses', { ascending: true })
       .order('time_seconds', { ascending: true })
       .limit(20);
-    if (!data || !data.length) { table.innerHTML = '<div class="lb-empty">No entries yet today. Be the first! 🏆</div>'; return; }
+    if (!data || !data.length) { table.innerHTML = `<div class="lb-empty">No entries yet today. Be the first! 🏆</div>`; return; }
     const rankColors = ['gold','silver','bronze'];
     table.innerHTML = data.map((row, i) => `
       <div class="lb-row ${row.username === state.username ? 'me' : ''}">
@@ -2158,7 +2155,7 @@ async function loadRiddles() {
   `).join('');
 
   if (filtered.length === 0) {
-    list.innerHTML = '<div style="text-align:center;color:var(--muted);font-family:'DM Mono',monospace;font-size:13px;padding:20px;">No riddles found</div>';
+        list.innerHTML = `<div style="text-align:center;color:var(--muted);font-family:'DM Mono',monospace;font-size:13px;padding:20px;">No riddles found</div>`;
   }
 }
 
@@ -2204,7 +2201,7 @@ async function deleteRiddle(id) {
 // ── Themes ──
 async function loadThemesOverview() {
   const { data: themes } = await db.from('themes').select('*').order('theme_name');
-  if (!data) return;
+  if (!themes) return;
 
   // Populate select dropdown
   const sel = document.getElementById('theme-select');
@@ -2272,7 +2269,7 @@ async function loadSchedule() {
 
   const list = document.getElementById('schedule-list');
   if (!data || !data.length) {
-    list.innerHTML = '<div style="text-align:center;color:var(--muted);font-family:'DM Mono',monospace;font-size:13px;padding:20px;">No puzzles scheduled yet</div>';
+    list.innerHTML = `<div style="text-align:center;color:var(--muted);font-family:'DM Mono',monospace;font-size:13px;padding:20px;">No puzzles scheduled yet</div>`;
     return;
   }
 
@@ -2323,7 +2320,12 @@ async function deletePuzzle(date) {
 }
 
 // ── START ──
-init();
+init().catch(err => {
+  console.error('Init failed:', err);
+  // Don't leave user stuck on loading — send to login
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById('username-screen').classList.add('active');
+});
 </script>
 </body>
 </html>
