@@ -29,6 +29,7 @@
     color: var(--text);
     min-height: 100vh;
     overflow-x: hidden;
+    max-width: 100vw;
   }
   body::before {
     content:'';
@@ -117,10 +118,11 @@
     text-transform:uppercase; color:var(--accent); margin-bottom:12px; opacity:0.8;
   }
   .logo-title {
-    font-family:'Syne',sans-serif; font-size:clamp(52px,12vw,80px); font-weight:800;
-    letter-spacing:-3px; line-height:1;
+    font-family:'Syne',sans-serif; font-size:clamp(36px,10vw,80px); font-weight:800;
+    letter-spacing:-2px; line-height:1;
     background:linear-gradient(135deg,#fff 40%,var(--accent) 100%);
     -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;
+    max-width:100%; overflow:hidden;
   }
   .logo-sub { font-size:15px; color:var(--secondary); margin-top:14px; font-weight:300; }
   .user-avatar {
@@ -513,18 +515,18 @@
 
 <!-- ══════════ LANDING PAGE ══════════ -->
 <div id="landing" class="screen">
-  <div style="max-width:520px;margin:0 auto;width:100%;padding:40px 20px;display:flex;flex-direction:column;align-items:center;gap:36px;min-height:100vh;justify-content:center;">
+  <div style="max-width:520px;margin:0 auto;width:100%;padding:40px 16px;display:flex;flex-direction:column;align-items:center;gap:28px;min-height:100vh;justify-content:center;overflow-x:hidden;">
 
     <!-- Logo -->
     <div style="text-align:center;animation:fadeUp 0.8s ease both;">
-      <div style="font-family:'DM Mono',monospace;font-size:11px;letter-spacing:3px;text-transform:uppercase;color:var(--accent);margin-bottom:12px;opacity:0.8;">Word × Meaning</div>
-      <div style="font-family:'Syne',sans-serif;font-size:clamp(52px,12vw,80px);font-weight:800;letter-spacing:-3px;line-height:1;background:linear-gradient(135deg,#fff 40%,var(--accent) 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">Semantle</div>
-      <div style="font-size:15px;color:var(--secondary);margin-top:14px;font-weight:300;">Guess the word — not by spelling, but by meaning.</div>
+      <div class="logo-eyebrow">Word × Meaning</div>
+      <div class="logo-title">Semantle</div>
+      <div class="logo-sub">Guess the word — not by spelling, but by meaning.</div>
     </div>
 
     <!-- Random mode — open to all -->
     <div style="width:100%;animation:fadeUp 0.8s 0.1s ease both;">
-      <div style="font-family:'DM Mono',monospace;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);text-align:center;margin-bottom:12px;">Play instantly — no account needed</div>
+      <div style="font-family:'DM Mono',monospace;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);text-align:center;margin-bottom:12px;word-break:break-word;">Play instantly — no account needed</div>
       <div class="mode-card" onclick="startGame('random','random')" style="border-color:var(--accent);background:linear-gradient(135deg,rgba(0,255,136,0.06),var(--card));">
         <div class="mode-icon" style="font-size:32px;border:none;background:transparent;">♾️</div>
         <div class="mode-info">
