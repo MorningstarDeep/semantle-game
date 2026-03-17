@@ -2741,7 +2741,7 @@ async function addNewTheme() {
 
   if (!name) { msg.style.color = '#ef4444'; msg.textContent = 'Theme name is required.'; return; }
 
-  const wordPool = words.split(/[\n,]+/.map(w => w.trim().toLowerCase()).filter(w => w.length > 0);
+  const wordPool = words.split(/[\n,]+/).map(w => w.trim().toLowerCase()).filter(w => w.length > 0);
 
   const { error } = await db.from('themes').insert({
     theme_name: name,
