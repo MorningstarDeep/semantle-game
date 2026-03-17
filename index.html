@@ -374,6 +374,129 @@
   @keyframes popIn { from{opacity:0;transform:scale(0.85)} to{opacity:1;transform:scale(1)} }
   @keyframes shake { 0%,100%{transform:translateX(0)} 20%,60%{transform:translateX(-6px)} 40%,80%{transform:translateX(6px)} }
   .shake { animation:shake 0.4s ease; }
+
+  /* ══════════════════════════════════════════
+     MOBILE RESPONSIVE — 480px and below
+  ══════════════════════════════════════════ */
+  @media (max-width: 480px) {
+
+    /* ── Logo ── */
+    .logo-title {
+      font-size: clamp(36px, 15vw, 56px) !important;
+      letter-spacing: -2px !important;
+    }
+    .logo-sub { font-size: 13px !important; }
+    .logo-eyebrow { font-size: 10px !important; letter-spacing: 2px !important; }
+
+    /* ── Home / Landing inner ── */
+    .home-inner { gap: 24px !important; padding: 0 !important; }
+    #home { padding: 24px 16px !important; justify-content: flex-start !important; padding-top: 40px !important; }
+
+    /* ── User topbar ── */
+    #user-topbar {
+      top: 10px !important;
+      right: 10px !important;
+      gap: 6px !important;
+    }
+    #user-topbar > div { padding: 5px 10px 5px 6px !important; }
+    #user-topbar button { width: 30px !important; height: 30px !important; font-size: 13px !important; }
+
+    /* ── Mode cards ── */
+    .mode-card { padding: 14px 16px !important; gap: 12px !important; }
+    .mode-icon { width: 42px !important; height: 42px !important; font-size: 22px !important; border-radius: 11px !important; }
+    .mode-name { font-size: 15px !important; }
+    .mode-desc { font-size: 12px !important; }
+    .mode-badge { font-size: 9px !important; padding: 2px 7px !important; }
+
+    /* ── Auth cards ── */
+    .username-card { padding: 32px 20px !important; border-radius: 18px !important; }
+    .username-icon { font-size: 40px !important; margin-bottom: 14px !important; }
+    .username-title { font-size: 22px !important; }
+    .username-sub { font-size: 13px !important; margin-bottom: 24px !important; }
+    .username-input { font-size: 15px !important; padding: 12px 14px !important; }
+    .username-btn { font-size: 15px !important; padding: 13px !important; }
+
+    /* ── Stats row ── */
+    .stats-row { gap: 16px !important; }
+    .stat-num { font-size: 18px !important; }
+    .stat-label { font-size: 9px !important; }
+
+    /* ── Game screen ── */
+    #game { padding: 0 12px 60px !important; }
+    .game-header { padding: 14px 0 0 !important; margin-bottom: 14px !important; }
+    .game-mode-label { font-size: 10px !important; }
+    .back-btn { padding: 7px 12px !important; font-size: 12px !important; }
+    .streak-badge { font-size: 11px !important; padding: 4px 8px !important; }
+
+    /* ── Riddle card ── */
+    .riddle-card { padding: 16px !important; }
+    .riddle-text { font-size: 16px !important; }
+
+    /* ── Input row ── */
+    .input-row { gap: 8px !important; }
+    .guess-input { font-size: 14px !important; padding: 12px 14px !important; }
+    .submit-btn { padding: 12px 14px !important; font-size: 13px !important; }
+
+    /* ── Guess items ── */
+    .guess-word { font-size: 14px !important; }
+    .guess-pct { font-size: 12px !important; min-width: 36px !important; }
+    .guess-heat { font-size: 12px !important; min-width: 60px !important; }
+    .guess-item { padding: 10px 12px !important; gap: 8px !important; }
+
+    /* ── Hint/giveup buttons ── */
+    .hint-btn, .giveup-btn { padding: 5px 10px !important; font-size: 11px !important; }
+    .guesses-count { font-size: 10px !important; }
+
+    /* ── Win card ── */
+    .win-card { padding: 28px 20px !important; }
+    .win-title { font-size: 28px !important; }
+    .win-word { font-size: 20px !important; padding: 10px 18px !important; }
+    .win-emoji { font-size: 44px !important; }
+    .win-stat-num { font-size: 22px !important; }
+
+    /* ── Leaderboard ── */
+    #leaderboard-screen { padding: 0 12px 40px !important; }
+    .lb-title { font-size: 22px !important; }
+    .lb-tab { padding: 7px 10px !important; font-size: 10px !important; }
+    .lb-row { padding: 10px 12px !important; gap: 10px !important; }
+    .lb-user { font-size: 13px !important; }
+    .lb-guesses { font-size: 14px !important; }
+    .lb-time { font-size: 11px !important; }
+
+    /* ── End screen ── */
+    #end-screen > div { padding: 0 12px 40px !important; gap: 16px !important; }
+
+    /* ── Admin stats grid ── */
+    #admin-stats { grid-template-columns: 1fr 1fr !important; }
+
+    /* ── Diff tabs ── */
+    .diff-tab { font-size: 10px !important; padding: 8px 6px !important; letter-spacing: 0 !important; }
+
+    /* ── Toast ── */
+    .toast { font-size: 12px !important; padding: 10px 18px !important; max-width: 90vw !important; white-space: normal !important; text-align: center !important; }
+
+    /* ── Win overlay ── */
+    .win-stats { gap: 12px !important; }
+
+    /* ── Modals ── */
+    #confirm-overlay > div { padding: 28px 20px !important; }
+    #admin-auth-overlay > div { padding: 28px 20px !important; }
+    #rename-overlay .username-card { padding: 28px 20px !important; }
+    #change-password-overlay .username-card { padding: 28px 20px !important; }
+
+    /* ── Landing page locked section ── */
+    #landing > div { gap: 24px !important; padding: 24px 16px !important; justify-content: flex-start !important; padding-top: 48px !important; }
+
+    /* ── Refresh button ── */
+    #refresh-btn { font-size: 11px !important; padding: 5px 10px !important; }
+  }
+
+  /* ── Tablet (481–768px) minor tweaks ── */
+  @media (max-width: 768px) {
+    .logo-title { font-size: clamp(44px, 13vw, 70px) !important; }
+    #user-topbar { top: 12px !important; right: 12px !important; }
+    .admin-tab { font-size: 10px !important; padding: 8px 6px !important; letter-spacing: 0 !important; }
+  }
 </style>
 </head>
 <body>
