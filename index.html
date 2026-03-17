@@ -2,7 +2,6 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="google-site-verification" content="D68-yYioh1jFDF8gjz8G2VzyEZgCFegn8dyrUj7VBWk" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Semantle — Word by Meaning</title>
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
@@ -2919,17 +2918,32 @@ async function importBulkJSON() {
       definition: r.definition||null, synonyms: Array.isArray(r.synonyms) ? r.synonyms : null });
   });
   if (errors.length) { msg.style.color = '#ef4444'; msg.textContent = `❌ ${errors[0]}${errors.length>1?` (+${errors.length-1} more)`:''}`;return; }
-  msg.style.color = 'var(--muted)'; msg.textContent = `Importing ${rows.length} riddles...`;
+  msg.style.color = 'var(--muted)'; msg.textContent = 'Checking for duplicates...';
+
+  // Fetch all existing answers from DB to avoid duplicates
+  const { data: existing } = await db.from('riddles').select('answer, difficulty');
+  const existingKeys = new Set((existing || []).map(r => r.answer.toLowerCase() + '|' + r.difficulty));
+
+  const deduped = rows.filter(r => !existingKeys.has(r.answer.toLowerCase() + '|' + r.difficulty));
+  const skipped = rows.length - deduped.length;
+
+  if (deduped.length === 0) {
+    msg.style.color = '#ffaa00';
+    msg.textContent = `⚠ All ${rows.length} riddles already exist in DB. Nothing imported.`;
+    return;
+  }
+
+  msg.textContent = `Importing ${deduped.length} riddles (${skipped} duplicates skipped)...`;
   let imported = 0;
-  for (let i = 0; i < rows.length; i += 50) {
-    const batch = rows.slice(i, i+50);
+  for (let i = 0; i < deduped.length; i += 50) {
+    const batch = deduped.slice(i, i+50);
     const { error } = await db.from('riddles').insert(batch);
     if (error) { msg.style.color='#ef4444'; msg.textContent=`❌ Error at row ${i+1}: ${error.message}`; return; }
     imported += batch.length;
-    msg.textContent = `Importing... ${imported}/${rows.length}`;
+    msg.textContent = `Importing... ${imported}/${deduped.length}`;
   }
   msg.style.color = 'var(--accent)';
-  msg.textContent = `✅ Successfully imported ${imported} riddles!`;
+  msg.textContent = `✅ Imported ${imported} riddles! ${skipped > 0 ? `(${skipped} duplicates skipped)` : ''}`;
   document.getElementById('bulk-json-input').value = '';
   document.getElementById('bulk-json-preview').style.display = 'none';
   await loadAdminStats();
