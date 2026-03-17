@@ -522,6 +522,7 @@
         </div>
       </div>
       <button onclick="showLeaderboard()" style="background:var(--card);border:1px solid var(--border);color:var(--secondary);padding:10px 16px;border-radius:10px;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:13px;transition:all 0.2s;" onmouseover="this.style.borderColor='var(--accent)';this.style.color='var(--accent)'" onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--secondary)'">🏆 Leaderboard</button>
+      <button id="admin-btn" onclick="showAdmin()" style="display:none;background:var(--card);border:1px solid rgba(255,170,0,0.4);color:#ffaa00;padding:10px 16px;border-radius:10px;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:13px;transition:all 0.2s;" onmouseover="this.style.borderColor='#ffaa00'" onmouseout="this.style.borderColor='rgba(255,170,0,0.4)'">⚙️ Admin</button>
     </div>
   </div>
 </div>
@@ -706,6 +707,152 @@
   </div>
 </div>
 
+<!-- ══════════ ADMIN PASSWORD MODAL ══════════ -->
+<div id="admin-auth-overlay" style="display:none;position:fixed;inset:0;background:rgba(8,11,15,0.95);z-index:400;align-items:center;justify-content:center;backdrop-filter:blur(10px);">
+  <div style="background:var(--card);border:1px solid rgba(255,170,0,0.3);border-radius:20px;padding:36px;max-width:360px;width:90%;text-align:center;animation:popIn 0.35s cubic-bezier(0.34,1.56,0.64,1) both;">
+    <div style="font-size:40px;margin-bottom:12px;">🔐</div>
+    <div style="font-family:'Syne',sans-serif;font-size:22px;font-weight:800;margin-bottom:8px;letter-spacing:-0.5px;">Admin Access</div>
+    <div style="font-size:13px;color:var(--secondary);margin-bottom:24px;">Enter the admin password to continue.</div>
+    <input type="password" id="admin-password-input" placeholder="Password"
+      style="width:100%;background:var(--surface);border:1.5px solid var(--border);border-radius:10px;padding:13px 16px;font-family:'DM Mono',monospace;font-size:15px;color:var(--text);outline:none;text-align:center;letter-spacing:2px;margin-bottom:10px;transition:border-color 0.2s;"
+      onkeydown="if(event.key==='Enter') verifyAdminPassword()"
+      onfocus="this.style.borderColor='rgba(255,170,0,0.6)'"
+      onblur="this.style.borderColor='var(--border)'" />
+    <div id="admin-auth-err" style="font-family:'DM Mono',monospace;font-size:12px;color:#ef4444;min-height:16px;margin-bottom:14px;"></div>
+    <div style="display:flex;flex-direction:column;gap:8px;">
+      <button onclick="verifyAdminPassword()" style="background:#ffaa00;color:#000;border:none;border-radius:12px;padding:13px;font-family:'Syne',sans-serif;font-weight:700;font-size:15px;cursor:pointer;transition:all 0.2s;">Unlock →</button>
+      <button onclick="closeAdminAuth()" style="background:transparent;border:1px solid var(--border);color:var(--secondary);border-radius:12px;padding:12px;font-family:'Syne',sans-serif;font-weight:600;font-size:14px;cursor:pointer;">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════ ADMIN SCREEN ══════════ -->
+<div id="admin-screen" class="screen">
+  <div style="max-width:700px;margin:0 auto;width:100%;padding:20px 16px 60px;">
+
+    <!-- Header -->
+    <div style="display:flex;align-items:center;gap:16px;margin-bottom:28px;padding-top:4px;">
+      <button class="back-btn" onclick="showScreen('home')">← Home</button>
+      <div style="font-family:'Syne',sans-serif;font-size:24px;font-weight:800;letter-spacing:-1px;flex:1;">⚙️ Admin Panel</div>
+      <div style="font-family:'DM Mono',monospace;font-size:11px;color:#ffaa00;background:rgba(255,170,0,0.1);border:1px solid rgba(255,170,0,0.3);padding:4px 10px;border-radius:20px;">morningstardeep</div>
+    </div>
+
+    <!-- Stats cards -->
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:10px;margin-bottom:24px;" id="admin-stats">
+      <div style="background:var(--card);border:1px solid var(--border);border-radius:14px;padding:16px;text-align:center;">
+        <div id="stat-easy" style="font-family:'Syne',sans-serif;font-size:28px;font-weight:800;color:var(--accent);">—</div>
+        <div style="font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-top:4px;">Easy</div>
+      </div>
+      <div style="background:var(--card);border:1px solid var(--border);border-radius:14px;padding:16px;text-align:center;">
+        <div id="stat-medium" style="font-family:'Syne',sans-serif;font-size:28px;font-weight:800;color:#ffaa00;">—</div>
+        <div style="font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-top:4px;">Medium</div>
+      </div>
+      <div style="background:var(--card);border:1px solid var(--border);border-radius:14px;padding:16px;text-align:center;">
+        <div id="stat-hard" style="font-family:'Syne',sans-serif;font-size:28px;font-weight:800;color:#ef4444;">—</div>
+        <div style="font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-top:4px;">Hard</div>
+      </div>
+      <div style="background:var(--card);border:1px solid var(--border);border-radius:14px;padding:16px;text-align:center;">
+        <div id="stat-themes" style="font-family:'Syne',sans-serif;font-size:28px;font-weight:800;color:#a78bfa;">—</div>
+        <div style="font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-top:4px;">Themes</div>
+      </div>
+    </div>
+
+    <!-- Tabs -->
+    <div style="display:flex;gap:8px;margin-bottom:20px;">
+      <button class="admin-tab active" onclick="switchAdminTab('riddles',this)" style="flex:1;padding:10px;border-radius:10px;border:1px solid var(--accent);background:var(--accent-glow);color:var(--accent);font-family:'DM Mono',monospace;font-size:11px;letter-spacing:1px;text-transform:uppercase;cursor:pointer;transition:all 0.2s;">Riddles</button>
+      <button class="admin-tab" onclick="switchAdminTab('themes',this)" style="flex:1;padding:10px;border-radius:10px;border:1px solid var(--border);background:var(--card);color:var(--secondary);font-family:'DM Mono',monospace;font-size:11px;letter-spacing:1px;text-transform:uppercase;cursor:pointer;transition:all 0.2s;">Themes</button>
+      <button class="admin-tab" onclick="switchAdminTab('schedule',this)" style="flex:1;padding:10px;border-radius:10px;border:1px solid var(--border);background:var(--card);color:var(--secondary);font-family:'DM Mono',monospace;font-size:11px;letter-spacing:1px;text-transform:uppercase;cursor:pointer;transition:all 0.2s;">Schedule</button>
+    </div>
+
+    <!-- RIDDLES TAB -->
+    <div id="admin-riddles" class="admin-panel">
+      <!-- Add riddle form -->
+      <div style="background:var(--card);border:1px solid var(--border);border-radius:16px;padding:20px;margin-bottom:16px;">
+        <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:16px;margin-bottom:16px;">➕ Add New Riddle</div>
+        <div style="display:flex;flex-direction:column;gap:10px;">
+          <textarea id="new-riddle-text" placeholder="Riddle text..." rows="2"
+            style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px;font-family:'DM Sans',sans-serif;font-size:14px;color:var(--text);resize:vertical;outline:none;"></textarea>
+          <div style="display:flex;gap:10px;">
+            <input id="new-riddle-answer" type="text" placeholder="Answer"
+              style="flex:1;background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px;font-family:'DM Mono',monospace;font-size:14px;color:var(--text);outline:none;" />
+            <select id="new-riddle-difficulty"
+              style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px;font-family:'DM Mono',monospace;font-size:13px;color:var(--text);outline:none;cursor:pointer;">
+              <option value="easy">Easy</option>
+              <option value="medium">Medium</option>
+              <option value="hard">Hard</option>
+            </select>
+          </div>
+          <input id="new-riddle-category" type="text" placeholder="Category (e.g. object, nature, concept)"
+            style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px;font-family:'DM Sans',sans-serif;font-size:14px;color:var(--text);outline:none;" />
+          <input id="new-riddle-definition" type="text" placeholder="Short definition of the answer"
+            style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px;font-family:'DM Sans',sans-serif;font-size:14px;color:var(--text);outline:none;" />
+          <input id="new-riddle-synonyms" type="text" placeholder="Synonyms (comma separated)"
+            style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px;font-family:'DM Sans',sans-serif;font-size:14px;color:var(--text);outline:none;" />
+          <button onclick="addRiddle()" style="background:var(--accent);color:#000;border:none;border-radius:10px;padding:13px;font-family:'Syne',sans-serif;font-weight:700;font-size:14px;cursor:pointer;transition:all 0.2s;">Add Riddle</button>
+          <div id="riddle-msg" style="font-family:'DM Mono',monospace;font-size:12px;text-align:center;min-height:16px;"></div>
+        </div>
+      </div>
+
+      <!-- Riddle list with search -->
+      <div style="background:var(--card);border:1px solid var(--border);border-radius:16px;padding:20px;">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;">
+          <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:16px;flex:1;">📋 All Riddles</div>
+          <select id="filter-difficulty" onchange="loadRiddles()" style="background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:7px 10px;font-family:'DM Mono',monospace;font-size:11px;color:var(--text);outline:none;cursor:pointer;">
+            <option value="all">All</option>
+            <option value="easy">Easy</option>
+            <option value="medium">Medium</option>
+            <option value="hard">Hard</option>
+          </select>
+          <input id="search-riddles" type="text" placeholder="Search..." oninput="loadRiddles()"
+            style="background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:7px 12px;font-family:'DM Sans',sans-serif;font-size:13px;color:var(--text);outline:none;width:140px;" />
+        </div>
+        <div id="riddles-list" style="display:flex;flex-direction:column;gap:8px;max-height:400px;overflow-y:auto;"></div>
+      </div>
+    </div>
+
+    <!-- THEMES TAB -->
+    <div id="admin-themes" class="admin-panel" style="display:none;">
+      <div style="background:var(--card);border:1px solid var(--border);border-radius:16px;padding:20px;margin-bottom:16px;">
+        <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:16px;margin-bottom:16px;">➕ Add Words to Theme</div>
+        <div style="display:flex;flex-direction:column;gap:10px;">
+          <select id="theme-select" style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px;font-family:'DM Sans',sans-serif;font-size:14px;color:var(--text);outline:none;cursor:pointer;">
+            <option value="">Select theme...</option>
+          </select>
+          <textarea id="new-theme-words" placeholder="New words (comma separated)&#10;e.g. dolphin, coral, reef, tide" rows="3"
+            style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px;font-family:'DM Mono',monospace;font-size:13px;color:var(--text);resize:vertical;outline:none;"></textarea>
+          <button onclick="addThemeWords()" style="background:var(--accent);color:#000;border:none;border-radius:10px;padding:13px;font-family:'Syne',sans-serif;font-weight:700;font-size:14px;cursor:pointer;">Add Words</button>
+          <div id="theme-msg" style="font-family:'DM Mono',monospace;font-size:12px;text-align:center;min-height:16px;"></div>
+        </div>
+      </div>
+
+      <!-- Theme overview -->
+      <div style="background:var(--card);border:1px solid var(--border);border-radius:16px;padding:20px;">
+        <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:16px;margin-bottom:14px;">🎯 Theme Overview</div>
+        <div id="themes-overview" style="display:flex;flex-direction:column;gap:8px;"></div>
+      </div>
+    </div>
+
+    <!-- SCHEDULE TAB -->
+    <div id="admin-schedule" class="admin-panel" style="display:none;">
+      <div style="background:var(--card);border:1px solid var(--border);border-radius:16px;padding:20px;margin-bottom:16px;">
+        <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:16px;margin-bottom:16px;">📅 Generate Puzzle for Date</div>
+        <div style="display:flex;gap:10px;align-items:center;">
+          <input type="date" id="puzzle-date" style="flex:1;background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px;font-family:'DM Mono',monospace;font-size:14px;color:var(--text);outline:none;" />
+          <button onclick="generatePuzzleForDate()" style="background:var(--accent);color:#000;border:none;border-radius:10px;padding:13px 20px;font-family:'Syne',sans-serif;font-weight:700;font-size:14px;cursor:pointer;white-space:nowrap;">Generate</button>
+        </div>
+        <div id="schedule-msg" style="font-family:'DM Mono',monospace;font-size:12px;margin-top:10px;min-height:16px;"></div>
+      </div>
+
+      <!-- Upcoming puzzles -->
+      <div style="background:var(--card);border:1px solid var(--border);border-radius:16px;padding:20px;">
+        <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:16px;margin-bottom:14px;">🗓️ Recent & Upcoming Puzzles</div>
+        <div id="schedule-list" style="display:flex;flex-direction:column;gap:8px;max-height:400px;overflow-y:auto;"></div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
 <!-- ══════════════════════════════ SCRIPT ══════════════════════════════ -->
 <script>
 // ── SUPABASE INIT ──
@@ -713,6 +860,11 @@ const { createClient } = supabase;
 const SUPABASE_URL = 'https://kpqvhdzoxobacdlvjcnx.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtwcXZoZHpveG9iYWNkbHZqY254Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM2ODEzMzQsImV4cCI6MjA4OTI1NzMzNH0.CT9D2C4FroN7R7O-ijtCcIAJc63hcU0PJn-KE3G-7eQ';
 const db = createClient(SUPABASE_URL, SUPABASE_KEY);
+const ADMIN_USERNAME = 'morningstardeep';
+// Admin password stored as a SHA-256 hash — never stored as plaintext
+// To change password, generate new hash with: crypto.subtle.digest('SHA-256', ...)
+// Password is hashed with SHA-256 — actual password is never in source code
+const ADMIN_PASSWORD_HASH = 'a79748fb0bae49272a7ef9168652eec8417ee763b384b5c1e773519a9f07fabf';
 
 // ── STATE ──
 let state = {
@@ -1038,6 +1190,10 @@ function refreshHomeUI() {
     riddleCard.classList.remove('mode-solved');
     riddleBadge.textContent = 'Daily';
   }
+
+  // Show admin button only for admin user
+  const adminBtn = document.getElementById('admin-btn');
+  if (adminBtn) adminBtn.style.display = state.username === ADMIN_USERNAME ? 'block' : 'none';
 
   // Update theme card icon/desc
   if (state.dailyPuzzle?.theme) {
@@ -1893,6 +2049,277 @@ Play at: semantle-game.vercel.app`;
     // Fallback: show the text in a toast if clipboard also fails
     toast('Result copied! 📋', 'green');
   }
+}
+
+// ══════════════════════════════════════════════════
+// ADMIN PANEL
+// ══════════════════════════════════════════════════
+
+async function showAdmin() {
+  if (state.username !== ADMIN_USERNAME) return;
+  // Show password prompt first
+  document.getElementById('admin-password-input').value = '';
+  document.getElementById('admin-auth-err').textContent = '';
+  document.getElementById('admin-auth-overlay').style.display = 'flex';
+  setTimeout(() => document.getElementById('admin-password-input').focus(), 100);
+}
+
+function closeAdminAuth() {
+  document.getElementById('admin-auth-overlay').style.display = 'none';
+}
+
+async function verifyAdminPassword() {
+  const input = document.getElementById('admin-password-input').value;
+  const err   = document.getElementById('admin-auth-err');
+
+  if (!input) { err.textContent = 'Please enter the password.'; return; }
+
+  // Hash the input using SHA-256 and compare
+  const encoder = new TextEncoder();
+  const data     = encoder.encode(input);
+  const hashBuf  = await crypto.subtle.digest('SHA-256', data);
+  const hashArr  = Array.from(new Uint8Array(hashBuf));
+  const hashHex  = hashArr.map(b => b.toString(16).padStart(2, '0')).join('');
+
+  if (hashHex !== ADMIN_PASSWORD_HASH) {
+    err.textContent = 'Incorrect password.';
+    document.getElementById('admin-password-input').value = '';
+    document.getElementById('admin-password-input').focus();
+    // Shake effect
+    const input_el = document.getElementById('admin-password-input');
+    input_el.classList.add('shake');
+    setTimeout(() => input_el.classList.remove('shake'), 400);
+    return;
+  }
+
+  // Password correct — open admin panel
+  closeAdminAuth();
+  showScreen('admin-screen');
+  await loadAdminStats();
+  await loadRiddles();
+  await loadThemesOverview();
+  await loadSchedule();
+  document.getElementById('puzzle-date').value = new Date().toISOString().split('T')[0];
+}
+
+function switchAdminTab(tab, el) {
+  document.querySelectorAll('.admin-panel').forEach(p => p.style.display = 'none');
+  document.querySelectorAll('.admin-tab').forEach(t => {
+    t.style.borderColor = 'var(--border)';
+    t.style.background  = 'var(--card)';
+    t.style.color       = 'var(--secondary)';
+  });
+  document.getElementById('admin-' + tab).style.display = 'block';
+  el.style.borderColor = 'var(--accent)';
+  el.style.background  = 'var(--accent-glow)';
+  el.style.color       = 'var(--accent)';
+}
+
+// ── Stats ──
+async function loadAdminStats() {
+  const { data } = await db.from('riddles').select('difficulty');
+  if (!data) return;
+  const counts = { easy: 0, medium: 0, hard: 0 };
+  data.forEach(r => counts[r.difficulty]++);
+  document.getElementById('stat-easy').textContent   = counts.easy;
+  document.getElementById('stat-medium').textContent = counts.medium;
+  document.getElementById('stat-hard').textContent   = counts.hard;
+
+  const { data: themes } = await db.from('themes').select('id');
+  document.getElementById('stat-themes').textContent = themes?.length || 0;
+}
+
+// ── Riddles ──
+async function loadRiddles() {
+  const diff   = document.getElementById('filter-difficulty').value;
+  const search = document.getElementById('search-riddles').value.toLowerCase();
+
+  let query = db.from('riddles').select('*').order('difficulty').order('id');
+  if (diff !== 'all') query = query.eq('difficulty', diff);
+
+  const { data } = await query;
+  if (!data) return;
+
+  const filtered = search
+    ? data.filter(r => r.riddle_text.toLowerCase().includes(search) || r.answer.toLowerCase().includes(search))
+    : data;
+
+  const diffColors = { easy: 'var(--accent)', medium: '#ffaa00', hard: '#ef4444' };
+  const list = document.getElementById('riddles-list');
+  list.innerHTML = filtered.map(r => `
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px 14px;display:flex;gap:12px;align-items:flex-start;">
+      <span style="font-family:'DM Mono',monospace;font-size:10px;color:${diffColors[r.difficulty]};background:rgba(0,0,0,0.3);border:1px solid ${diffColors[r.difficulty]}33;padding:2px 7px;border-radius:6px;flex-shrink:0;margin-top:2px;text-transform:uppercase;">${r.difficulty}</span>
+      <div style="flex:1;min-width:0;">
+        <div style="font-size:13px;color:var(--text);line-height:1.5;margin-bottom:4px;">${r.riddle_text}</div>
+        <div style="font-family:'DM Mono',monospace;font-size:12px;color:${diffColors[r.difficulty]};">→ ${r.answer}</div>
+      </div>
+      <button onclick="deleteRiddle(${r.id})" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:16px;padding:2px;flex-shrink:0;" onmouseover="this.style.color='#ef4444'" onmouseout="this.style.color='var(--muted)'">🗑</button>
+    </div>
+  `).join('');
+
+  if (filtered.length === 0) {
+    list.innerHTML = '<div style="text-align:center;color:var(--muted);font-family:'DM Mono',monospace;font-size:13px;padding:20px;">No riddles found</div>';
+  }
+}
+
+async function addRiddle() {
+  const text  = document.getElementById('new-riddle-text').value.trim();
+  const answer = document.getElementById('new-riddle-answer').value.trim().toLowerCase();
+  const diff  = document.getElementById('new-riddle-difficulty').value;
+  const cat   = document.getElementById('new-riddle-category').value.trim();
+  const def   = document.getElementById('new-riddle-definition').value.trim();
+  const syns  = document.getElementById('new-riddle-synonyms').value.split(',').map(s => s.trim()).filter(Boolean);
+  const msg   = document.getElementById('riddle-msg');
+
+  if (!text || !answer) { msg.style.color = '#ef4444'; msg.textContent = 'Riddle text and answer are required.'; return; }
+
+  const { error } = await db.from('riddles').insert({
+    riddle_text: text, answer, difficulty: diff,
+    category: cat || null, definition: def || null,
+    synonyms: syns.length ? syns : null
+  });
+
+  if (error) { msg.style.color = '#ef4444'; msg.textContent = 'Error: ' + error.message; return; }
+
+  msg.style.color = 'var(--accent)';
+  msg.textContent = `✓ Riddle added! Answer: "${answer}"`;
+  document.getElementById('new-riddle-text').value = '';
+  document.getElementById('new-riddle-answer').value = '';
+  document.getElementById('new-riddle-category').value = '';
+  document.getElementById('new-riddle-definition').value = '';
+  document.getElementById('new-riddle-synonyms').value = '';
+  await loadAdminStats();
+  await loadRiddles();
+}
+
+async function deleteRiddle(id) {
+  showConfirm('Delete Riddle?', 'This riddle will be permanently removed.', 'Delete', async () => {
+    await db.from('riddles').delete().eq('id', id);
+    await loadAdminStats();
+    await loadRiddles();
+    toast('Riddle deleted', 'red');
+  }, '🗑️');
+}
+
+// ── Themes ──
+async function loadThemesOverview() {
+  const { data: themes } = await db.from('themes').select('*').order('theme_name');
+  if (!data) return;
+
+  // Populate select dropdown
+  const sel = document.getElementById('theme-select');
+  sel.innerHTML = '<option value="">Select theme...</option>' +
+    themes.map(t => `<option value="${t.id}">${t.theme_emoji} ${t.theme_name}</option>`).join('');
+
+  // Load usage counts
+  const { data: puzzles } = await db.from('daily_puzzles').select('theme_id');
+  const usageMap = {};
+  (puzzles || []).forEach(p => { usageMap[p.theme_id] = (usageMap[p.theme_id] || 0) + 1; });
+
+  const overview = document.getElementById('themes-overview');
+  overview.innerHTML = themes.map(t => {
+    const wordCount = (t.word_pool || []).length;
+    const used = usageMap[t.id] || 0;
+    const pct = Math.round(used / Math.max(wordCount, 1) * 100);
+    const barColor = pct > 70 ? '#ef4444' : pct > 40 ? '#ffaa00' : 'var(--accent)';
+    return `
+      <div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px 14px;">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px;">
+          <span style="font-size:18px;">${t.theme_emoji}</span>
+          <span style="font-family:'Syne',sans-serif;font-weight:600;font-size:15px;flex:1;">${t.theme_name}</span>
+          <span style="font-family:'DM Mono',monospace;font-size:11px;color:var(--muted);">${wordCount} words · used ${used}×</span>
+        </div>
+        <div style="height:4px;background:var(--border);border-radius:2px;overflow:hidden;">
+          <div style="height:100%;width:${Math.min(pct,100)}%;background:${barColor};border-radius:2px;transition:width 0.5s;"></div>
+        </div>
+      </div>`;
+  }).join('');
+}
+
+async function addThemeWords() {
+  const themeId = document.getElementById('theme-select').value;
+  const wordsRaw = document.getElementById('new-theme-words').value;
+  const msg = document.getElementById('theme-msg');
+
+  if (!themeId) { msg.style.color = '#ef4444'; msg.textContent = 'Please select a theme.'; return; }
+
+  const newWords = wordsRaw.split(',').map(w => w.trim().toLowerCase()).filter(Boolean);
+  if (!newWords.length) { msg.style.color = '#ef4444'; msg.textContent = 'Enter at least one word.'; return; }
+
+  // Fetch current pool and merge
+  const { data: theme } = await db.from('themes').select('word_pool').eq('id', themeId).single();
+  const existing = theme?.word_pool || [];
+  const merged = [...new Set([...existing, ...newWords])]; // deduplicate
+
+  const added = merged.length - existing.length;
+  const { error } = await db.from('themes').update({ word_pool: merged }).eq('id', themeId);
+
+  if (error) { msg.style.color = '#ef4444'; msg.textContent = 'Error: ' + error.message; return; }
+
+  msg.style.color = 'var(--accent)';
+  msg.textContent = `✓ Added ${added} new words (${merged.length - existing.length === 0 ? 'all were duplicates' : added + ' unique'})`;
+  document.getElementById('new-theme-words').value = '';
+  await loadThemesOverview();
+}
+
+// ── Schedule ──
+async function loadSchedule() {
+  const { data } = await db
+    .from('daily_puzzles')
+    .select(`date, theme_word, easy:easy_riddle_id(answer), medium:medium_riddle_id(answer), hard:hard_riddle_id(answer), theme:theme_id(theme_name,theme_emoji)`)
+    .order('date', { ascending: false })
+    .limit(14);
+
+  const list = document.getElementById('schedule-list');
+  if (!data || !data.length) {
+    list.innerHTML = '<div style="text-align:center;color:var(--muted);font-family:'DM Mono',monospace;font-size:13px;padding:20px;">No puzzles scheduled yet</div>';
+    return;
+  }
+
+  const today = new Date().toISOString().split('T')[0];
+  list.innerHTML = data.map(p => {
+    const isToday = p.date === today;
+    return `
+      <div style="background:var(--surface);border:1px solid ${isToday ? 'var(--accent)' : 'var(--border)'};border-radius:10px;padding:12px 14px;">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px;">
+          <span style="font-family:'DM Mono',monospace;font-size:12px;color:${isToday ? 'var(--accent)' : 'var(--muted)'};">${p.date}${isToday ? ' · TODAY' : ''}</span>
+          <span style="font-size:14px;">${p.theme?.theme_emoji || '🎯'}</span>
+          <span style="font-family:'DM Sans',sans-serif;font-size:13px;flex:1;">${p.theme?.theme_name || '?'} → <strong>${p.theme_word}</strong></span>
+          <button onclick="deletePuzzle('${p.date}')" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:14px;" onmouseover="this.style.color='#ef4444'" onmouseout="this.style.color='var(--muted)'">🗑</button>
+        </div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;">
+          <span style="font-family:'DM Mono',monospace;font-size:11px;color:var(--accent);background:var(--accent-glow);border:1px solid rgba(0,255,136,0.2);padding:2px 8px;border-radius:6px;">E: ${p.easy?.answer || '?'}</span>
+          <span style="font-family:'DM Mono',monospace;font-size:11px;color:#ffaa00;background:rgba(255,170,0,0.1);border:1px solid rgba(255,170,0,0.2);padding:2px 8px;border-radius:6px;">M: ${p.medium?.answer || '?'}</span>
+          <span style="font-family:'DM Mono',monospace;font-size:11px;color:#ef4444;background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.2);padding:2px 8px;border-radius:6px;">H: ${p.hard?.answer || '?'}</span>
+        </div>
+      </div>`;
+  }).join('');
+}
+
+async function generatePuzzleForDate() {
+  const date = document.getElementById('puzzle-date').value;
+  const msg  = document.getElementById('schedule-msg');
+  if (!date) { msg.style.color = '#ef4444'; msg.textContent = 'Please select a date.'; return; }
+
+  msg.style.color = 'var(--muted)';
+  msg.textContent = 'Generating...';
+
+  // Call the edge function
+  const { data, error } = await db.functions.invoke('daily-puzzle', { body: { date } });
+
+  if (error) { msg.style.color = '#ef4444'; msg.textContent = 'Error: ' + error.message; return; }
+
+  msg.style.color = 'var(--accent)';
+  msg.textContent = `✓ Puzzle generated for ${date}! Theme: ${data?.theme || '?'} → ${data?.theme_word || '?'}`;
+  await loadSchedule();
+}
+
+async function deletePuzzle(date) {
+  showConfirm('Delete Puzzle?', `Remove the puzzle scheduled for ${date}?`, 'Delete', async () => {
+    await db.from('daily_puzzles').delete().eq('date', date);
+    await loadSchedule();
+    toast('Puzzle deleted', 'red');
+  }, '🗑️');
 }
 
 // ── START ──
