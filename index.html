@@ -23,22 +23,22 @@
     --secondary: #718096;
     --radius: 12px;
     --radius-lg: 20px;
-    /* Fluid spacing scale */
-    --sp-xs:  clamp(4px,  1vw,  8px);
-    --sp-sm:  clamp(8px,  2vw,  12px);
-    --sp-md:  clamp(12px, 2.5vw, 20px);
-    --sp-lg:  clamp(16px, 3vw,  28px);
-    --sp-xl:  clamp(20px, 4vw,  40px);
-    /* Fluid font scale */
-    --fs-xs:  clamp(9px,  2vw,  11px);
-    --fs-sm:  clamp(11px, 2.5vw, 13px);
-    --fs-md:  clamp(13px, 3vw,  15px);
-    --fs-lg:  clamp(15px, 3.5vw, 17px);
-    --fs-xl:  clamp(18px, 4vw,  22px);
-    --fs-2xl: clamp(20px, 5vw,  28px);
-    --fs-3xl: clamp(24px, 7vw,  36px);
+    /* Spacing scale */
+    --sp-xs:  8px;
+    --sp-sm:  12px;
+    --sp-md:  20px;
+    --sp-lg:  28px;
+    --sp-xl:  40px;
+    /* Font scale — fixed on desktop, responsive on mobile */
+    --fs-xs:  11px;
+    --fs-sm:  13px;
+    --fs-md:  15px;
+    --fs-lg:  17px;
+    --fs-xl:  22px;
+    --fs-2xl: 28px;
+    --fs-3xl: 36px;
     /* Logo: never overflows on any device */
-    --fs-logo: clamp(28px, 8vw, 80px);
+    --fs-logo: 80px;
   }
 
   /* ══════════════════════════════════════════════════
@@ -107,11 +107,11 @@
   .username-card {
     background:var(--card); border:1px solid var(--border);
     border-radius:clamp(16px,3vw,24px);
-    padding: clamp(24px,5vw,48px) clamp(16px,5vw,40px);
+    padding: 48px 40px;
     max-width:420px; width:100%;
     text-align:center; animation:fadeUp 0.6s ease both;
   }
-  .username-icon { font-size: clamp(36px,8vw,52px); margin-bottom:var(--sp-md); }
+  .username-icon { font-size: 52px; margin-bottom: 20px; }
   .username-title {
     font-family:'Syne',sans-serif;
     font-size: var(--fs-2xl);
@@ -120,8 +120,8 @@
   .username-sub { color:var(--secondary); font-size:var(--fs-md); margin-bottom:var(--sp-xl); line-height:1.5; }
   .username-input {
     width:100%; background:var(--surface); border:1.5px solid var(--border);
-    border-radius:var(--radius); padding: clamp(10px,2.5vw,14px) clamp(12px,3vw,18px);
-    font-family:'DM Mono',monospace; font-size: clamp(14px,3.5vw,18px); color:var(--text);
+    border-radius:var(--radius); padding: 14px 18px;
+    font-family:'DM Mono',monospace; font-size: 18px; color:var(--text);
     outline:none; transition:border-color 0.2s,box-shadow 0.2s;
     text-align:center; letter-spacing:2px; margin-bottom:10px;
     text-transform: lowercase;
@@ -168,8 +168,8 @@
   /* ══════════════════════════════════════════════════
      HOME SCREEN
   ══════════════════════════════════════════════════ */
-  #home { align-items:center; justify-content:center; padding: var(--sp-xl) 16px; }
-  .home-inner { width:100%; max-width:480px; display:flex; flex-direction:column; align-items:center; gap:var(--sp-xl); }
+  #home { align-items:center; justify-content:center; padding: 40px 20px; }
+  .home-inner { width:100%; max-width:480px; display:flex; flex-direction:column; align-items:center; gap:40px; }
 
   /* User topbar */
   #user-topbar {
@@ -194,9 +194,9 @@
   .mode-card {
     background:var(--card); border:1px solid var(--border);
     border-radius:var(--radius-lg);
-    padding: clamp(14px,3vw,20px) clamp(14px,3.5vw,24px);
+    padding: 20px 24px;
     cursor:pointer; transition:all 0.2s; display:flex; align-items:center;
-    gap: clamp(10px,2.5vw,18px);
+    gap: 18px;
     position:relative; overflow:hidden; width:100%;
   }
   .mode-card::before {
@@ -207,8 +207,8 @@
   .mode-card:hover { border-color:var(--accent); transform:translateY(-2px); box-shadow:0 8px 32px rgba(0,255,136,0.1); }
   .mode-card:hover::before { opacity:1; }
   .mode-icon {
-    font-size: clamp(20px,4vw,26px);
-    width: clamp(40px,8vw,50px); height: clamp(40px,8vw,50px);
+    font-size: 26px;
+    width: 50px; height: 50px;
     background:var(--surface); border-radius:12px;
     display:flex; align-items:center; justify-content:center;
     flex-shrink:0; border:1px solid var(--border);
@@ -275,7 +275,7 @@
   /* ══════════════════════════════════════════════════
      GAME SCREEN
   ══════════════════════════════════════════════════ */
-  #game { flex-direction:column; max-width:600px; margin:0 auto; width:100%; padding:0 clamp(12px,3vw,16px) 80px; }
+  #game { flex-direction:column; max-width:600px; margin:0 auto; width:100%; padding:0 16px 80px; }
   .game-header {
     display:flex; align-items:center; justify-content:space-between;
     padding: clamp(14px,3vw,20px) 0 0; margin-bottom: clamp(14px,3vw,20px);
@@ -283,7 +283,7 @@
   }
   .back-btn {
     background:none; border:1px solid var(--border); color:var(--secondary);
-    padding: clamp(6px,1.5vw,8px) clamp(10px,2.5vw,16px);
+    padding: 8px 16px;
     border-radius:8px; cursor:pointer; font-family:'DM Sans',sans-serif;
     font-size:var(--fs-sm); transition:all 0.2s; flex-shrink:0;
   }
@@ -321,7 +321,7 @@
     display:flex; align-items:center; gap:6px;
   }
   .riddle-label::after { content:''; flex:1; height:1px; background:linear-gradient(to right,var(--accent-glow),transparent); }
-  .riddle-text { font-family:'Syne',sans-serif; font-size:clamp(14px,3.5vw,20px); font-weight:600; line-height:1.55; word-break:break-word; }
+  .riddle-text { font-family:'Syne',sans-serif; font-size:20px; font-weight:600; line-height:1.5; word-break:break-word; }
   .diff-pips { display:flex; gap:4px; margin-top:12px; }
   .pip { width:20px; height:4px; border-radius:2px; background:var(--border); }
   .pip.active { background:var(--accent); }
@@ -338,7 +338,7 @@
   .input-row { display:flex; gap:8px; margin-bottom:8px; animation:fadeUp 0.5s 0.15s ease both; }
   .guess-input {
     flex:1; background:var(--card); border:1.5px solid var(--border);
-    border-radius:var(--radius); padding: clamp(10px,2.5vw,14px) clamp(12px,3vw,18px);
+    border-radius:var(--radius); padding: 14px 18px;
     font-family:'DM Mono',monospace; font-size:clamp(14px,3.5vw,16px); color:var(--text);
     outline:none; transition:border-color 0.2s,box-shadow 0.2s; letter-spacing:0.5px;
     min-width:0;
@@ -347,7 +347,7 @@
   .guess-input::placeholder { color:var(--muted); }
   .submit-btn {
     background:var(--accent); color:#000; border:none; border-radius:var(--radius);
-    padding: clamp(10px,2.5vw,14px) clamp(14px,3vw,22px);
+    padding: 14px 22px;
     font-family:'Syne',sans-serif; font-weight:700; font-size:clamp(12px,3vw,14px);
     cursor:pointer; transition:all 0.2s; white-space:nowrap; letter-spacing:0.5px; flex-shrink:0;
   }
@@ -402,20 +402,20 @@
   .win-overlay.visible { display:flex; }
   .win-card {
     background:var(--card); border:1px solid var(--accent); border-radius:clamp(16px,3vw,24px);
-    padding: clamp(24px,5vw,40px) clamp(20px,4vw,40px);
+    padding: 40px;
     max-width:420px; width:100%; text-align:center;
     box-shadow:0 0 80px rgba(0,255,136,0.2); animation:popIn 0.5s cubic-bezier(0.34,1.56,0.64,1) both;
   }
-  .win-emoji { font-size:clamp(40px,10vw,56px); margin-bottom:var(--sp-md); }
+  .win-emoji { font-size:56px; margin-bottom:16px; }
   .win-title { font-family:'Syne',sans-serif; font-size:var(--fs-3xl); font-weight:800; color:var(--accent); margin-bottom:8px; letter-spacing:-1px; }
   .win-subtitle { color:var(--secondary); font-size:var(--fs-sm); margin-bottom:10px; }
-  .win-word { font-family:'DM Mono',monospace; font-size:clamp(16px,5vw,26px); color:var(--text); margin-bottom:var(--sp-lg); background:var(--surface); padding: clamp(8px,2vw,12px) clamp(16px,4vw,24px); border-radius:10px; display:inline-block; border:1px solid var(--border); max-width:100%; word-break:break-word; }
-  .win-stats { display:flex; gap: clamp(10px,3vw,20px); justify-content:center; margin-bottom:var(--sp-lg); }
+  .win-word { font-family:'DM Mono',monospace; font-size:26px; color:var(--text); margin-bottom:24px; background:var(--surface); padding:12px 24px; border-radius:10px; display:inline-block; border:1px solid var(--border); max-width:100%; word-break:break-word; }
+  .win-stats { display:flex; gap:20px; justify-content:center; margin-bottom:28px; }
   .win-stat { text-align:center; }
   .win-stat-num { font-family:'Syne',sans-serif; font-size:var(--fs-3xl); font-weight:700; color:var(--accent); }
   .win-stat-label { font-size:var(--fs-xs); color:var(--secondary); font-family:'DM Mono',monospace; text-transform:uppercase; letter-spacing:1px; }
   .win-actions { display:flex; flex-direction:column; gap:10px; }
-  .win-btn { padding: clamp(11px,2.5vw,14px); border-radius:12px; font-family:'Syne',sans-serif; font-weight:700; font-size:var(--fs-md); cursor:pointer; transition:all 0.2s; }
+  .win-btn { padding:14px; border-radius:12px; font-family:'Syne',sans-serif; font-weight:700; font-size:15px; cursor:pointer; transition:all 0.2s; }
   .win-btn.primary { background:var(--accent); border:none; color:#000; }
   .win-btn.primary:hover { box-shadow:0 0 20px rgba(0,255,136,0.4); }
   .win-btn.secondary { background:transparent; border:1px solid var(--border); color:var(--secondary); }
@@ -461,32 +461,74 @@
      (only for things clamp() alone can't handle)
   ══════════════════════════════════════════════════ */
 
-  /* Small phones — 360px and below */
-  @media (max-width: 360px) {
-    :root { --fs-logo: clamp(24px, 7vw, 32px); }
-    .mode-badge { display: none; }
-    .guess-heat { display: none; }
-    .game-mode-label { display: none; }
-  }
-
-  /* Mobile — 480px and below */
+  /* ── Mobile ≤ 480px ── */
   @media (max-width: 480px) {
+    :root {
+      --fs-logo: clamp(26px, 9vw, 44px);
+      --fs-xs:  10px; --fs-sm: 12px; --fs-md: 13px;
+      --fs-lg:  14px; --fs-xl: 18px; --fs-2xl: 22px; --fs-3xl: 26px;
+      --sp-xs: 4px; --sp-sm: 8px; --sp-md: 12px; --sp-lg: 16px; --sp-xl: 24px;
+    }
+    body, html { overflow-x: hidden; }
+    #home { padding: 24px 14px; }
+    .home-inner { gap: 20px; }
+    .logo-block { padding: 0 4px; }
+    .logo-title { letter-spacing: -1px; }
+    .logo-sub { font-size: 12px; }
+    .mode-card { padding: 14px 14px; gap: 12px; }
+    .mode-icon { width: 42px; height: 42px; font-size: 20px; }
+    .mode-name { font-size: 15px; }
+    .mode-desc { font-size: 12px; }
+    .stats-row { gap: 14px; }
+    .stat-num { font-size: 18px; }
     #user-topbar { top:10px; right:10px; gap:6px; }
     #user-topbar > div { padding:5px 10px 5px 6px; }
+    #user-topbar > div span:last-of-type { display:none; }
     #user-topbar button { width:30px !important; height:30px !important; font-size:13px !important; }
-    .win-stats { gap:10px; }
+    .username-card { padding: 28px 18px; border-radius: 18px; }
+    .username-icon { font-size: 40px; margin-bottom: 14px; }
+    .username-input { font-size: 15px; padding: 11px 14px; }
+    .username-btn { font-size: 15px; padding: 13px; }
+    #game { padding: 0 12px 80px; }
+    .game-header { padding: 14px 0 0; margin-bottom: 14px; }
+    .back-btn { padding: 7px 10px; font-size: 12px; }
+    .riddle-card { padding: 14px; }
+    .riddle-text { font-size: 15px; }
+    .guess-input { font-size: 14px; padding: 11px 12px; }
+    .submit-btn { padding: 11px 12px; font-size: 13px; }
+    .guess-item { padding: 10px 10px; gap: 7px; }
+    .guess-word { font-size: 13px; }
+    .guess-pct { font-size: 11px; min-width: 34px; }
+    .guess-heat { font-size: 11px; min-width: 50px; }
+    .hint-btn, .giveup-btn { padding: 5px 9px; font-size: 11px; }
+    .win-card { padding: 24px 18px; }
+    .win-emoji { font-size: 44px; }
+    .win-title { font-size: 26px; }
+    .win-word { font-size: 18px; padding: 10px 16px; }
+    .win-stat-num { font-size: 22px; }
+    .win-stats { gap: 12px; }
+    .lb-title { font-size: 22px; }
+    .lb-tab { padding: 6px 8px; font-size: 10px; letter-spacing: 0; }
+    .lb-row { padding: 9px 10px; gap: 8px; }
+    .lb-user { font-size: 12px; }
+    #end-screen > div { padding: 0 12px 40px; gap: 14px; }
     #admin-stats { grid-template-columns: 1fr 1fr !important; }
-    .lb-tabs { gap:4px; }
-    .lb-tab { letter-spacing:0; }
+    .diff-tab { font-size: 10px; padding: 8px 4px; letter-spacing: 0; }
+    .toast { max-width: 88vw; font-size: 11px; padding: 10px 14px; }
+    #leaderboard-screen { padding: 0 12px 40px; }
+    #landing > div { padding: clamp(20px,5vw,40px) 14px; gap: 20px; }
   }
 
-  /* Large screens — TV / 4K */
+  /* ── Tablet 481–768px ── */
+  @media (max-width: 768px) and (min-width: 481px) {
+    :root { --fs-logo: clamp(44px, 8vw, 72px); }
+    #user-topbar { top: 12px; right: 12px; }
+    .admin-tab { font-size: 11px; }
+  }
+
+  /* ── Large TV / 4K ── */
   @media (min-width: 1800px) {
-    :root {
-      --fs-logo: 100px;
-      --fs-xs:  13px; --fs-sm: 15px; --fs-md: 17px;
-      --fs-lg:  19px; --fs-xl: 24px; --fs-2xl: 32px; --fs-3xl: 42px;
-    }
+    :root { --fs-logo: 100px; }
     .home-inner, #game, #leaderboard-screen { max-width: 720px; }
   }
 </style>
