@@ -1875,109 +1875,64 @@ function browserLemmatize(word) {
 
   // Irregular forms — checked first
   const irregulars = {
-    'are':'be','were':'be','been':'be','being':'be','is':'be','was':'be','am':'be',
-    'ran':'run','running':'run',
-    'ate':'eat','eating':'eat','eaten':'eat',
-    'went':'go','going':'go','gone':'go',
-    'saw':'see','seen':'see','seeing':'see',
-    'took':'take','taken':'take','taking':'take',
-    'came':'come','coming':'come',
-    'knew':'know','known':'know','knowing':'know',
-    'grew':'grow','grown':'grow','growing':'grow',
-    'flew':'fly','flown':'fly','flying':'fly',
-    'drew':'draw','drawn':'draw','drawing':'draw',
-    'threw':'throw','thrown':'throw','throwing':'throw',
-    'broke':'break','broken':'break','breaking':'break',
-    'spoke':'speak','spoken':'speak','speaking':'speak',
-    'wrote':'write','written':'write','writing':'write',
-    'rode':'ride','ridden':'ride','riding':'ride',
-    'rose':'rise','risen':'rise','rising':'rise',
-    'gave':'give','given':'give','giving':'give',
-    'fell':'fall','fallen':'fall','falling':'fall',
-    'felt':'feel','feeling':'feel',
-    'left':'leave','leaving':'leave',
-    'kept':'keep','keeping':'keep',
-    'met':'meet','meeting':'meet',
+    // Irregular plurals → singular (autocorrected silently)
+    'children':'child','mice':'mouse','geese':'goose','men':'man','women':'woman',
+    'feet':'foot','teeth':'tooth','oxen':'ox','wolves':'wolf','leaves':'leaf',
+    'knives':'knife','lives':'life','wives':'wife','halves':'half',
+    'scarves':'scarf','loaves':'loaf','shelves':'shelf','elves':'elf',
+    'calves':'calf','hooves':'hoof','people':'person',
+    // -ing forms only (safe to normalize)
+    'running':'run','swimming':'swim','flying':'fly','going':'go',
+    'eating':'eat','seeing':'see','taking':'take','coming':'come',
+    'knowing':'know','growing':'grow','drawing':'draw','throwing':'throw',
+    'breaking':'break','speaking':'speak','writing':'write','riding':'ride',
+    'rising':'rise','giving':'give','falling':'fall','feeling':'feel',
+    'leaving':'leave','keeping':'keep','meeting':'meet',
     'sent':'send','sending':'send',
     'built':'build','building':'build',
-    'bought':'buy','buying':'buy',
-    'brought':'bring','bringing':'bring',
-    'caught':'catch','catching':'catch',
-    'taught':'teach','teaching':'teach',
-    'thought':'think','thinking':'think',
-    'fought':'fight','fighting':'fight',
-    'sought':'seek','seeking':'seek',
-    'found':'find','finding':'find',
-    'bound':'bind','binding':'bind',
-    'wound':'wind','winding':'wind',
-    'held':'hold','holding':'hold',
-    'told':'tell','telling':'tell',
-    'sold':'sell','selling':'sell',
-    'children':'child','mice':'mouse','geese':'goose',
-    'feet':'foot','teeth':'tooth','men':'man','women':'woman',
-    'people':'person','oxen':'ox','sheep':'sheep','fish':'fish',
-    'wolves':'wolf','leaves':'leaf','knives':'knife','lives':'life',
-    'wives':'wife','halves':'half','scarves':'scarf',
+    'sending':'send','building':'build','buying':'buy',
+    'bringing':'bring','catching':'catch','teaching':'teach',
+    'thinking':'think','fighting':'fight','seeking':'seek',
+    'finding':'find','holding':'hold','telling':'tell','selling':'sell',
+    // -ies plurals
     'cities':'city','countries':'country','families':'family',
-    'babies':'baby','bodies':'body','copies':'copy',
-    'stories':'story','parties':'party','libraries':'library',
-    'easier':'easy','easiest':'easy','harder':'hard','hardest':'hard',
-    'bigger':'big','biggest':'big','faster':'fast','fastest':'fast',
-    'slower':'slow','slowest':'slow','stronger':'strong','strongest':'strong',
-    'weaker':'weak','weakest':'weak','older':'old','oldest':'old',
-    'younger':'young','youngest':'young','better':'good','best':'good',
-    'worse':'bad','worst':'bad','more':'much','most':'much',
+    'babies':'baby','bodies':'body','stories':'story',
+    'parties':'party','copies':'copy','libraries':'library',
+    'flies':'fly','tries':'try','cries':'cry','dries':'dry',
   };
 
   if (irregulars[w]) return irregulars[w];
 
-  // Rule-based stripping (order matters)
-  const rules = [
-    // -ing: running→run, swimming→swim, writing→write
-    [/(.{3,})ing$/, (m, s) => {
-      if (s.endsWith(s[s.length-1]) && s.length > 3) return s.slice(0,-1); // swimming→swim
-      if (s.endsWith('e')) return s;                                          // writing→write (keep e stripped)
-      return s;                                                                // running→run
-    }],
-    // -ed: jumped→jump, stopped→stop, smiled→smile
-    [/(.{3,})ed$/, (m, s) => {
-      if (s.endsWith(s[s.length-1]) && s.length > 3) return s.slice(0,-1); // stopped→stop
-      if (!s.endsWith('e')) return s + 'e';                                  // smiled→smile — actually return s
-      return s;
-    }],
-    // -ies: flies→fly, tries→try
-    [/(.{2,})ies$/, (m, s) => s + 'y'],
-    // -es: boxes→box, watches→watch, fixes→fix
-    [/(.{3,})(ch|sh|ss|x|z)es$/, (m, s, end) => s + end],
-    // -s: cats→cat, dogs→dog (but not -ss, -us endings)
-    [/(.{2,}[^su])s$/, (m, s) => s],
-    // -er: teacher→teach, runner→run
-    [/(.{3,})er$/, (m, s) => s],
-    // -est: fastest→fast
-    [/(.{3,})est$/, (m, s) => s],
-    // -ly: quickly→quick
-    [/(.{3,})ly$/, (m, s) => s],
-    // -ness: darkness→dark
-    [/(.{3,})ness$/, (m, s) => s],
-    // -tion/-sion: creation→create
-    [/(.{3,})(a?tion|sion)$/, (m, s) => s],
-    // -ment: movement→move
-    [/(.{3,})ment$/, (m, s) => s],
-    // -ful: powerful→power
-    [/(.{3,})ful$/, (m, s) => s],
-    // -less: powerless→power
-    [/(.{3,})less$/, (m, s) => s],
-  ];
+  // Minimal rule-based suffix stripping — NO -er,-ly,-ness,-tion,-ment,-ful,-less
+  // Those cause computer->compute, function->func, darkness->dark etc.
 
-  for (const [pattern, fn] of rules) {
-    const match = w.match(pattern);
-    if (match) {
-      const result = fn(...match);
-      if (result && result.length >= 2 && result !== w) return result;
+  // -s: cats->cat, dogs->dog (not -ss, -us, -is)
+  if (/^.{3,}[^aeiouss]s$/.test(w)) return w.slice(0, -1);
+
+  // -es after sibilants: boxes->box, watches->watch
+  const esM = w.match(/^(.{3,}(?:ch|sh|ss|x|z))es$/);
+  if (esM) return esM[1];
+
+  // -ies: handled above but just in case
+  const iesM = w.match(/^(.{2,})ies$/);
+  if (iesM) return iesM[1] + 'y';
+
+  // -ing: jumping->jump (result must be >= 3 chars)
+  const ingM = w.match(/^(.{3,})ing$/);
+  if (ingM) {
+    const b = ingM[1];
+    if (b.length > 3 && b[b.length-1] === b[b.length-2]) {
+      const r = b.slice(0,-1);
+      if (r.length >= 3) return r;
     }
+    if (b.length >= 3) return b;
   }
 
-  return w; // return as-is if no rule matched
+  // -ed: jumped->jump
+  const edM = w.match(/^(.{3,})ed$/);
+  if (edM && edM[1].length >= 3) return edM[1];
+
+  return w;
 }
 
 // ── LAYER 2: Supabase smart processor ──
@@ -2107,27 +2062,27 @@ async function submitGuess() {
     return;
   }
 
-  // ── Fuzzy match detected — DON'T autocorrect, show suggestion instead ──
-  // If server corrected the word (watre→water, birght→bright), reject the guess
-  // and show "Did you mean X?" — user must type the correct spelling themselves
+  // ── Typo detected (corrected:true) — show "Did you mean?" suggestion, don't accept ──
+  // e.g. watre→water, birght→bright
   if (result.corrected && result.matched !== normalized) {
     showFeedback(`"${normalized}" is not in our dictionary`, 'error');
     showSuggestion(normalized, result.matched);
     input.classList.add('shake');
     setTimeout(() => input.classList.remove('shake'), 400);
-    input.value = normalized; // restore what they typed
+    input.value = normalized;
     return;
   }
 
-  // ── Valid word — proceed with guess ──
+  // ── Valid word (exact or silently normalized plural/inflection) ──
+  // corrected:false means: exact match, OR server did suffix stripping (dogs→dog)
+  // In both cases we silently accept and use result.matched as the display word
   hideSuggestion();
   clearFeedback();
 
-  // Use matched word (handles suffix stripping: dogs→dog, jumping→jump)
   const displayWord = result.matched || normalized;
 
-  // Duplicate check
-  const isDup = state.guesses.find(g => g.word === displayWord || g.word === normalized);
+  // Duplicate check — check both the display word and what was typed
+  const isDup = state.guesses.find(g => g.word === displayWord || g.typed === normalized);
   if (isDup) {
     showFeedback(`Already guessed "${isDup.word}"!`, 'error');
     input.classList.add('shake');
@@ -2135,10 +2090,16 @@ async function submitGuess() {
     return;
   }
 
+  // If silently normalized (dogs→dog), show a subtle note
+  if (result.matched !== normalized) {
+    showFeedback(`Scored as "${result.matched}"`, 'suggest');
+    setTimeout(() => clearFeedback(), 2000);
+  }
+
   state.guesses.push({
     word:       displayWord,
     typed:      normalized,
-    corrected:  false,        // no silent correction — word was typed correctly
+    corrected:  result.matched !== normalized,
     similarity: result.similarity
   });
   state.guesses.sort((a, b) => b.similarity - a.similarity);
