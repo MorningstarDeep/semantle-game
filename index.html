@@ -388,21 +388,136 @@
   <div class="loader-text" id="loader-text">Connecting...</div>
 </div>
 
+<!-- ══════════ LANDING PAGE ══════════ -->
+<div id="landing" class="screen">
+  <div style="max-width:520px;margin:0 auto;width:100%;padding:40px 20px;display:flex;flex-direction:column;align-items:center;gap:36px;min-height:100vh;justify-content:center;">
+
+    <!-- Logo -->
+    <div style="text-align:center;animation:fadeUp 0.8s ease both;">
+      <div style="font-family:'DM Mono',monospace;font-size:11px;letter-spacing:3px;text-transform:uppercase;color:var(--accent);margin-bottom:12px;opacity:0.8;">Word × Meaning</div>
+      <div style="font-family:'Syne',sans-serif;font-size:clamp(52px,12vw,80px);font-weight:800;letter-spacing:-3px;line-height:1;background:linear-gradient(135deg,#fff 40%,var(--accent) 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">Semantle</div>
+      <div style="font-size:15px;color:var(--secondary);margin-top:14px;font-weight:300;">Guess the word — not by spelling, but by meaning.</div>
+    </div>
+
+    <!-- Random mode — open to all -->
+    <div style="width:100%;animation:fadeUp 0.8s 0.1s ease both;">
+      <div style="font-family:'DM Mono',monospace;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);text-align:center;margin-bottom:12px;">Play instantly — no account needed</div>
+      <div class="mode-card" onclick="startGame('random','random')" style="border-color:var(--accent);background:linear-gradient(135deg,rgba(0,255,136,0.06),var(--card));">
+        <div class="mode-icon" style="font-size:32px;border:none;background:transparent;">♾️</div>
+        <div class="mode-info">
+          <div class="mode-name">Random Mode</div>
+          <div class="mode-desc">Unlimited practice. Any word, any time. No pressure.</div>
+        </div>
+        <div style="font-family:'DM Mono',monospace;font-size:11px;color:var(--accent);background:var(--accent-glow);border:1px solid rgba(0,255,136,0.3);padding:4px 10px;border-radius:20px;">Free</div>
+      </div>
+    </div>
+
+    <!-- Divider with members section -->
+    <div style="width:100%;animation:fadeUp 0.8s 0.2s ease both;">
+      <div style="display:flex;align-items:center;gap:14px;margin-bottom:16px;">
+        <div style="flex:1;height:1px;background:var(--border);"></div>
+        <div style="font-family:'DM Mono',monospace;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);white-space:nowrap;">Members only</div>
+        <div style="flex:1;height:1px;background:var(--border);"></div>
+      </div>
+
+      <!-- Locked modes preview -->
+      <div style="background:var(--card);border:1px solid var(--border);border-radius:var(--radius-lg);padding:20px;position:relative;overflow:hidden;">
+        <!-- Blurred locked content -->
+        <div style="display:flex;flex-direction:column;gap:10px;filter:blur(1px);opacity:0.5;pointer-events:none;user-select:none;">
+          <div style="display:flex;align-items:center;gap:14px;padding:12px;background:var(--surface);border-radius:12px;">
+            <div style="font-size:24px;width:44px;height:44px;background:var(--card);border-radius:12px;display:flex;align-items:center;justify-content:center;border:1px solid var(--border);">🎭</div>
+            <div><div style="font-family:'Syne',sans-serif;font-weight:700;font-size:15px;">Daily Riddle</div><div style="font-size:12px;color:var(--secondary);">Streaks · Leaderboard · 3 difficulties</div></div>
+          </div>
+          <div style="display:flex;align-items:center;gap:14px;padding:12px;background:var(--surface);border-radius:12px;">
+            <div style="font-size:24px;width:44px;height:44px;background:var(--card);border-radius:12px;display:flex;align-items:center;justify-content:center;border:1px solid var(--border);">🌊</div>
+            <div><div style="font-family:'Syne',sans-serif;font-weight:700;font-size:15px;">Daily Theme</div><div style="font-size:12px;color:var(--secondary);">New theme every day · Track your progress</div></div>
+          </div>
+        </div>
+        <!-- Lock overlay -->
+        <div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;background:rgba(8,11,15,0.6);backdrop-filter:blur(2px);border-radius:var(--radius-lg);">
+          <div style="font-size:32px;">🔒</div>
+          <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:16px;text-align:center;">Sign in to unlock</div>
+          <div style="font-size:13px;color:var(--secondary);text-align:center;max-width:240px;">Daily riddles, themes, leaderboards and streaks — all free.</div>
+          <div style="display:flex;gap:10px;margin-top:4px;">
+            <button onclick="showScreen('login-screen')" style="background:var(--accent);color:#000;border:none;border-radius:10px;padding:11px 22px;font-family:'Syne',sans-serif;font-weight:700;font-size:14px;cursor:pointer;transition:all 0.2s;">Log In</button>
+            <button onclick="showScreen('register-screen')" style="background:transparent;border:1.5px solid var(--accent);color:var(--accent);border-radius:10px;padding:11px 22px;font-family:'Syne',sans-serif;font-weight:700;font-size:14px;cursor:pointer;transition:all 0.2s;">Register</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
 <!-- ══════════ LOGIN SCREEN ══════════ -->
-<div id="username-screen" class="screen">
-  <div class="username-card">
-    <div class="username-icon" id="login-icon">👤</div>
-    <div class="username-title" id="login-title">Welcome to Semantle</div>
-    <div class="username-sub" id="login-sub">Enter your username to play. If you've played before, your progress will be restored.</div>
-    <input type="text" class="username-input" id="username-input" placeholder="your_name" maxlength="15"
-      onkeydown="if(event.key==='Enter') saveUsername()"
-      oninput="this.value=this.value.toLowerCase()"
-      autocomplete="off" spellcheck="false" />
-    <div class="username-rules">3–15 characters · letters, numbers, underscores only</div>
-    <button class="username-btn" id="login-btn" onclick="saveUsername()">Continue →</button>
-    <div class="username-err" id="username-err"></div>
-    <!-- Status indicator shown while checking -->
-    <div id="login-status" style="margin-top:14px;font-family:'DM Mono',monospace;font-size:12px;color:var(--muted);min-height:16px;"></div>
+<div id="login-screen" class="screen">
+  <div style="max-width:420px;margin:0 auto;width:100%;padding:40px 20px;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;">
+    <div class="username-card" style="width:100%;">
+      <div class="username-icon">👤</div>
+      <div class="username-title">Welcome Back</div>
+      <div class="username-sub">Log in to access your streaks and daily puzzles.</div>
+      <input type="text" class="username-input" id="login-username" placeholder="username" maxlength="15"
+        oninput="this.value=this.value.toLowerCase()" autocomplete="off" spellcheck="false"
+        onkeydown="if(event.key==='Enter') document.getElementById('login-password').focus()" style="margin-bottom:10px;" />
+      <input type="password" class="username-input" id="login-password" placeholder="password"
+        onkeydown="if(event.key==='Enter') doLogin()" style="margin-bottom:12px;letter-spacing:2px;" />
+      <button class="username-btn" onclick="doLogin()">Log In →</button>
+      <div class="username-err" id="login-err"></div>
+      <div id="login-status-msg" style="margin-top:12px;font-family:'DM Mono',monospace;font-size:12px;color:var(--muted);min-height:16px;text-align:center;"></div>
+      <div style="margin-top:20px;font-size:13px;color:var(--secondary);text-align:center;">
+        No account? <span onclick="showScreen('register-screen')" style="color:var(--accent);cursor:pointer;font-weight:600;">Register here</span>
+      </div>
+      <div style="margin-top:10px;font-size:13px;color:var(--secondary);text-align:center;">
+        <span onclick="showScreen('landing')" style="color:var(--muted);cursor:pointer;">← Back to landing</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════ REGISTER SCREEN ══════════ -->
+<div id="register-screen" class="screen">
+  <div style="max-width:420px;margin:0 auto;width:100%;padding:40px 20px;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;">
+    <div class="username-card" style="width:100%;">
+      <div class="username-icon">✨</div>
+      <div class="username-title">Create Account</div>
+      <div class="username-sub">Pick a username and password. Your progress is tied to your account.</div>
+      <input type="text" class="username-input" id="reg-username" placeholder="username (3–15 chars)" maxlength="15"
+        oninput="this.value=this.value.toLowerCase()" autocomplete="off" spellcheck="false"
+        onkeydown="if(event.key==='Enter') document.getElementById('reg-password').focus()" style="margin-bottom:10px;" />
+      <input type="password" class="username-input" id="reg-password" placeholder="password (min 6 chars)"
+        onkeydown="if(event.key==='Enter') document.getElementById('reg-confirm').focus()" style="margin-bottom:10px;letter-spacing:2px;" />
+      <input type="password" class="username-input" id="reg-confirm" placeholder="confirm password"
+        onkeydown="if(event.key==='Enter') doRegister()" style="margin-bottom:12px;letter-spacing:2px;" />
+      <div class="username-rules">Username: 3–15 chars, lowercase letters/numbers/underscores</div>
+      <button class="username-btn" onclick="doRegister()">Create Account →</button>
+      <div class="username-err" id="reg-err"></div>
+      <div id="reg-status" style="margin-top:12px;font-family:'DM Mono',monospace;font-size:12px;color:var(--muted);min-height:16px;text-align:center;"></div>
+      <div style="margin-top:20px;font-size:13px;color:var(--secondary);text-align:center;">
+        Already have an account? <span onclick="showScreen('login-screen')" style="color:var(--accent);cursor:pointer;font-weight:600;">Log in</span>
+      </div>
+      <div style="margin-top:10px;font-size:13px;color:var(--secondary);text-align:center;">
+        <span onclick="showScreen('landing')" style="color:var(--muted);cursor:pointer;">← Back to landing</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════ CHANGE PASSWORD MODAL ══════════ -->
+<div id="change-password-overlay" style="display:none;position:fixed;inset:0;background:rgba(8,11,15,0.92);z-index:150;align-items:center;justify-content:center;backdrop-filter:blur(8px);">
+  <div class="username-card" style="animation:popIn 0.4s cubic-bezier(0.34,1.56,0.64,1) both;max-width:400px;width:90%;">
+    <div class="username-icon">🔑</div>
+    <div class="username-title">Change Password</div>
+    <div class="username-sub">Enter your current password then choose a new one.</div>
+    <input type="password" class="username-input" id="cp-current" placeholder="Current password"
+      style="margin-bottom:10px;letter-spacing:2px;" />
+    <input type="password" class="username-input" id="cp-new" placeholder="New password (min 6 chars)"
+      style="margin-bottom:10px;letter-spacing:2px;" />
+    <input type="password" class="username-input" id="cp-confirm" placeholder="Confirm new password"
+      onkeydown="if(event.key==='Enter') submitChangePassword()"
+      style="margin-bottom:12px;letter-spacing:2px;" />
+    <button class="username-btn" onclick="submitChangePassword()">Update Password →</button>
+    <div class="username-err" id="cp-err"></div>
+    <button onclick="closeChangePasswordModal()" style="margin-top:14px;background:none;border:none;color:var(--muted);font-family:'DM Mono',monospace;font-size:12px;cursor:pointer;letter-spacing:1px;">Cancel</button>
   </div>
 </div>
 
@@ -442,6 +557,10 @@
         style="background:var(--card);border:1px solid var(--border);color:var(--secondary);width:36px;height:36px;border-radius:50%;cursor:pointer;font-size:15px;transition:all 0.2s;display:flex;align-items:center;justify-content:center;"
         onmouseover="this.style.borderColor='var(--accent)';this.style.color='var(--accent)'"
         onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--secondary)'">✎</button>
+      <button onclick="openChangePasswordModal()" title="Change password"
+        style="background:var(--card);border:1px solid var(--border);color:var(--secondary);width:36px;height:36px;border-radius:50%;cursor:pointer;font-size:15px;transition:all 0.2s;display:flex;align-items:center;justify-content:center;"
+        onmouseover="this.style.borderColor='var(--accent)';this.style.color='var(--accent)'"
+        onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--secondary)'">🔑</button>
       <button onclick="logOut()" title="Log out"
         style="background:var(--card);border:1px solid var(--border);color:var(--secondary);width:36px;height:36px;border-radius:50%;cursor:pointer;font-size:15px;transition:all 0.2s;display:flex;align-items:center;justify-content:center;"
         onmouseover="this.style.borderColor='#ef4444';this.style.color='#ef4444'"
@@ -826,6 +945,36 @@
         </div>
       </div>
 
+      <!-- Add new theme -->
+      <div style="background:var(--card);border:1px solid var(--border);border-radius:16px;padding:20px;margin-bottom:16px;">
+        <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:16px;margin-bottom:16px;">🆕 Add New Theme</div>
+        <div style="display:flex;flex-direction:column;gap:10px;">
+          <div style="display:flex;gap:10px;">
+            <input id="new-theme-emoji" type="text" placeholder="Emoji (e.g. 🏔️)" maxlength="4"
+              style="width:80px;background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px;font-size:20px;color:var(--text);outline:none;text-align:center;" />
+            <input id="new-theme-name" type="text" placeholder="Theme name (e.g. Mountains)"
+              style="flex:1;background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px;font-family:'DM Sans',sans-serif;font-size:14px;color:var(--text);outline:none;" />
+          </div>
+          <textarea id="new-theme-wordpool" placeholder="Initial words (comma separated)&#10;e.g. peak, summit, glacier, avalanche, ridge" rows="3"
+            style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px;font-family:'DM Mono',monospace;font-size:13px;color:var(--text);resize:vertical;outline:none;"></textarea>
+          <button onclick="addNewTheme()" style="background:var(--accent);color:#000;border:none;border-radius:10px;padding:13px;font-family:'Syne',sans-serif;font-weight:700;font-size:14px;cursor:pointer;">Create Theme</button>
+          <div id="new-theme-msg" style="font-family:'DM Mono',monospace;font-size:12px;text-align:center;min-height:16px;"></div>
+        </div>
+      </div>
+
+      <!-- Change admin panel password -->
+      <div style="background:var(--card);border:1px solid rgba(255,170,0,0.2);border-radius:16px;padding:20px;margin-bottom:16px;">
+        <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:16px;margin-bottom:16px;">🔐 Change Admin Panel Password</div>
+        <div style="display:flex;flex-direction:column;gap:10px;">
+          <input type="password" id="admin-new-pw" placeholder="New admin panel password"
+            style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px;font-family:'DM Mono',monospace;font-size:14px;color:var(--text);outline:none;letter-spacing:2px;" />
+          <input type="password" id="admin-confirm-pw" placeholder="Confirm new password"
+            style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px;font-family:'DM Mono',monospace;font-size:14px;color:var(--text);outline:none;letter-spacing:2px;" />
+          <button onclick="changeAdminPassword()" style="background:#ffaa00;color:#000;border:none;border-radius:10px;padding:13px;font-family:'Syne',sans-serif;font-weight:700;font-size:14px;cursor:pointer;">Update Admin Password</button>
+          <div id="admin-pw-msg" style="font-family:'DM Mono',monospace;font-size:12px;text-align:center;min-height:16px;"></div>
+        </div>
+      </div>
+
       <!-- Theme overview -->
       <div style="background:var(--card);border:1px solid var(--border);border-radius:16px;padding:20px;">
         <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:16px;margin-bottom:14px;">🎯 Theme Overview</div>
@@ -995,24 +1144,34 @@ function toast(msg, type = '') {
   toastTimer = setTimeout(() => t.classList.remove('show'), 2800);
 }
 
+// ── HELPERS ──
+function setLoaderText(t) { document.getElementById('loader-text').textContent = t; }
+
+async function hashPassword(password) {
+  const encoder = new TextEncoder();
+  const data = encoder.encode(password);
+  const hashBuf = await crypto.subtle.digest('SHA-256', data);
+  return Array.from(new Uint8Array(hashBuf)).map(b => b.toString(16).padStart(2,'0')).join('');
+}
+
+function generateSessionToken() {
+  const arr = new Uint8Array(32);
+  crypto.getRandomValues(arr);
+  return Array.from(arr).map(b => b.toString(16).padStart(2,'0')).join('');
+}
+
 // ── INIT ──
 async function init() {
   setLoaderText('Loading...');
-  const stored = localStorage.getItem('semantle_username');
+  const storedToken    = localStorage.getItem('semantle_token');
+  const storedUsername = localStorage.getItem('semantle_username');
 
-  if (stored) {
-    setLoaderText('Verifying account...');
-
-    // Always verify the user actually exists in Supabase
-    const { data: existsInDB } = await db
-      .from('users')
-      .select('username')
-      .eq('username', stored)
-      .single();
-
-    if (existsInDB) {
-      // User confirmed in DB — load normally
-      state.username = stored;
+  if (storedToken && storedUsername) {
+    setLoaderText('Verifying session...');
+    const { data: session } = await db.from('sessions')
+      .select('username').eq('token', storedToken).eq('username', storedUsername).single();
+    if (session) {
+      state.username = storedUsername;
       setLoaderText('Fetching your stats...');
       await loadUserStats();
       setLoaderText("Loading today's puzzle...");
@@ -1020,106 +1179,120 @@ async function init() {
       setLoaderText('Ready!');
       setTimeout(() => { showScreen('home'); refreshHomeUI(); }, 600);
     } else {
-      // User was deleted from DB — recreate their account automatically
-      setLoaderText('Restoring account...');
-      const { error } = await db
-        .from('users')
-        .insert({ username: stored, streak: 0, best_streak: 0, total_solved: 0 });
-
-      if (!error) {
-        state.username = stored;
-        await loadUserStats();
-        await loadDailyPuzzle();
-        setTimeout(() => {
-          showScreen('home');
-          refreshHomeUI();
-          toast('Account restored — welcome back, ' + stored + '!', 'green');
-        }, 600);
-      } else {
-        // Could not recreate — clear and send to login
-        localStorage.removeItem('semantle_username');
-        setTimeout(() => showScreen('username-screen'), 1200);
-      }
+      localStorage.removeItem('semantle_token');
+      localStorage.removeItem('semantle_username');
+      setTimeout(() => showScreen('landing'), 800);
     }
   } else {
-    setTimeout(() => showScreen('username-screen'), 1200);
+    setTimeout(() => showScreen('landing'), 800);
   }
 }
 
-function setLoaderText(t) { document.getElementById('loader-text').textContent = t; }
+// ── REGISTER ──
+async function doRegister() {
+  const username = document.getElementById('reg-username').value.trim().toLowerCase();
+  const password = document.getElementById('reg-password').value;
+  const confirm  = document.getElementById('reg-confirm').value;
+  const err      = document.getElementById('reg-err');
+  const status   = document.getElementById('reg-status');
+  err.textContent = ''; status.textContent = '';
 
-// ── LOGIN (handles both new + returning users) ──
-async function saveUsername() {
-  const val = document.getElementById('username-input').value.trim().toLowerCase();
-  const err = document.getElementById('username-err');
-  const status = document.getElementById('login-status');
-  err.textContent = '';
-  status.textContent = '';
+  if (!/^[a-z0-9_]{3,15}$/.test(username)) { err.textContent = '3–15 chars. Lowercase letters, numbers, underscores only.'; return; }
+  if (password.length < 6) { err.textContent = 'Password must be at least 6 characters.'; return; }
+  if (password !== confirm) { err.textContent = 'Passwords do not match.'; return; }
 
-  if (!/^[a-z0-9_]{3,15}$/.test(val)) {
-    err.textContent = '3–15 characters. Lowercase letters, numbers, underscores only.';
-    return;
-  }
+  status.textContent = 'Checking username...';
+  const { data: existing } = await db.from('users').select('username').eq('username', username).single();
+  if (existing) { err.textContent = 'Username already taken. Try another.'; status.textContent = ''; return; }
 
-  status.textContent = 'Checking...';
-  const btn = document.getElementById('login-btn');
-  btn.disabled = true; btn.textContent = 'Please wait...';
+  status.textContent = 'Creating account...';
+  const hash = await hashPassword(password);
+  const { error } = await db.from('users').insert({ username, password_hash: hash, streak: 0, best_streak: 0, total_solved: 0 });
+  if (error) { err.textContent = 'Error creating account. Try again.'; status.textContent = ''; return; }
+  await createSession(username);
+}
 
-  // Check if user already exists
-  const { data: existing } = await db.from('users').select('*').eq('username', val).single();
+// ── LOGIN ──
+async function doLogin() {
+  const username = document.getElementById('login-username').value.trim().toLowerCase();
+  const password = document.getElementById('login-password').value;
+  const err      = document.getElementById('login-err');
+  const status   = document.getElementById('login-status-msg');
+  err.textContent = ''; status.textContent = '';
 
-  if (existing) {
-    // Returning user — load their account
-    status.textContent = '✓ Account found! Loading your progress...';
-    state.username = val;
-    localStorage.setItem('semantle_username', val);
-    await loadUserStats();
-    await loadDailyPuzzle();
-    btn.disabled = false; btn.textContent = 'Continue →';
-    document.getElementById('username-input').value = '';
-    showScreen('home');
-    refreshHomeUI();
-    toast('Welcome back, ' + val + '! 👋', 'green');
-  } else {
-    // New user — create account
-    status.textContent = 'Creating your account...';
-    const { error } = await db.from('users').insert({ username: val, streak: 0, best_streak: 0, total_solved: 0 });
-    if (error) {
-      err.textContent = 'Error creating account. Try again.';
-      status.textContent = '';
-      btn.disabled = false; btn.textContent = 'Continue →';
-      return;
-    }
-    state.username = val;
-    localStorage.setItem('semantle_username', val);
-    await loadUserStats();
-    await loadDailyPuzzle();
-    btn.disabled = false; btn.textContent = 'Continue →';
-    document.getElementById('username-input').value = '';
-    showScreen('home');
-    refreshHomeUI();
-    toast('Welcome, ' + val + '! 👋', 'green');
-  }
+  if (!username || !password) { err.textContent = 'Please enter username and password.'; return; }
+
+  status.textContent = 'Verifying...';
+  const { data: user } = await db.from('users').select('username, password_hash').eq('username', username).single();
+  if (!user) { err.textContent = 'Username not found.'; status.textContent = ''; return; }
+  if (!user.password_hash) { err.textContent = 'This account has no password. Please register a new account.'; status.textContent = ''; return; }
+
+  const hash = await hashPassword(password);
+  if (hash !== user.password_hash) { err.textContent = 'Incorrect password.'; status.textContent = ''; return; }
+  await createSession(username);
+}
+
+// ── CREATE SESSION ──
+async function createSession(username) {
+  const token = generateSessionToken();
+  await db.from('sessions').insert({ token, username });
+  localStorage.setItem('semantle_token', token);
+  localStorage.setItem('semantle_username', username);
+  state.username = username;
+  await loadUserStats();
+  await loadDailyPuzzle();
+  ['login-username','login-password','reg-username','reg-password','reg-confirm'].forEach(id => {
+    const el = document.getElementById(id); if (el) el.value = '';
+  });
+  showScreen('home');
+  refreshHomeUI();
+  toast('Welcome, ' + username + '! 👋', 'green');
 }
 
 // ── LOGOUT ──
 function logOut() {
-  showConfirm('Log out?', 'You can log back in anytime with your username.', 'Log Out', () => {
+  showConfirm('Log out?', 'You can log back in anytime with your username and password.', 'Log Out', async () => {
+    const token = localStorage.getItem('semantle_token');
+    if (token) await db.from('sessions').delete().eq('token', token);
+    localStorage.removeItem('semantle_token');
     localStorage.removeItem('semantle_username');
-  state.username = null;
-  state.userStats = { streak: 0, best_streak: 0, total_solved: 0 };
-  state.todaySolved = {};
-  // Reset login screen to default state
-  document.getElementById('login-icon').textContent = '👤';
-  document.getElementById('login-title').textContent = 'Welcome to Semantle';
-  document.getElementById('login-sub').textContent = 'Enter your username to play. If you\'ve played before, your progress will be restored.';
-  document.getElementById('login-btn').textContent = 'Continue →';
-  document.getElementById('username-input').value = '';
-  document.getElementById('username-err').textContent = '';
-  document.getElementById('login-status').textContent = '';
-    showScreen('username-screen');
+    state.username = null;
+    state.userStats = { streak: 0, best_streak: 0, total_solved: 0 };
+    state.todaySolved = {}; state.todayGaveUp = {}; state.todayResults = {};
+    showScreen('landing');
     toast('Logged out. See you soon!');
   });
+}
+
+// ── CHANGE PASSWORD ──
+function openChangePasswordModal() {
+  ['cp-current','cp-new','cp-confirm'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('cp-err').textContent = '';
+  document.getElementById('change-password-overlay').style.display = 'flex';
+  setTimeout(() => document.getElementById('cp-current').focus(), 100);
+}
+
+function closeChangePasswordModal() {
+  document.getElementById('change-password-overlay').style.display = 'none';
+}
+
+async function submitChangePassword() {
+  const current = document.getElementById('cp-current').value;
+  const newPw   = document.getElementById('cp-new').value;
+  const confirm = document.getElementById('cp-confirm').value;
+  const err     = document.getElementById('cp-err');
+  err.textContent = '';
+  if (!current || !newPw || !confirm) { err.textContent = 'All fields are required.'; return; }
+  if (newPw.length < 6) { err.textContent = 'New password must be at least 6 characters.'; return; }
+  if (newPw !== confirm) { err.textContent = 'Passwords do not match.'; return; }
+  const { data: user } = await db.from('users').select('password_hash').eq('username', state.username).single();
+  const currentHash = await hashPassword(current);
+  if (!user || currentHash !== user.password_hash) { err.textContent = 'Current password is incorrect.'; return; }
+  const newHash = await hashPassword(newPw);
+  const { error } = await db.from('users').update({ password_hash: newHash }).eq('username', state.username);
+  if (error) { err.textContent = 'Error updating password. Try again.'; return; }
+  closeChangePasswordModal();
+  toast('Password updated! ✓', 'green');
 }
 
 // ── RENAME MODAL ──
@@ -1299,6 +1472,13 @@ function refreshHomeUI() {
 // ── START GAME ──
 async function startGame(mode, difficulty) {
   const ptype = mode === 'theme' ? 'theme' : difficulty;
+
+  // Riddle and Theme require login
+  if (mode !== 'random' && !state.username) {
+    showScreen('login-screen');
+    toast('Please log in to play Riddle and Theme modes.', '');
+    return;
+  }
 
   // For daily modes, check if already played today
   if (mode !== 'random') {
@@ -2174,11 +2354,15 @@ async function verifyAdminPassword() {
   const hashArr  = Array.from(new Uint8Array(hashBuf));
   const hashHex  = hashArr.map(b => b.toString(16).padStart(2, '0')).join('');
 
-  if (hashHex !== ADMIN_PASSWORD_HASH) {
+  // Load current hash from DB (supports dynamic password change)
+  const { data: setting } = await db.from('settings')
+    .select('value').eq('key', 'admin_panel_password_hash').single();
+  const currentHash = setting?.value || ADMIN_PASSWORD_HASH;
+
+  if (hashHex !== currentHash) {
     err.textContent = 'Incorrect password.';
     document.getElementById('admin-password-input').value = '';
     document.getElementById('admin-password-input').focus();
-    // Shake effect
     const input_el = document.getElementById('admin-password-input');
     input_el.classList.add('shake');
     setTimeout(() => input_el.classList.remove('shake'), 400);
@@ -2545,6 +2729,67 @@ async function bulkAddThemeWords() {
   msg.textContent = `✅ Added ${added} new words! (${newWords.length - added} were duplicates)`;
   document.getElementById('bulk-theme-words').value = '';
   await loadThemesOverview();
+}
+
+// ── ADD NEW THEME ──
+async function addNewTheme() {
+  const emoji = document.getElementById('new-theme-emoji').value.trim();
+  const name  = document.getElementById('new-theme-name').value.trim();
+  const words = document.getElementById('new-theme-wordpool').value;
+  const msg   = document.getElementById('new-theme-msg');
+  msg.textContent = '';
+
+  if (!name) { msg.style.color = '#ef4444'; msg.textContent = 'Theme name is required.'; return; }
+
+  const wordPool = words.split(/[
+,]+/).map(w => w.trim().toLowerCase()).filter(w => w.length > 0);
+
+  const { error } = await db.from('themes').insert({
+    theme_name: name,
+    theme_emoji: emoji || '🎯',
+    word_pool: wordPool
+  });
+
+  if (error) { msg.style.color = '#ef4444'; msg.textContent = '❌ Error: ' + error.message; return; }
+
+  msg.style.color = 'var(--accent)';
+  msg.textContent = `✅ Theme "${name}" created with ${wordPool.length} words!`;
+  document.getElementById('new-theme-emoji').value = '';
+  document.getElementById('new-theme-name').value  = '';
+  document.getElementById('new-theme-wordpool').value = '';
+  document.getElementById('stat-themes').textContent =
+    parseInt(document.getElementById('stat-themes').textContent || '0') + 1;
+  await loadThemesOverview();
+  await loadBulkThemeSelect();
+}
+
+// ── CHANGE ADMIN PANEL PASSWORD ──
+async function changeAdminPassword() {
+  const newPw   = document.getElementById('admin-new-pw').value;
+  const confirm = document.getElementById('admin-confirm-pw').value;
+  const msg     = document.getElementById('admin-pw-msg');
+  msg.textContent = '';
+
+  if (!newPw || !confirm) { msg.style.color = '#ef4444'; msg.textContent = 'Both fields required.'; return; }
+  if (newPw.length < 6)   { msg.style.color = '#ef4444'; msg.textContent = 'Password must be at least 6 characters.'; return; }
+  if (newPw !== confirm)  { msg.style.color = '#ef4444'; msg.textContent = 'Passwords do not match.'; return; }
+
+  const hash = await hashPassword(newPw);
+
+  // Update in DB settings table
+  const { error } = await db.from('settings')
+    .update({ value: hash })
+    .eq('key', 'admin_panel_password_hash');
+
+  if (error) { msg.style.color = '#ef4444'; msg.textContent = '❌ Error: ' + error.message; return; }
+
+  // Update in-memory hash so current session reflects new password
+  state.adminPasswordHash = hash;
+
+  msg.style.color = 'var(--accent)';
+  msg.textContent = '✅ Admin panel password updated!';
+  document.getElementById('admin-new-pw').value     = '';
+  document.getElementById('admin-confirm-pw').value = '';
 }
 
 // ── START ──
