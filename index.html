@@ -1266,7 +1266,7 @@ function browserLemmatize(word) {
     // -es: boxes→box, watches→watch, fixes→fix
     [/(.{3,})(ch|sh|ss|x|z)es$/, (m, s, end) => s + end],
     // -s: cats→cat, dogs→dog (but not -ss, -us endings)
-    [/(.{3,}[^su])s$/, (m, s) => s],
+    [/(.{2,}[^su])s$/, (m, s) => s],
     // -er: teacher→teach, runner→run
     [/(.{3,})er$/, (m, s) => s],
     // -est: fastest→fast
