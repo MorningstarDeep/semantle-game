@@ -1998,8 +1998,12 @@ function nextPuzzle() {
 
 function goHome() {
   document.getElementById('win-overlay').classList.remove('visible');
-  refreshHomeUI();
-  showScreen('home');
+  if (state.username) {
+    refreshHomeUI();
+    showScreen('home');
+  } else {
+    showScreen('landing');
+  }
 }
 
 // ── RIDDLE EXPAND ──
