@@ -2741,8 +2741,7 @@ async function addNewTheme() {
 
   if (!name) { msg.style.color = '#ef4444'; msg.textContent = 'Theme name is required.'; return; }
 
-  const wordPool = words.split(/[
-,]+/).map(w => w.trim().toLowerCase()).filter(w => w.length > 0);
+  const wordPool = words.split(/[\n,]+/.map(w => w.trim().toLowerCase()).filter(w => w.length > 0);
 
   const { error } = await db.from('themes').insert({
     theme_name: name,
@@ -2795,9 +2794,14 @@ async function changeAdminPassword() {
 // ── START ──
 init().catch(err => {
   console.error('Init failed:', err);
-  // Don't leave user stuck on loading — send to landing
-  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-  document.getElementById('landing').classList.add('active');
+  // Show error on loading screen for debugging
+  const loaderText = document.getElementById('loader-text');
+  if (loaderText) loaderText.textContent = 'Error: ' + (err?.message || String(err));
+  // After 3 seconds go to landing anyway
+  setTimeout(() => {
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    document.getElementById('landing').classList.add('active');
+  }, 3000);
 });
 </script>
 </body>
