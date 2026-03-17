@@ -23,22 +23,22 @@
     --secondary: #718096;
     --radius: 12px;
     --radius-lg: 20px;
-    /* Spacing scale */
-    --sp-xs:  8px;
-    --sp-sm:  12px;
-    --sp-md:  20px;
-    --sp-lg:  28px;
-    --sp-xl:  40px;
-    /* Font scale — fixed on desktop, responsive on mobile */
-    --fs-xs:  11px;
-    --fs-sm:  13px;
-    --fs-md:  15px;
-    --fs-lg:  17px;
-    --fs-xl:  22px;
-    --fs-2xl: 28px;
-    --fs-3xl: 36px;
+    /* Spacing scale — proportional */
+    --sp-xs:  clamp(4px,  0.8vw, 8px);
+    --sp-sm:  clamp(8px,  1.2vw, 12px);
+    --sp-md:  clamp(14px, 2vw,   20px);
+    --sp-lg:  clamp(18px, 2.8vw, 28px);
+    --sp-xl:  clamp(24px, 4vw,   40px);
+    /* Font scale — proportional, clamped between min and max */
+    --fs-xs:  clamp(9px,  1.1vw, 11px);
+    --fs-sm:  clamp(11px, 1.3vw, 13px);
+    --fs-md:  clamp(13px, 1.5vw, 15px);
+    --fs-lg:  clamp(14px, 1.7vw, 17px);
+    --fs-xl:  clamp(17px, 2.2vw, 22px);
+    --fs-2xl: clamp(20px, 2.8vw, 28px);
+    --fs-3xl: clamp(24px, 3.6vw, 36px);
     /* Logo: never overflows on any device */
-    --fs-logo: 80px;
+    --fs-logo: clamp(28px, 10.5vw, 80px);
   }
 
   /* ══════════════════════════════════════════════════
@@ -88,7 +88,7 @@
   #loading { align-items:center; justify-content:center; flex-direction:column; gap:var(--sp-lg); }
   .loader-logo {
     font-family:'Syne',sans-serif;
-    font-size: clamp(28px, 8vw, 48px);
+    font-size: clamp(24px, 7vw, 48px);
     font-weight:800; letter-spacing:-2px;
     background: linear-gradient(135deg,#fff 40%, var(--accent) 100%);
     -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;
@@ -151,17 +151,15 @@
     font-family:'Syne',sans-serif;
     font-size: var(--fs-logo);
     font-weight:800;
-    /* Prevent overflow: fit inside viewport */
-    letter-spacing: clamp(-1px, -0.3vw, -3px);
+    letter-spacing: -3px;
     line-height:1;
     background:linear-gradient(135deg,#fff 40%,var(--accent) 100%);
     -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;
-    /* Key: scale down to fit if needed */
-    max-width: 100%;
     display: block;
-    /* Use width-based scaling as last resort */
-    width: 100%;
     text-align: center;
+    /* Never clip characters */
+    overflow: visible;
+    width: 100%;
   }
   .logo-sub { font-size:var(--fs-md); color:var(--secondary); margin-top:var(--sp-sm); font-weight:300; line-height:1.4; }
 
@@ -464,7 +462,7 @@
   /* ── Mobile ≤ 480px ── */
   @media (max-width: 480px) {
     :root {
-      --fs-logo: clamp(26px, 9vw, 44px);
+      /* Mobile: logo already handled by clamp(28px, 10.5vw, 80px) */
       --fs-xs:  10px; --fs-sm: 12px; --fs-md: 13px;
       --fs-lg:  14px; --fs-xl: 18px; --fs-2xl: 22px; --fs-3xl: 26px;
       --sp-xs: 4px; --sp-sm: 8px; --sp-md: 12px; --sp-lg: 16px; --sp-xl: 24px;
@@ -521,7 +519,7 @@
 
   /* ── Tablet 481–768px ── */
   @media (max-width: 768px) and (min-width: 481px) {
-    :root { --fs-logo: clamp(44px, 8vw, 72px); }
+    /* Tablet: logo already handled by main clamp */
     #user-topbar { top: 12px; right: 12px; }
     .admin-tab { font-size: 11px; }
   }
