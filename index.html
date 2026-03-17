@@ -1381,10 +1381,16 @@ async function submitGuess() {
   const normalized = raw.toLowerCase().replace(/[^a-z]/g, '').trim();
   if (!normalized) return;
 
-  // Check duplicate (check both typed word and its lemma)
+  // Check duplicate — compare against stored word, typed original, AND lemma
   const lemma = browserLemmatize(normalized);
-  if (state.guesses.find(g => g.word === normalized || g.matched === normalized || g.matched === lemma)) {
-    showFeedback('Already guessed!', 'error');
+  const isDuplicate = state.guesses.find(g =>
+    g.word === normalized ||       // exact match to stored word
+    g.word === lemma ||            // lemma matches stored word (cats→cat already guessed)
+    g.typed === normalized ||      // same thing typed before
+    g.typed === lemma              // lemma of typed matches previous typed
+  );
+  if (isDuplicate) {
+    showFeedback(`Already guessed "${isDuplicate.word}"!`, 'error');
     input.classList.add('shake');
     setTimeout(() => input.classList.remove('shake'), 400);
     return;
