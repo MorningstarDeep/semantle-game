@@ -599,6 +599,35 @@
       </div>
     </div>
 
+    <!-- How it works — inline on landing -->
+    <div style="width:100%;animation:fadeUp 0.8s 0.15s ease both;">
+      <div style="background:var(--card);border:1px solid var(--border);border-radius:14px;overflow:hidden;">
+        <div style="padding:16px 18px;">
+          <div style="font-family:'DM Mono',monospace;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--accent);margin-bottom:10px;opacity:0.8;">How it works</div>
+          <div style="display:flex;flex-direction:column;gap:7px;">
+            <div style="font-size:13px;color:var(--secondary);line-height:1.5;display:flex;gap:8px;"><span style="color:var(--accent);font-family:'DM Mono',monospace;flex-shrink:0;">1.</span>A secret word is hidden. Guess any word to see how semantically close you are.</div>
+            <div style="font-size:13px;color:var(--secondary);line-height:1.5;display:flex;gap:8px;"><span style="color:var(--accent);font-family:'DM Mono',monospace;flex-shrink:0;">2.</span>Scores from ❄️ 0% (cold) to 🔥🔥🔥🔥🔥 100% (got it!).</div>
+            <div style="font-size:13px;color:var(--secondary);line-height:1.5;display:flex;gap:8px;"><span style="color:var(--accent);font-family:'DM Mono',monospace;flex-shrink:0;">3.</span>Meaning matters — "ocean" scores higher than "pond" if the answer is "water".</div>
+          </div>
+        </div>
+        <button onclick="toggleLandingRules()" id="landing-rules-btn"
+          style="width:100%;background:var(--surface);border:none;border-top:1px solid var(--border);color:var(--muted);padding:10px;cursor:pointer;font-family:'DM Mono',monospace;font-size:11px;letter-spacing:1px;transition:all 0.2s;display:flex;align-items:center;justify-content:center;gap:6px;"
+          onmouseover="this.style.color='var(--accent)'" onmouseout="this.style.color='var(--muted)'">
+          <span id="landing-rules-arrow">▼</span> <span id="landing-rules-label">SHOW MORE</span>
+        </button>
+        <div id="landing-rules-expanded" style="display:none;padding:0 18px 16px;border-top:1px solid var(--border);">
+          <div style="margin-top:14px;display:flex;flex-direction:column;gap:7px;font-size:12px;color:var(--secondary);">
+            <div style="display:flex;gap:8px;"><span style="color:var(--accent);flex-shrink:0;">✓</span>Daily Riddle & Theme modes require login. One attempt per day. Builds streak.</div>
+            <div style="display:flex;gap:8px;"><span style="color:var(--accent);flex-shrink:0;">✓</span>Random mode is free, unlimited, no streak. Great for practice.</div>
+            <div style="display:flex;gap:8px;"><span style="color:var(--accent);flex-shrink:0;">✓</span>Up to 5 hints — letter count, category, definition, synonym.</div>
+            <div style="display:flex;gap:8px;"><span style="color:var(--accent);flex-shrink:0;">✓</span>Giving up on a daily puzzle breaks your streak. Solving keeps it alive.</div>
+            <div style="display:flex;gap:8px;"><span style="color:#ef4444;flex-shrink:0;">✗</span>Only real dictionary words accepted — gibberish is rejected.</div>
+          </div>
+          <button onclick="showRules()" style="margin-top:12px;width:100%;background:none;border:1px solid var(--border);color:var(--secondary);border-radius:8px;padding:9px;font-family:'DM Mono',monospace;font-size:11px;cursor:pointer;transition:all 0.2s;" onmouseover="this.style.borderColor='var(--accent)';this.style.color='var(--accent)'" onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--secondary)'">📖 Full Rules & Examples →</button>
+        </div>
+      </div>
+    </div>
+
     <!-- Divider with members section -->
     <div style="width:100%;animation:fadeUp 0.8s 0.2s ease both;">
       <div style="display:flex;align-items:center;gap:14px;margin-bottom:16px;">
@@ -3153,6 +3182,18 @@ async function changeAdminPassword() {
   msg.style.color = 'var(--accent)';
   msg.textContent = '✅ Updated!';
   setTimeout(() => closeAdminPwModal(), 1000);
+}
+
+// ── LANDING RULES EXPAND ──
+function toggleLandingRules() {
+  const exp = document.getElementById('landing-rules-expanded');
+  const arrow = document.getElementById('landing-rules-arrow');
+  const label = document.getElementById('landing-rules-label');
+  if (!exp) return;
+  const open = exp.style.display !== 'none';
+  exp.style.display = open ? 'none' : 'block';
+  if (arrow) arrow.textContent = open ? '▼' : '▲';
+  if (label) label.textContent = open ? 'SHOW MORE' : 'SHOW LESS';
 }
 
 // ── PROFILE DROPDOWN ──
