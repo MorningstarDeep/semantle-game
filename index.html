@@ -410,6 +410,24 @@
   .hint-panel.visible { display:block; }
   .hint-title { font-family:'DM Mono',monospace; font-size:var(--fs-xs); letter-spacing:2px; text-transform:uppercase; color:var(--accent); margin-bottom:8px; }
   .hint-text { font-size:var(--fs-md); color:var(--text); }
+  .hint-item {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 10px 14px;
+    font-size: 13px;
+    color: var(--text);
+    line-height: 1.5;
+    animation: fadeUp 0.3s ease both;
+  }
+  .hint-item-num {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    color: var(--accent);
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    margin-bottom: 3px;
+  }
   .hint-slots { display:flex; gap:6px; margin-top:10px; }
   .hint-slot { width:28px; height:4px; border-radius:2px; background:var(--border); transition:background 0.3s; }
   .hint-slot.used { background:var(--accent); }
@@ -1067,8 +1085,9 @@
   </div>
 
   <div class="hint-panel" id="hint-panel">
-    <div class="hint-title">Hint <span id="hint-num">1</span></div>
-    <div class="hint-text" id="hint-text"></div>
+    <div class="hint-title">💡 Hints revealed: <span id="hint-num">0</span>/5</div>
+    <!-- List of ALL revealed hints — new ones append to bottom -->
+    <div id="hint-list" style="display:flex;flex-direction:column;gap:8px;"></div>
     <div class="hint-slots">
       <div class="hint-slot" id="hs-1"></div><div class="hint-slot" id="hs-2"></div>
       <div class="hint-slot" id="hs-3"></div><div class="hint-slot" id="hs-4"></div>
@@ -2130,13 +2149,13 @@ async function startGame(mode, difficulty) {
       const el = document.getElementById(`hs-${i}`);
       if (el) el.classList.toggle('used', i <= state.hintsUsed);
     }
-    // Restore last hint text if any hints were used
-    if (state.hintsUsed > 0 && saved.lastHintText) {
-      document.getElementById('hint-num').textContent  = state.hintsUsed;
-      document.getElementById('hint-text').textContent = saved.lastHintText;
-      document.getElementById('hint-panel').classList.add('visible');
+    // Restore all revealed hints
+    if (state.hintsUsed > 0) {
+      renderHints();
     } else {
       document.getElementById('hint-panel').classList.remove('visible');
+      const list = document.getElementById('hint-list');
+      if (list) list.innerHTML = '';
     }
   } else {
     // Fresh UI
@@ -2145,6 +2164,9 @@ async function startGame(mode, difficulty) {
     document.getElementById('progress-pct').textContent = '0%';
     document.getElementById('progress-fill').style.width = '0%';
     document.getElementById('hint-panel').classList.remove('visible');
+    document.getElementById('hint-num').textContent = '0';
+    const hintList = document.getElementById('hint-list');
+    if (hintList) hintList.innerHTML = '';
     for (let i = 1; i <= 5; i++) {
       const el = document.getElementById(`hs-${i}`);
       if (el) el.classList.remove('used');
@@ -2248,8 +2270,7 @@ function saveGameProgress() {
     startTime:      state.startTime,
     currentPuzzle:  state.currentPuzzle,
     mode:           state.mode,
-    difficulty:     state.difficulty,
-    lastHintText:   document.getElementById('hint-text')?.textContent || null
+    difficulty:     state.difficulty
   };
   gameProgress[key] = data;
   try { localStorage.setItem('smp_' + key, JSON.stringify(data)); } catch(e) {}
@@ -2615,74 +2636,155 @@ function renderGuesses() {
 // Medium: balanced  — letters, category, short definition, first letter, partial synonym
 // Hard:   brutal    — only vague clues, no direct letters revealed
 function getHints(difficulty, puzzle) {
-  const a   = puzzle.answer || '';
-  const cat = puzzle.category || '';
-  const def = puzzle.definition || '';
-  const syn = (puzzle.synonyms || [])[0] || null;
-  const len = a.length;
-  const vowels     = a.split('').filter(c => 'aeiou'.includes(c)).length;
-  const consonants = len - vowels;
-  const uniqLetters = new Set(a.split('')).size;
-  const hasDouble  = a.split('').some((c,i) => a[i+1] === c);
-  const alphHalf   = a.charCodeAt(0) < 110 ? 'first half (A–M)' : 'second half (N–Z)';
-  const vagueLen   = len <= 4 ? 'very short' : len <= 6 ? 'short' : len <= 9 ? 'medium length' : 'long';
+  const a      = puzzle.answer || '';
+  const cat    = puzzle.category || '';
+  const def    = puzzle.definition || '';
+  const synArr = puzzle.synonyms || [];
+  const syn    = synArr[0] || null;
+  const len    = a.length;
+  const first  = a[0]?.toUpperCase();
+  const last   = a[a.length - 1]?.toUpperCase();
 
-  // Scramble — only used in easy mode
-  const scramble = w => {
-    const arr = w.split('');
-    for (let i = arr.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [arr[i], arr[j]] = [arr[j], arr[i]];
-    }
-    return arr.join('').toUpperCase();
-  };
+  // ── Context-aware clue builders ──
+  // These create riddle-like, contemplative hints — never give the answer directly
 
-  // Mask synonym — fully masked except length
-  const maskFull = w => w ? '*'.repeat(w.length) + ` (${w.length} letters)` : null;
+  // Riddle a synonym: "I share my soul with X" — gives semantic direction
+  const synClue = syn
+    ? `I share my soul with "${syn}" — we mean the same thing, though we wear different letters.`
+    : null;
 
-  // Partial definition — first 4 words only, nothing identifiable
-  const vagDef = def ? def.split(' ').slice(0,4).join(' ') + '...' : null;
+  // Contextual usage clue from definition
+  const usageClue = def
+    ? `Think about this: ${def.charAt(0).toLowerCase() + def.slice(1).replace(/\.$/, '')}. What one word captures that?`
+    : null;
 
-  // Very vague category — only first word, no context
-  const vagCat = cat ? cat.split(/[\s,\/]/)[0].toLowerCase() : null;
+  // Abstract "what am I" riddle style
+  const riddleStyle = def
+    ? `Here is a clue in riddle form — "${def.split(' ').slice(0, 8).join(' ')}..." — I am a single word.`
+    : null;
 
+  // Category clue — worded as a boundary, not a label
+  const catClue = cat
+    ? `My world is the realm of ${cat.toLowerCase()}. I live there, breathe it, belong to it.`
+    : null;
+
+  // First letter clue — poetic, not direct
+  const firstClue = first
+    ? `My name begins where "${first}" begins — that letter is my first breath.`
+    : null;
+
+  // Length clue — the only numerical clue, kept for hint 1 on easy
+  const lenClue = `I am a ${len}-letter word.`;
+
+  // Association clue — "I am what you think of when..."
+  const assocClue = def
+    ? `I am what you think of when you hear: "${def.split(' ').slice(0, 6).join(' ')}..."`
+    : cat ? `I am what you think of when you enter the world of ${cat.toLowerCase()}.` : null;
+
+  // Negative clue — narrows by exclusion
+  const negClue = cat
+    ? `I am not a person, not a place (unless I am). I belong to the world of ${cat.toLowerCase()}.`
+    : null;
+
+  // Hard contextual clue — cryptic association, no category name
+  const cryptic = def
+    ? `Here is all I will say: "${def.split(' ').slice(0, 4).join(' ')}..." Contemplate.`
+    : `Some things cannot be unseen once you know them. I am one of those things.`;
+
+  // Very last resort — tiny nudge on first letter but wrapped poetically
+  const nudge = first && last
+    ? `I begin with "${first}" and end with "${last}". Between those two letters, I live.`
+    : first ? `I begin with "${first}". That is more than most deserve.` : null;
+
+  // ── EASY ──
+  // H1: letter count (only easy gets this directly)
+  // H2: poetic category clue
+  // H3: usage / what am I clue
+  // H4: synonym clue (semantic sister)
+  // H5: first letter nudge
   if (difficulty === 'easy') {
-    // Easy: still requires 15–25 guesses to solve
-    // NO first letter. Scrambled letters is the "generous" hint.
     return [
-      `The word has ${len} letters.`,
-      cat  ? `Broad category: ${vagCat}.` : `It is a ${vagueLen} word.`,
-      `Scrambled: "${scramble(a)}". Unscramble to find it.`,
-      def  ? `Partial clue: "${vagDef}"` : `It has ${vowels} vowel${vowels!==1?'s':''}.`,
-      syn  ? `A masked related word: ${maskFull(syn)}` : `Letters span the alphabet's ${alphHalf}.`
+      lenClue,
+      catClue || assocClue || `Think broadly — I'm a common concept you encounter often.`,
+      usageClue || assocClue || `I am used, known, encountered — yet my name eludes you.`,
+      synClue  || `I am closely related to something you already guessed. Think of its cousin.`,
+      firstClue || nudge || `You're very close. Trust your instincts.`
     ];
   }
 
+  // ── MEDIUM ──
+  // H1: vague association — no letter count, no category name
+  // H2: contextual "what am I" clue
+  // H3: poetic synonym hint — no direct synonym revealed
+  // H4: category clue (deliberately late)
+  // H5: nudge with first letter, wrapped poetically
   if (difficulty === 'medium') {
-    // Medium: 25–50 guesses expected. No scramble, no category name.
     return [
-      `The word is ${vagueLen} — ${len} letters total.`,
-      `It contains ${vowels} vowel${vowels!==1?'s':''} and ${consonants} consonant${consonants!==1?'s':''}.`,
-      hasDouble ? 'At least one letter appears more than once.'
-                : `All ${uniqLetters} letters are distinct.`,
-      def  ? `Very partial clue: "${def.split(' ').slice(0,3).join(' ')}..."` : `It has ${uniqLetters} unique letters.`,
-      syn  ? `A related concept — fully masked: ${maskFull(syn)}`
-           : `First letter is in the ${alphHalf} of the alphabet.`
+      assocClue || `I exist somewhere between the obvious and the forgotten. Seek me.`,
+      riddleStyle || usageClue || `There is a word that means exactly this. What is it?`,
+      syn ? `I have a sibling in meaning. That sibling's name starts with "${syn[0].toUpperCase()}" and has ${syn.length} letters. I am not that sibling.`
+          : `I am a word many know but few can name when asked directly.`,
+      catClue || negClue || `My domain is specific. Not everything belongs here — I do.`,
+      nudge || firstClue || `My first letter is "${first}". My length is ${len}. That is your final clue.`
     ];
   }
 
-  // Hard: 50+ guesses expected. Zero semantic information.
-  // Only pure structural/mathematical properties of the word.
-  const letterFreq = a.split('').reduce((acc, c) => { acc[c] = (acc[c]||0)+1; return acc; }, {});
-  const maxFreq    = Math.max(...Object.values(letterFreq));
-  const sumChars   = a.split('').reduce((s,c) => s + c.charCodeAt(0) - 96, 0); // a=1,b=2...
+  // ── HARD ──
+  // H1: pure abstract / philosophical clue — no numbers, no category, nothing concrete
+  // H2: cryptic riddle-style (definition fragment, deliberately brief)
+  // H3: exclusion / negative space clue
+  // H4: "I am what you feel when..." or "I am what happens when..." — experiential
+  // H5: final cryptic — only 2 words of the definition at most
+  const experiential = def
+    ? `I am what happens when: ${def.split(' ').slice(0, 5).join(' ')}... You've experienced this.`
+    : `You have encountered me before. You just didn't know my name.`;
+
+  const philosophical = def
+    ? `Consider this truth: "${def.split(' ').slice(0, 3).join(' ')}". One word holds it all.`
+    : `I am singular. I am specific. I cannot be replaced by a phrase.`;
+
   return [
-    `Letter count: ${len}. Vowel ratio: ${vowels}/${len}.`,
-    `Unique letters: ${uniqLetters}. ${hasDouble ? 'Has repeating letters.' : 'No repeating letters.'}`,
-    `Most frequent letter appears ${maxFreq} time${maxFreq!==1?'s':''}.`,
-    `Sum of letter positions (a=1): ${sumChars}. First letter is in the ${alphHalf}.`,
-    def  ? `Abstract fragment: "${def.split(' ').slice(0,2).join(' ')}..."` : 'No further hints.'
+    philosophical,
+    cryptic,
+    `I am not what you expect. I am not what you first think. I am the word that arrives when the others fall away.`,
+    experiential,
+    syn ? `My closest kin in meaning has ${syn.length} letters. I am not that word, but I am its equal.`
+        : cat ? `My realm: ${cat.split(/[\s,\/]/)[0].toLowerCase()}. That is all I offer.`
+              : `${len} letters. Nothing more will be said.`
   ];
+}
+
+// Append a single hint item to the hint list
+function appendHintItem(num, text) {
+  const list = document.getElementById('hint-list');
+  if (!list) return;
+  const item = document.createElement('div');
+  item.className = 'hint-item';
+  item.innerHTML = `<div class="hint-item-num">Hint ${num}</div><div>${text}</div>`;
+  list.appendChild(item);
+}
+
+// Render all revealed hints from scratch (used on game restore)
+function renderHints() {
+  const list = document.getElementById('hint-list');
+  if (!list) return;
+  list.innerHTML = '';
+  if (!state.currentPuzzle || state.hintsUsed === 0) return;
+  const hintDiff = state.currentPuzzle._randomDifficulty
+    || (state.mode === 'theme' ? 'medium' : state.difficulty)
+    || 'medium';
+  const texts = getHints(hintDiff, state.currentPuzzle);
+  for (let i = 0; i < state.hintsUsed; i++) {
+    appendHintItem(i + 1, texts[i]);
+  }
+  document.getElementById('hint-num').textContent = state.hintsUsed;
+  for (let i = 1; i <= 5; i++) {
+    const el = document.getElementById(`hs-${i}`);
+    if (el) el.classList.toggle('used', i <= state.hintsUsed);
+  }
+  if (state.hintsUsed > 0) {
+    document.getElementById('hint-panel').classList.add('visible');
+  }
 }
 
 function getHint() {
@@ -2690,10 +2792,6 @@ function getHint() {
   const p = state.currentPuzzle;
   const n = state.hintsUsed;
 
-  // Determine hint difficulty
-  // random: use _randomDifficulty stored on puzzle
-  // riddle: use state.difficulty (easy/medium/hard)
-  // theme:  always 'medium' (theme clues are inherently less direct)
   const hintDiff = p._randomDifficulty
     || (state.mode === 'theme' ? 'medium' : state.difficulty)
     || 'medium';
@@ -2703,7 +2801,7 @@ function getHint() {
   state.hintsUsed++;
   document.getElementById(`hs-${state.hintsUsed}`).classList.add('used');
   document.getElementById('hint-num').textContent = state.hintsUsed;
-  document.getElementById('hint-text').textContent = texts[n];
+  appendHintItem(state.hintsUsed, texts[n]);
   document.getElementById('hint-panel').classList.add('visible');
   document.getElementById('guess-count').textContent = state.guessCount + ` +${state.hintsUsed}h`;
   saveGameProgress();
