@@ -24,10 +24,6 @@
 <meta name="twitter:description" content="Play Semantle online. Guess the hidden word using meaning similarity.">
 <meta name="twitter:image" content="https://semantle.me/og-image.png">
 <meta name="robots" content="index, follow">
-<script>
-  window.si = window.si || function () { (window.siq = window.siq || []).push(arguments); };
-</script>
-<script defer src="/_vercel/speed-insights/script.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
   /* ══════════════════════════════════════════════════
@@ -569,10 +565,6 @@
     .home-inner, #game, #leaderboard-screen { max-width: 720px; }
   }
 </style>
-<script>
-  window.va = window.va || function () { (window.vaq = window.vaq || []).push(arguments); };
-</script>
-<script defer src="/_vercel/insights/script.js"></script>
 </head>
 <body>
 
@@ -600,13 +592,30 @@
     <!-- Random mode — open to all -->
     <div style="width:100%;animation:fadeUp 0.8s 0.1s ease both;">
       <div style="font-family:'DM Mono',monospace;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);text-align:center;margin-bottom:12px;word-break:break-word;">Play instantly — no account needed</div>
-      <div class="mode-card" onclick="startGame('random','random')" style="border-color:var(--accent);background:linear-gradient(135deg,rgba(0,255,136,0.06),var(--card));">
+      <div class="mode-card" id="landing-random-card" onclick="toggleLandingRandom()" style="border-color:var(--accent);background:linear-gradient(135deg,rgba(0,255,136,0.06),var(--card));cursor:pointer;">
         <div class="mode-icon" style="font-size:32px;border:none;background:transparent;">♾️</div>
         <div class="mode-info">
           <div class="mode-name">Random Mode</div>
-          <div class="mode-desc">Unlimited practice. Any word, any time. No pressure.</div>
+          <div class="mode-desc">Choose difficulty and play instantly.</div>
         </div>
-        <div style="font-family:'DM Mono',monospace;font-size:11px;color:var(--accent);background:var(--accent-glow);border:1px solid rgba(0,255,136,0.3);padding:4px 10px;border-radius:20px;">Free</div>
+        <div style="display:flex;align-items:center;gap:8px;">
+          <div style="font-family:'DM Mono',monospace;font-size:11px;color:var(--accent);background:var(--accent-glow);border:1px solid rgba(0,255,136,0.3);padding:4px 10px;border-radius:20px;">Free</div>
+          <span style="font-size:11px;color:var(--muted);font-family:'DM Mono',monospace;" id="landing-random-arrow">▼</span>
+        </div>
+      </div>
+      <div id="landing-random-subs" style="display:none;flex-direction:column;gap:8px;padding:0 4px;margin-top:-10px;">
+        <div class="mode-card sub-card" onclick="startRandomMode('easy')" style="border-color:rgba(0,255,136,0.3);">
+          <div class="mode-icon" style="width:36px;height:36px;font-size:18px;">🟢</div>
+          <div class="mode-info"><div class="mode-name" style="font-size:14px;">Easy</div><div class="mode-desc">Common words, generous hints</div></div>
+        </div>
+        <div class="mode-card sub-card" onclick="startRandomMode('medium')" style="border-color:rgba(255,204,68,0.3);">
+          <div class="mode-icon" style="width:36px;height:36px;font-size:18px;">🟡</div>
+          <div class="mode-info"><div class="mode-name" style="font-size:14px;">Medium</div><div class="mode-desc">Balanced challenge</div></div>
+        </div>
+        <div class="mode-card sub-card" onclick="startRandomMode('hard')" style="border-color:rgba(239,68,68,0.3);">
+          <div class="mode-icon" style="width:36px;height:36px;font-size:18px;">🔴</div>
+          <div class="mode-info"><div class="mode-name" style="font-size:14px;">Hard</div><div class="mode-desc">Rare words, brutal hints</div></div>
+        </div>
       </div>
     </div>
 
@@ -645,28 +654,73 @@
         <div style="flex:1;height:1px;background:var(--border);"></div>
       </div>
 
-      <!-- Locked modes preview -->
-      <div style="background:var(--card);border:1px solid var(--border);border-radius:var(--radius-lg);padding:20px;position:relative;overflow:hidden;">
-        <!-- Blurred locked content -->
-        <div style="display:flex;flex-direction:column;gap:10px;filter:blur(1px);opacity:0.5;pointer-events:none;user-select:none;">
-          <div style="display:flex;align-items:center;gap:14px;padding:12px;background:var(--surface);border-radius:12px;">
-            <div style="font-size:24px;width:44px;height:44px;background:var(--card);border-radius:12px;display:flex;align-items:center;justify-content:center;border:1px solid var(--border);">🎭</div>
-            <div><div style="font-family:'Syne',sans-serif;font-weight:700;font-size:15px;">Daily Riddle</div><div style="font-size:12px;color:var(--secondary);">Streaks · Leaderboard · 3 difficulties</div></div>
+      <!-- Locked modes — enticing preview with real feature tease -->
+      <div style="display:flex;flex-direction:column;gap:12px;">
+
+        <!-- Feature cards — blurred but visible -->
+        <div style="position:relative;border-radius:16px;overflow:hidden;border:1px solid var(--border);">
+          <div style="display:flex;flex-direction:column;gap:0;filter:blur(2px);opacity:0.55;pointer-events:none;user-select:none;">
+            <!-- Daily Riddle preview -->
+            <div style="display:flex;align-items:center;gap:14px;padding:14px 16px;background:var(--surface);">
+              <div style="font-size:22px;width:42px;height:42px;background:linear-gradient(135deg,rgba(0,255,136,0.15),rgba(0,255,136,0.05));border-radius:12px;display:flex;align-items:center;justify-content:center;border:1px solid rgba(0,255,136,0.2);flex-shrink:0;">🎭</div>
+              <div style="flex:1;">
+                <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:15px;">Daily Riddle</div>
+                <div style="font-size:12px;color:var(--secondary);margin-top:2px;">Easy · Medium · Hard · Leaderboard</div>
+              </div>
+              <div style="display:flex;flex-direction:column;align-items:flex-end;gap:3px;">
+                <div style="font-family:'DM Mono',monospace;font-size:18px;font-weight:700;color:var(--accent);">🔥7</div>
+                <div style="font-size:10px;color:var(--muted);">day streak</div>
+              </div>
+            </div>
+            <div style="height:1px;background:var(--border);"></div>
+            <!-- Daily Theme preview -->
+            <div style="display:flex;align-items:center;gap:14px;padding:14px 16px;background:var(--surface);">
+              <div style="font-size:22px;width:42px;height:42px;background:linear-gradient(135deg,rgba(99,102,241,0.15),rgba(99,102,241,0.05));border-radius:12px;display:flex;align-items:center;justify-content:center;border:1px solid rgba(99,102,241,0.2);flex-shrink:0;">🌊</div>
+              <div style="flex:1;">
+                <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:15px;">Daily Theme</div>
+                <div style="font-size:12px;color:var(--secondary);margin-top:2px;">Guess the word by its theme category</div>
+              </div>
+              <div style="display:flex;flex-direction:column;align-items:flex-end;gap:3px;">
+                <div style="font-family:'DM Mono',monospace;font-size:18px;font-weight:700;color:#818cf8;">🏆3</div>
+                <div style="font-size:10px;color:var(--muted);">rank today</div>
+              </div>
+            </div>
+            <div style="height:1px;background:var(--border);"></div>
+            <!-- Leaderboard preview -->
+            <div style="display:flex;align-items:center;gap:14px;padding:12px 16px;background:var(--card);">
+              <div style="display:flex;flex-direction:column;gap:4px;flex:1;">
+                <div style="display:flex;align-items:center;justify-content:space-between;font-size:12px;padding:4px 8px;background:var(--surface);border-radius:6px;">
+                  <span style="color:#ffd700;font-weight:700;">🥇 ██████</span><span style="color:var(--accent);font-family:'DM Mono',monospace;">23 guesses</span>
+                </div>
+                <div style="display:flex;align-items:center;justify-content:space-between;font-size:12px;padding:4px 8px;background:var(--surface);border-radius:6px;">
+                  <span style="color:#c0c0c0;font-weight:700;">🥈 ████</span><span style="color:var(--secondary);font-family:'DM Mono',monospace;">31 guesses</span>
+                </div>
+                <div style="display:flex;align-items:center;justify-content:space-between;font-size:12px;padding:4px 8px;background:var(--surface);border-radius:6px;">
+                  <span style="color:#cd7f32;font-weight:700;">🥉 █████</span><span style="color:var(--secondary);font-family:'DM Mono',monospace;">38 guesses</span>
+                </div>
+              </div>
+            </div>
           </div>
-          <div style="display:flex;align-items:center;gap:14px;padding:12px;background:var(--surface);border-radius:12px;">
-            <div style="font-size:24px;width:44px;height:44px;background:var(--card);border-radius:12px;display:flex;align-items:center;justify-content:center;border:1px solid var(--border);">🌊</div>
-            <div><div style="font-family:'Syne',sans-serif;font-weight:700;font-size:15px;">Daily Theme</div><div style="font-size:12px;color:var(--secondary);">New theme every day · Track your progress</div></div>
+          <!-- Overlay CTA -->
+          <div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;background:rgba(8,11,15,0.72);backdrop-filter:blur(3px);border-radius:16px;">
+            <div style="text-align:center;">
+              <div style="font-size:28px;margin-bottom:6px;">🔒</div>
+              <div style="font-family:'Syne',sans-serif;font-weight:800;font-size:18px;margin-bottom:4px;">Unlock Daily Modes</div>
+              <div style="font-size:12px;color:var(--secondary);max-width:220px;line-height:1.5;">Streaks, leaderboards, daily riddles &amp; themes — completely free.</div>
+            </div>
+            <div style="display:flex;gap:10px;">
+              <button onclick="showScreen('login-screen')" style="background:var(--accent);color:#000;border:none;border-radius:12px;padding:12px 24px;font-family:'Syne',sans-serif;font-weight:700;font-size:14px;cursor:pointer;transition:all 0.15s;box-shadow:0 0 20px rgba(0,255,136,0.3);" onmouseover="this.style.transform='scale(1.04)'" onmouseout="this.style.transform='scale(1)'">Log In</button>
+              <button onclick="showScreen('register-screen')" style="background:transparent;border:1.5px solid var(--accent);color:var(--accent);border-radius:12px;padding:12px 24px;font-family:'Syne',sans-serif;font-weight:700;font-size:14px;cursor:pointer;transition:all 0.15s;" onmouseover="this.style.background='rgba(0,255,136,0.08)'" onmouseout="this.style.background='transparent'">Register Free</button>
+            </div>
           </div>
         </div>
-        <!-- Lock overlay -->
-        <div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;background:rgba(8,11,15,0.6);backdrop-filter:blur(2px);border-radius:var(--radius-lg);">
-          <div style="font-size:32px;">🔒</div>
-          <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:16px;text-align:center;">Sign in to unlock</div>
-          <div style="font-size:13px;color:var(--secondary);text-align:center;max-width:240px;">Daily riddles, themes, leaderboards and streaks — all free.</div>
-          <div style="display:flex;gap:10px;margin-top:4px;">
-            <button onclick="showScreen('login-screen')" style="background:var(--accent);color:#000;border:none;border-radius:10px;padding:11px 22px;font-family:'Syne',sans-serif;font-weight:700;font-size:14px;cursor:pointer;transition:all 0.2s;">Log In</button>
-            <button onclick="showScreen('register-screen')" style="background:transparent;border:1.5px solid var(--accent);color:var(--accent);border-radius:10px;padding:11px 22px;font-family:'Syne',sans-serif;font-weight:700;font-size:14px;cursor:pointer;transition:all 0.2s;">Register</button>
-          </div>
+
+        <!-- Benefit pills -->
+        <div style="display:flex;flex-wrap:wrap;gap:8px;justify-content:center;">
+          <div style="font-size:12px;color:var(--secondary);background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:5px 12px;display:flex;align-items:center;gap:5px;"><span style="color:var(--accent);">🔥</span> Daily streaks</div>
+          <div style="font-size:12px;color:var(--secondary);background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:5px 12px;display:flex;align-items:center;gap:5px;"><span style="color:#818cf8;">🏆</span> Leaderboards</div>
+          <div style="font-size:12px;color:var(--secondary);background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:5px 12px;display:flex;align-items:center;gap:5px;"><span style="color:#ffd700;">🎭</span> 3 difficulties</div>
+          <div style="font-size:12px;color:var(--secondary);background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:5px 12px;display:flex;align-items:center;gap:5px;"><span style="color:#f59e0b;">🌊</span> Daily themes</div>
         </div>
       </div>
     </div>
@@ -885,11 +939,37 @@
         <div class="mode-badge" id="badge-theme">Daily</div>
       </div>
 
-      <div class="mode-card" onclick="startGame('random','random')">
-        <div class="mode-icon" style="font-size:32px; border:none; background:transparent;">♾️</div>
+      <!-- Random Mode — expandable difficulty picker -->
+      <div class="mode-card" id="card-random" onclick="toggleRandomExpand()" style="cursor:pointer;">
+        <div class="mode-icon" style="font-size:32px;border:none;background:transparent;">♾️</div>
         <div class="mode-info">
           <div class="mode-name">Random Mode</div>
-          <div class="mode-desc">Unlimited practice. No pressure.</div>
+          <div class="mode-desc">Unlimited practice. Choose your difficulty.</div>
+        </div>
+        <div style="font-size:11px;color:var(--muted);font-family:'DM Mono',monospace;" id="random-arrow">▼</div>
+      </div>
+      <!-- Random difficulty sub-cards -->
+      <div id="random-sub-cards" style="display:none;flex-direction:column;gap:8px;padding:0 4px;">
+        <div class="mode-card sub-card" onclick="startRandomMode('easy'); event.stopPropagation()" style="border-color:rgba(0,255,136,0.3);">
+          <div class="mode-icon" style="width:40px;height:40px;font-size:20px;">🟢</div>
+          <div class="mode-info">
+            <div class="mode-name" style="font-size:15px;">Easy Random</div>
+            <div class="mode-desc">Common words. More generous hints.</div>
+          </div>
+        </div>
+        <div class="mode-card sub-card" onclick="startRandomMode('medium'); event.stopPropagation()" style="border-color:rgba(255,204,68,0.3);">
+          <div class="mode-icon" style="width:40px;height:40px;font-size:20px;">🟡</div>
+          <div class="mode-info">
+            <div class="mode-name" style="font-size:15px;">Medium Random</div>
+            <div class="mode-desc">Balanced. Hints reveal less.</div>
+          </div>
+        </div>
+        <div class="mode-card sub-card" onclick="startRandomMode('hard'); event.stopPropagation()" style="border-color:rgba(239,68,68,0.3);">
+          <div class="mode-icon" style="width:40px;height:40px;font-size:20px;">🔴</div>
+          <div class="mode-info">
+            <div class="mode-name" style="font-size:15px;">Hard Random</div>
+            <div class="mode-desc">Rare words. Brutal hints.</div>
+          </div>
         </div>
       </div>
     </div>
@@ -1464,7 +1544,8 @@ let state = {
   todaySolved: {},
   todayGaveUp: {},
   todayResults: {},
-  randomPuzzle: null
+  randomPuzzle: null,
+  randomDifficulty: 'medium'  // default random difficulty
 };
 
 // ── SCREEN MANAGER ──
@@ -1963,21 +2044,35 @@ async function startGame(mode, difficulty) {
         }
       }
     } else {
-      // Random mode — check randomPuzzle cache (same session only)
+      // Random mode — cache per session + difficulty
+      // difficulty passed from startRandomMode (easy/medium/hard) or default 'medium'
+      const rDiff = (difficulty && difficulty !== 'random')
+        ? difficulty : (state.randomDifficulty || 'medium');
       const cachedRandom = state.randomPuzzle;
-      const sameSession  = cachedRandom?._sessionUser === (state.username || 'anonymous');
+      const sameSession  = cachedRandom?._sessionUser === (state.username || 'anonymous')
+                        && cachedRandom?._randomDifficulty === rDiff;
       if (cachedRandom && sameSession) {
         puzzle = cachedRandom;
       } else {
-        const { count } = await db.from('riddles').select('*', { count:'exact', head:true });
+        // Fetch riddle filtered by chosen difficulty
+        const { count } = await db.from('riddles')
+          .select('*', { count:'exact', head:true })
+          .eq('difficulty', rDiff);
         if (count > 0) {
           const offset = Math.floor(Math.random() * count);
           const { data } = await db.from('riddles')
             .select('id,riddle_text,answer,category,definition,synonyms,difficulty')
+            .eq('difficulty', rDiff)
             .range(offset, offset);
           if (data?.length) {
-            puzzle = { ...data[0], mode:'random', _sessionUser: state.username||'anonymous' };
-            state.randomPuzzle = puzzle;
+            puzzle = {
+              ...data[0],
+              mode: 'random',
+              _sessionUser: state.username || 'anonymous',
+              _randomDifficulty: rDiff
+            };
+            state.randomPuzzle   = puzzle;
+            state.randomDifficulty = rDiff;
           }
         }
       }
@@ -1988,7 +2083,14 @@ async function startGame(mode, difficulty) {
   }
 
   // ── Build game UI ──
-  const modeLabels = { riddle:'Daily Riddle · '+difficulty, theme:'Daily Theme', random:'Random Mode' };
+  const rDiffLabel = puzzle?._randomDifficulty
+    ? { easy:'Easy', medium:'Medium', hard:'Hard' }[puzzle._randomDifficulty] || ''
+    : '';
+  const modeLabels = {
+    riddle: 'Daily Riddle · ' + difficulty,
+    theme:  'Daily Theme',
+    random: 'Random' + (rDiffLabel ? ' · ' + rDiffLabel : '')
+  };
   document.getElementById('mode-label').textContent = modeLabels[mode] || mode;
   const streakBadge = document.getElementById('streak-badge');
   if (streakBadge) streakBadge.style.display = (mode !== 'random' && !!state.username) ? 'flex' : 'none';
@@ -2077,8 +2179,9 @@ function resetGameState() {
   state.gaveUp         = false;
   state.startTime      = null;
   state.currentPuzzle  = null;
-  state.randomPuzzle   = null;
-  state.mode           = null;
+  state.randomPuzzle     = null;
+  state.randomDifficulty = 'medium';
+  state.mode             = null;
   state.difficulty     = null;
 }
 
@@ -2097,8 +2200,9 @@ let gameProgress = {}; // in-memory mirror of localStorage entries
 // ── PROGRESS KEY ──
 function getProgressKey(mode, difficulty) {
   if (mode === 'random') {
-    // Keyed to user: anonymous vs logged-in get separate random puzzles
-    return 'random-' + (state.username || 'anonymous');
+    // Keyed to user + difficulty so easy/medium/hard random are separate sessions
+    const diff = difficulty && difficulty !== 'random' ? difficulty : (state.randomDifficulty || 'medium');
+    return 'random-' + diff + '-' + (state.username || 'anonymous');
   }
   const today = getTodayIST();
   if (mode === 'theme') return 'theme-' + today;
@@ -2506,26 +2610,73 @@ function renderGuesses() {
   }).join('');
 }
 
-// ── HINTS ──
+// ── HINTS — difficulty-scaled ──
+// Easy:   generous  — letters, first letter, category, definition, synonym
+// Medium: balanced  — letters, category, short definition, first letter, partial synonym
+// Hard:   brutal    — only vague clues, no direct letters revealed
+function getHints(difficulty, puzzle) {
+  const a = puzzle.answer || '';
+  const cat = puzzle.category || 'a common concept';
+  const def = (puzzle.definition || '').substring(0, 50);
+  const syn = (puzzle.synonyms || [])[0] || null;
+  const firstLetter = a[0]?.toUpperCase() || '?';
+  const lastLetter  = a[a.length-1]?.toUpperCase() || '?';
+
+  if (difficulty === 'easy') {
+    return [
+      `The word has ${a.length} letters.`,
+      `It starts with "${firstLetter}".`,
+      `Category: ${cat}.`,
+      def ? `Definition: "${def}..."` : `It ends with "${lastLetter}".`,
+      syn ? `A synonym: "${syn}".` : `It contains the letter "${a[Math.floor(a.length/2)].toUpperCase()}".`
+    ];
+  }
+  if (difficulty === 'medium') {
+    return [
+      `The word has ${a.length} letters.`,
+      `Category: ${cat}.`,
+      def ? `Definition (partial): "${def.substring(0, 28)}..."` : `It's a ${a.length}-letter word.`,
+      `It starts with "${firstLetter}".`,
+      syn ? `Related word: starts with "${syn[0].toUpperCase()}", has ${syn.length} letters.`
+          : `The word ends with "${lastLetter}".`
+    ];
+  }
+  // Hard — no direct letter reveals, only vague clues
+  const lengthHint = a.length <= 4 ? 'short (4 letters or fewer)'
+                   : a.length <= 7 ? 'medium length (5–7 letters)'
+                   : 'long (8+ letters)';
+  return [
+    `The word is ${lengthHint}.`,
+    `Broad category: ${cat.split(' ')[0]}.`,
+    def ? `Vague clue: "${def.substring(0, 18)}..."` : `It's a ${a.length >= 8 ? 'long' : 'short'} word.`,
+    `The word has ${new Set(a.split('')).size} unique letters.`,
+    syn ? `A distant related concept: "${syn[0]}${'*'.repeat(syn.length - 1)}".`
+        : `First letter: somewhere in the alphabet's ${a.charCodeAt(0) < 110 ? 'first' : 'second'} half.`
+  ];
+}
+
 function getHint() {
   if (state.hintsUsed >= 5) { toast('No more hints!', 'red'); return; }
   const p = state.currentPuzzle;
-  const a = p.answer;
   const n = state.hintsUsed;
-  const texts = [
-    `The word has ${a.length} letters.`,
-    `It starts with "${a[0].toUpperCase()}".`,
-    `Category: ${p.category || 'unknown'}.`,
-    `Definition: "${(p.definition || '').substring(0, 40)}..."`,
-    `Synonym: "${(p.synonyms || [])[0] || '?'}"`
-  ];
+
+  // Determine hint difficulty
+  // random: use _randomDifficulty stored on puzzle
+  // riddle: use state.difficulty (easy/medium/hard)
+  // theme:  always 'medium' (theme clues are inherently less direct)
+  const hintDiff = p._randomDifficulty
+    || (state.mode === 'theme' ? 'medium' : state.difficulty)
+    || 'medium';
+
+  const texts = getHints(hintDiff, p);
+
   state.hintsUsed++;
   document.getElementById(`hs-${state.hintsUsed}`).classList.add('used');
   document.getElementById('hint-num').textContent = state.hintsUsed;
   document.getElementById('hint-text').textContent = texts[n];
   document.getElementById('hint-panel').classList.add('visible');
   document.getElementById('guess-count').textContent = state.guessCount + ` +${state.hintsUsed}h`;
-  saveGameProgress(); // persist hint state
+  saveGameProgress();
 }
 
 // ── GIVE UP ──
@@ -3447,6 +3598,38 @@ function closeRules() {
   if (o) o.style.display = 'none';
 }
 
+// ── RANDOM DIFFICULTY EXPAND ──
+let randomExpanded = false;
+function toggleRandomExpand() {
+  randomExpanded = !randomExpanded;
+  const subs  = document.getElementById('random-sub-cards');
+  const arrow = document.getElementById('random-arrow');
+  if (subs)  subs.style.display  = randomExpanded ? 'flex' : 'none';
+  if (arrow) arrow.textContent   = randomExpanded ? '▲' : '▼';
+}
+
+function toggleLandingRandom() {
+  const subs  = document.getElementById('landing-random-subs');
+  const arrow = document.getElementById('landing-random-arrow');
+  if (!subs) return;
+  const open = subs.style.display !== 'none';
+  subs.style.display  = open ? 'none' : 'flex';
+  if (arrow) arrow.textContent = open ? '▼' : '▲';
+}
+
+// Start random mode with a specific difficulty
+// Fetches a riddle of the chosen difficulty so hints/words scale appropriately
+async function startRandomMode(difficulty) {
+  // Save current progress before switching
+  saveGameProgress();
+  // Clear current random cache so a new difficulty-appropriate puzzle is fetched
+  state.randomPuzzle = null;
+  clearProgressFor('random', difficulty); // key includes difficulty
+  // Store chosen random difficulty for this session
+  state.randomDifficulty = difficulty;
+  await startGame('random', difficulty);
+}
+
 // ── LANDING RULES ──
 function toggleLandingRules() {
   const exp = document.getElementById('landing-rules-expanded');
@@ -3495,11 +3678,6 @@ init().catch(err => {
     document.getElementById('landing').classList.add('active');
   }, 3000);
 });
-</script>
-<script type="module">
-  // Vercel Web Analytics
-  import { inject } from 'https://cdn.jsdelivr.net/npm/@vercel/analytics@1/dist/index.mjs';
-  inject();
 </script>
 </body>
 </html>
