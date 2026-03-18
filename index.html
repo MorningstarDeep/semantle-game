@@ -2236,12 +2236,24 @@ function browserLemmatize(word) {
 // ── LAYER 2: Supabase smart processor ──
 // ── SERVER: calls process_guess() RPC ──
 async function serverProcessGuess(guess, answer) {
-  const { data, error } = await db.rpc('process_guess', {
-    raw_guess: guess,
-    answer: answer
-  });
-  if (error || !data) return null;
-  return data;
+  try {
+    const { data, error } = await db.rpc('process_guess', {
+      raw_guess: guess,
+      answer: answer
+    });
+    if (error) {
+      // RPC call failed (network, auth, Supabase down)
+      // Return a sentinel so submitGuess can show a connection error
+      // NOT "not in dictionary" — that would be misleading
+      console.error('process_guess RPC error:', error);
+      return { _rpcError: true, message: error.message || 'Connection error' };
+    }
+    if (!data) return { _rpcError: true, message: 'No response from server' };
+    return data;
+  } catch (e) {
+    console.error('process_guess exception:', e);
+    return { _rpcError: true, message: e.message || 'Unknown error' };
+  }
 }
 
 // ── MAIN: Full pipeline ──
@@ -2280,6 +2292,12 @@ async function processGuess(rawGuess, answer) {
   }
 
   if (result) {
+    // RPC connection error — don't cache, return connection error
+    if (result._rpcError) {
+      return { word: normalized, typed: normalized, matched: normalized,
+               similarity: 0, corrected: false, notFound: false,
+               _rpcError: true, error: 'connection error' };
+    }
     const final = {
       word:       normalized,
       typed:      normalized,
@@ -2294,8 +2312,8 @@ async function processGuess(rawGuess, answer) {
     return final;
   }
 
-  // Server completely failed — return not found (no fake scores)
-  return { word: normalized, typed: normalized, matched: normalized, similarity: 0, corrected: false, notFound: true, error: 'word not found' };
+  // Server completely failed — return connection error (NOT "not found")
+  return { word: normalized, typed: normalized, matched: normalized, similarity: 0, corrected: false, notFound: false, _rpcError: true, error: 'connection error' };
 }
 
 function getHeatInfo(pct) {
@@ -2347,11 +2365,20 @@ async function submitGuess() {
   input.disabled = false;
   input.focus();
 
-  if (!result) { showFeedback('Something went wrong. Try again.', 'error'); return; }
+  if (!result) { showFeedback('Connection error. Try again.', 'error'); return; }
+
+  // ── RPC connection error (Supabase unreachable) ──
+  // Show connection error, NOT "not in dictionary" — word may well be valid
+  if (result._rpcError) {
+    showFeedback('Connection error — please try again.', 'error');
+    input.classList.add('shake');
+    setTimeout(() => input.classList.remove('shake'), 400);
+    input.value = normalized; // restore typed word
+    return;
+  }
 
   // ── Word not in vocabulary ──
-  // Only reject if server explicitly says not found — never reject based on similarity score
-  // (a word with 0% similarity to the answer is still a valid guess!)
+  // Only reject if server explicitly confirmed word not found
   if (result.notFound || result.error === 'word not found') {
     showFeedback(`"${normalized}" is not in our dictionary`, 'error');
     hideSuggestion();
