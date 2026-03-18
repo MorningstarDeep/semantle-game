@@ -608,9 +608,9 @@
         <div style="padding:16px 18px;">
           <div style="font-family:'DM Mono',monospace;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--accent);margin-bottom:10px;opacity:0.8;">How it works</div>
           <div style="display:flex;flex-direction:column;gap:7px;">
-            <div style="font-size:13px;color:var(--secondary);line-height:1.5;display:flex;gap:8px;"><span style="color:var(--accent);font-family:'DM Mono',monospace;flex-shrink:0;">1.</span>A secret word is hidden. Guess any word to see how semantically close you are.</div>
-            <div style="font-size:13px;color:var(--secondary);line-height:1.5;display:flex;gap:8px;"><span style="color:var(--accent);font-family:'DM Mono',monospace;flex-shrink:0;">2.</span>Scores from ❄️ 0% (cold) to 🔥🔥🔥🔥🔥 100% (exact match).</div>
-            <div style="font-size:13px;color:var(--secondary);line-height:1.5;display:flex;gap:8px;"><span style="color:var(--accent);font-family:'DM Mono',monospace;flex-shrink:0;">3.</span>Meaning matters — "ocean" scores higher than "pond" if the answer is "water".</div>
+            <div style="font-size:13px;color:var(--secondary);line-height:1.5;display:flex;gap:8px;"><span style="color:var(--accent);flex-shrink:0;">1.</span>A secret word is hidden. Guess any word to see how semantically close you are.</div>
+            <div style="font-size:13px;color:var(--secondary);line-height:1.5;display:flex;gap:8px;"><span style="color:var(--accent);flex-shrink:0;">2.</span>Scores from ❄️ 0% (cold) to 🔥🔥🔥🔥🔥 100% (exact match).</div>
+            <div style="font-size:13px;color:var(--secondary);line-height:1.5;display:flex;gap:8px;"><span style="color:var(--accent);flex-shrink:0;">3.</span>Meaning matters — "ocean" scores higher than "pond" if the answer is "water".</div>
           </div>
         </div>
         <button onclick="toggleLandingRules()" id="landing-rules-btn"
@@ -1434,7 +1434,6 @@ const ADMIN_USERNAME = 'morningstardeep';
 const ADMIN_PASSWORD_HASH = 'a79748fb0bae49272a7ef9168652eec8417ee763b384b5c1e773519a9f07fabf';
 
 // ── STATE ──
-// ── IST DATE ──
 function getTodayIST() {
   const now = new Date();
   return new Date(now.getTime() + 5.5*60*60*1000).toISOString().split('T')[0];
@@ -1580,7 +1579,7 @@ async function createSession(username) {
   localStorage.setItem('semantle_token', token);
   localStorage.setItem('semantle_username', username);
   state.username = username;
-  resetGameState(); // clear any game state from the anonymous session before loading fresh data
+  resetGameState(); // clear anonymous session state before loading logged-in state
   await Promise.all([loadUserStats(), loadDailyPuzzle()]);
   ['login-username','login-password','reg-username','reg-password','reg-confirm'].forEach(id => {
     const el = document.getElementById(id); if (el) el.value = '';
@@ -1601,7 +1600,7 @@ function logOut() {
     state.userStats = { streak: 0, best_streak: 0, total_solved: 0 };
     state.todaySolved = {}; state.todayGaveUp = {}; state.todayResults = {};
     state.dailyPuzzle = null;
-    resetGameState(); // clear game state and guess cache — sessions must not bleed
+    resetGameState();
     showScreen('landing');
     toast('Logged out. See you soon!');
   });
@@ -1761,7 +1760,7 @@ async function loadUserStats() {
     });
   }
 
-  // ── today's solved/gaveup status (loaded in parallel above) ──
+  // ── today's solved/gaveup (loaded in parallel above) ──
 
   state.todaySolved  = {};
   state.todayGaveUp  = {};
@@ -1876,112 +1875,109 @@ async function startGame(mode, difficulty) {
     }
   }
 
-  // Check if re-entering same session's random puzzle (preserve guesses)
-  const restoringRandom = (
-    mode === 'random'
-    && state.randomPuzzle
-    && !state.solved
-    && !state.gaveUp
-    && state.randomPuzzle._sessionUser === (state.username || 'anonymous')
-  );
+  // ── Check for saved in-progress game ──
+  // Restores guesses, hints, puzzle — so users never lose progress when navigating
+  const saved = getProgressFor(mode, difficulty);
+  const restoring = !!(saved && !saved.solved && !saved.gaveUp);
 
-  state.mode = mode;
+  // Set core mode state
+  state.mode       = mode;
   state.difficulty = difficulty;
-  state.solved = false;
-  state.gaveUp = false;
-
-  if (!restoringRandom) {
-    // Fresh game — reset all progress
-    state.guesses        = [];
-    state.hintsUsed      = 0;
-    state.guessCount     = 0;
-    state.bestSimilarity = 0;
-    state.startTime      = Date.now();
-  }
-  // If restoringRandom, keep existing guesses/progress intact
+  state.solved     = false;
+  state.gaveUp     = false;
   hideSuggestion();
   clearFeedback();
 
+  if (restoring) {
+    // ── RESTORE saved progress ──
+    state.guesses        = saved.guesses;
+    state.guessCount     = saved.guessCount;
+    state.hintsUsed      = saved.hintsUsed;
+    state.bestSimilarity = saved.bestSimilarity;
+    state.startTime      = saved.startTime;
+    state.currentPuzzle  = saved.currentPuzzle;
+  } else {
+    // ── FRESH game ──
+    state.guesses        = [];
+    state.guessCount     = 0;
+    state.hintsUsed      = 0;
+    state.bestSimilarity = 0;
+    state.startTime      = Date.now();
+    state.currentPuzzle  = null;
+  }
+
   // Re-enable input
-  const inp = document.getElementById('guess-input');
+  const inp  = document.getElementById('guess-input');
   const sbtn = document.querySelector('.submit-btn');
-  if (inp) { inp.disabled = false; inp.placeholder = 'Type a word...'; }
+  if (inp)  { inp.disabled  = false; inp.placeholder  = 'Type a word...'; }
   if (sbtn) { sbtn.disabled = false; sbtn.style.opacity = '1'; }
 
-  // Load puzzle data
-  let puzzle = null;
+  // ── Load puzzle (only needed for fresh game) ──
+  let puzzle = state.currentPuzzle;
 
-  if (mode === 'riddle') {
-    // Try daily puzzle first
-    if (state.dailyPuzzle && state.dailyPuzzle[difficulty]) {
-      puzzle = { ...state.dailyPuzzle[difficulty], mode: 'riddle' };
-    }
-    // Fallback: pull a random riddle of that difficulty from DB
-    if (!puzzle || !puzzle.answer) {
-      const { data } = await db.from('riddles').select('*').eq('difficulty', difficulty);
-      if (data && data.length) puzzle = { ...data[Math.floor(Math.random() * data.length)], mode: 'riddle' };
-    }
-
-  } else if (mode === 'theme') {
-    // Try daily puzzle first
-    if (state.dailyPuzzle && state.dailyPuzzle.theme_word && state.dailyPuzzle.theme) {
-      puzzle = {
-        theme: state.dailyPuzzle.theme,
-        answer: state.dailyPuzzle.theme_word,
-        category: state.dailyPuzzle.theme?.theme_name,
-        definition: `A word related to ${state.dailyPuzzle.theme?.theme_name}`,
-        synonyms: [],
-        mode: 'theme'
-      };
-    }
-    // Fallback: pick a random theme + word from themes table
-    if (!puzzle) {
-      const { data: themes } = await db.from('themes').select('*');
-      if (themes && themes.length) {
-        const t = themes[Math.floor(Math.random() * themes.length)];
-        const pool = t.word_pool || [];
-        const word = pool[Math.floor(Math.random() * pool.length)] || 'ocean';
-        puzzle = {
-          theme: { theme_name: t.theme_name, theme_emoji: t.theme_emoji },
-          answer: word,
-          category: t.theme_name,
-          definition: `A word related to ${t.theme_name}`,
-          synonyms: [],
-          mode: 'theme'
-        };
+  if (!restoring) {
+    if (mode === 'riddle') {
+      if (state.dailyPuzzle?.[difficulty]) {
+        puzzle = { ...state.dailyPuzzle[difficulty], mode: 'riddle' };
       }
-    }
-
-  } else {
-    // Random mode — cache puzzle per session type (anonymous vs logged-in)
-    // randomPuzzle is cleared on login/logout via resetGameState()
-    const canRestore = state.randomPuzzle
-      && !state.solved
-      && !state.gaveUp
-      && state.randomPuzzle._sessionUser === (state.username || 'anonymous');
-
-    if (canRestore) {
-      puzzle = state.randomPuzzle;
-    } else {
-      const { count } = await db.from('riddles').select('*', { count: 'exact', head: true });
-      if (count && count > 0) {
-        const offset = Math.floor(Math.random() * count);
+      if (!puzzle?.answer) {
         const { data } = await db.from('riddles')
           .select('id,riddle_text,answer,category,definition,synonyms,difficulty')
-          .range(offset, offset);
-        if (data && data.length) {
-          puzzle = { ...data[0], mode: 'random', _sessionUser: state.username || 'anonymous' };
-          state.randomPuzzle = puzzle;
+          .eq('difficulty', difficulty);
+        if (data?.length) puzzle = { ...data[Math.floor(Math.random()*data.length)], mode:'riddle' };
+      }
+    } else if (mode === 'theme') {
+      if (state.dailyPuzzle?.theme_word && state.dailyPuzzle?.theme) {
+        puzzle = {
+          theme:      state.dailyPuzzle.theme,
+          answer:     state.dailyPuzzle.theme_word,
+          category:   state.dailyPuzzle.theme?.theme_name,
+          definition: `A word related to ${state.dailyPuzzle.theme?.theme_name}`,
+          synonyms:   [],
+          mode:       'theme'
+        };
+      }
+      if (!puzzle) {
+        const { data: themes } = await db.from('themes')
+          .select('id,theme_name,theme_emoji,word_pool');
+        if (themes?.length) {
+          const t = themes[Math.floor(Math.random()*themes.length)];
+          const w = (t.word_pool||[])[Math.floor(Math.random()*(t.word_pool||[]).length)]||'ocean';
+          puzzle = {
+            theme:      { theme_name: t.theme_name, theme_emoji: t.theme_emoji },
+            answer:     w, category: t.theme_name,
+            definition: `A word related to ${t.theme_name}`,
+            synonyms:   [], mode: 'theme'
+          };
+        }
+      }
+    } else {
+      // Random mode — check randomPuzzle cache (same session only)
+      const cachedRandom = state.randomPuzzle;
+      const sameSession  = cachedRandom?._sessionUser === (state.username || 'anonymous');
+      if (cachedRandom && sameSession) {
+        puzzle = cachedRandom;
+      } else {
+        const { count } = await db.from('riddles').select('*', { count:'exact', head:true });
+        if (count > 0) {
+          const offset = Math.floor(Math.random() * count);
+          const { data } = await db.from('riddles')
+            .select('id,riddle_text,answer,category,definition,synonyms,difficulty')
+            .range(offset, offset);
+          if (data?.length) {
+            puzzle = { ...data[0], mode:'random', _sessionUser: state.username||'anonymous' };
+            state.randomPuzzle = puzzle;
+          }
         }
       }
     }
+
+    if (!puzzle) { toast('Could not load puzzle. Try again.', 'red'); return; }
+    state.currentPuzzle = puzzle;
   }
 
-  if (!puzzle) { toast('Could not load puzzle. Try again.', 'red'); return; }
-  state.currentPuzzle = puzzle;
-
-  // Build game UI
-  const modeLabels = { riddle: 'Daily Riddle · ' + difficulty, theme: 'Daily Theme', random: 'Random Mode' };
+  // ── Build game UI ──
+  const modeLabels = { riddle:'Daily Riddle · '+difficulty, theme:'Daily Theme', random:'Random Mode' };
   document.getElementById('mode-label').textContent = modeLabels[mode] || mode;
   const streakBadge = document.getElementById('streak-badge');
   if (streakBadge) streakBadge.style.display = (mode !== 'random' && !!state.username) ? 'flex' : 'none';
@@ -1989,34 +1985,60 @@ async function startGame(mode, difficulty) {
   // Puzzle card
   if (mode === 'riddle') {
     document.getElementById('riddle-label-text').textContent =
-      `Today's Riddle · ${difficulty.charAt(0).toUpperCase() + difficulty.slice(1)}`;
+      `Today's Riddle · ${difficulty.charAt(0).toUpperCase()+difficulty.slice(1)}`;
     document.getElementById('riddle-text').textContent = puzzle.riddle_text;
     const diffMap = { easy:1, medium:2, hard:3 };
     document.getElementById('diff-pips').innerHTML = [1,2,3].map(n =>
-      `<div class="pip ${n <= (diffMap[difficulty]||0) ? 'active' : ''}"></div>`).join('');
+      `<div class="pip ${n<=(diffMap[difficulty]||0)?'active':''}"></div>`).join('');
     document.getElementById('puzzle-card').style.display = 'block';
   } else if (mode === 'theme') {
     document.getElementById('riddle-label-text').textContent = `Today's Theme`;
     document.getElementById('riddle-text').innerHTML =
-      `<span style="font-size:clamp(16px,4.5vw,22px);">${puzzle.theme?.theme_emoji || '🎯'} ${puzzle.theme?.theme_name || 'Unknown'}</span><br><span style="font-size:15px;font-weight:400;color:var(--secondary);font-family:'DM Sans',sans-serif;">Guess the hidden word associated with this theme!</span>`;
+      `<span style="font-size:clamp(16px,4.5vw,22px);">${puzzle.theme?.theme_emoji||'🎯'} ${puzzle.theme?.theme_name||'Unknown'}</span><br><span style="font-size:15px;font-weight:400;color:var(--secondary);font-family:'DM Sans',sans-serif;">Guess the hidden word associated with this theme!</span>`;
     document.getElementById('diff-pips').innerHTML = '';
     document.getElementById('puzzle-card').style.display = 'block';
   } else {
     document.getElementById('puzzle-card').style.display = 'none';
   }
 
-  // Reset UI
-  document.getElementById('guess-list').innerHTML = '';
-  document.getElementById('guess-count').textContent = '0';
-  document.getElementById('progress-pct').textContent = '0%';
-  document.getElementById('progress-fill').style.width = '0%';
-  document.getElementById('feedback-msg').textContent = '';
-  document.getElementById('hint-panel').classList.remove('visible');
-  document.getElementById('guess-input').value = '';
-  for (let i = 1; i <= 5; i++) document.getElementById(`hs-${i}`).classList.remove('used');
+  // ── Reset or restore UI ──
   document.getElementById('win-overlay').classList.remove('visible');
+  document.getElementById('guess-input').value = '';
+  document.getElementById('feedback-msg').textContent = '';
 
-  // Show refresh button only in random mode
+  if (restoring && state.guesses.length > 0) {
+    // Restore all guess UI
+    renderGuesses();
+    updateProgress(state.bestSimilarity);
+    document.getElementById('guess-count').textContent =
+      state.guessCount + (state.hintsUsed ? ` +${state.hintsUsed}h` : '');
+    // Restore hint slots
+    for (let i = 1; i <= 5; i++) {
+      const el = document.getElementById(`hs-${i}`);
+      if (el) el.classList.toggle('used', i <= state.hintsUsed);
+    }
+    // Restore last hint text if any hints were used
+    if (state.hintsUsed > 0 && saved.lastHintText) {
+      document.getElementById('hint-num').textContent  = state.hintsUsed;
+      document.getElementById('hint-text').textContent = saved.lastHintText;
+      document.getElementById('hint-panel').classList.add('visible');
+    } else {
+      document.getElementById('hint-panel').classList.remove('visible');
+    }
+  } else {
+    // Fresh UI
+    document.getElementById('guess-list').innerHTML   = '';
+    document.getElementById('guess-count').textContent = '0';
+    document.getElementById('progress-pct').textContent = '0%';
+    document.getElementById('progress-fill').style.width = '0%';
+    document.getElementById('hint-panel').classList.remove('visible');
+    for (let i = 1; i <= 5; i++) {
+      const el = document.getElementById(`hs-${i}`);
+      if (el) el.classList.remove('used');
+    }
+  }
+
+  // Refresh button (random mode only)
   const refreshBtn = document.getElementById('refresh-btn');
   if (refreshBtn) refreshBtn.style.display = mode === 'random' ? 'block' : 'none';
 
@@ -2030,14 +2052,10 @@ async function startGame(mode, difficulty) {
 // Layer 2 — Supabase: fuzzy match + similarity (smart)
 // ══════════════════════════════════════════════════════
 
-let guessCache = {}; // cache full results by "guess|answer"
-                    // WARNING: must be cleared on every login/logout via resetGameState()
-
-// ── RESET ALL GAME STATE ──
-// Called on logout, login, and any session transition.
-// Clears game state AND guess cache to prevent session bleed.
+let guessCache = {};
 function resetGameState() {
-  guessCache = {};                  // clear cache — logged-out guesses must not persist
+  guessCache    = {};
+  gameProgress  = {};
   state.guesses        = [];
   state.guessCount     = 0;
   state.hintsUsed      = 0;
@@ -2046,9 +2064,55 @@ function resetGameState() {
   state.gaveUp         = false;
   state.startTime      = null;
   state.currentPuzzle  = null;
-  state.randomPuzzle   = null;     // clear random puzzle cache on session change
+  state.randomPuzzle   = null;
   state.mode           = null;
   state.difficulty     = null;
+}     // cleared on session change via resetGameState()
+let gameProgress = {};   // in-progress game states, keyed by mode+date+session
+
+// ── GAME PROGRESS KEY ──
+function getProgressKey(mode, difficulty) {
+  if (mode === 'random') return 'random-' + (state.username || 'anonymous');
+  const today = getTodayIST();
+  if (mode === 'theme') return 'theme-' + today;
+  return 'riddle-' + difficulty + '-' + today;
+}
+
+// ── SAVE CURRENT GAME PROGRESS ──
+// Called when user navigates away mid-game (goHome, back button)
+// Saves guesses, hints, puzzle, time — everything needed to restore
+function saveGameProgress() {
+  if (!state.currentPuzzle || state.solved || state.gaveUp) return;
+  if (!state.mode) return;
+  const key = getProgressKey(state.mode, state.difficulty);
+  gameProgress[key] = {
+    guesses:       [...state.guesses],
+    guessCount:    state.guessCount,
+    hintsUsed:     state.hintsUsed,
+    bestSimilarity:state.bestSimilarity,
+    startTime:     state.startTime,
+    currentPuzzle: state.currentPuzzle,
+    mode:          state.mode,
+    difficulty:    state.difficulty,
+    // Store last hint text so it can be restored
+    lastHintText:  document.getElementById('hint-text')?.textContent || null
+  };
+}
+
+// ── RESTORE GAME PROGRESS ──
+// Returns saved progress if it exists and game wasn't finished
+function getProgressFor(mode, difficulty) {
+  const key = getProgressKey(mode, difficulty);
+  const saved = gameProgress[key];
+  if (!saved) return null;
+  // Validate: puzzle must match (guards against day rollover)
+  return saved;
+}
+
+// ── CLEAR GAME PROGRESS ──
+function clearProgressFor(mode, difficulty) {
+  const key = getProgressKey(mode, difficulty);
+  delete gameProgress[key];
 }
 
 // ── LAYER 1: Browser lemmatizer ──
@@ -2421,6 +2485,7 @@ function giveUp() {
           theme: state.currentPuzzle.theme || null,
           mode: state.mode, difficulty: state.difficulty
         };
+        clearProgressFor(state.mode, state.difficulty); // game over — remove saved progress
         await breakStreak();
       }
     }
@@ -2441,6 +2506,7 @@ function nextPuzzle() {
 
 function goHome() {
   document.getElementById('win-overlay').classList.remove('visible');
+  saveGameProgress(); // save mid-game progress before navigating away
   if (state.username) {
     refreshHomeUI();
     showScreen('home');
@@ -2598,17 +2664,15 @@ function showEndScreen(mode, difficulty, status) {
     document.getElementById('end-subtitle').textContent = 'You gave up on this puzzle today. The answer was:';
   }
 
-  // ── Answer — ALWAYS from todayResults[ptype] (stored at solve/giveUp) ──
-  // NEVER read from state.currentPuzzle here — it changes when a new game starts
+  // ── Answer — from todayResults (stored at solve/giveUp time) ──
   const storedAnswer     = result.answer;
   const storedRiddleText = result.riddleText;
   const storedTheme      = result.theme;
 
   const answer = storedAnswer
-    || (mode === 'riddle' ? state.dailyPuzzle?.[difficulty]?.answer : null)
-    || (mode === 'theme'  ? state.dailyPuzzle?.theme_word : null)
+    || (mode==='riddle' ? state.dailyPuzzle?.[difficulty]?.answer : null)
+    || (mode==='theme'  ? state.dailyPuzzle?.theme_word : null)
     || '?';
-
   document.getElementById('end-answer').textContent = answer;
 
   const ctx      = document.getElementById('end-context');
@@ -2650,9 +2714,9 @@ async function showWin() {
     const today = getTodayIST();
     const ptype = state.mode === 'theme' ? 'theme' : state.difficulty;
 
-    const newStreak = (state.userStats.streak || 0) + 1;
-    const newBest   = Math.max(newStreak, state.userStats.best_streak || 0);
-    const newSolved = (state.userStats.total_solved || 0) + 1;
+    const newStreak = (state.userStats.streak||0)+1;
+    const newBest   = Math.max(newStreak, state.userStats.best_streak||0);
+    const newSolved = (state.userStats.total_solved||0)+1;
     await Promise.all([
       db.from('leaderboard').upsert({
         username: state.username, puzzle_type: ptype,
@@ -2678,6 +2742,7 @@ async function showWin() {
       theme: state.currentPuzzle.theme || null,
       mode: state.mode, difficulty: state.difficulty
     };
+    clearProgressFor(state.mode, state.difficulty); // game over — remove saved progress
 
     // Show inline end screen
     showEndScreen(state.mode, state.difficulty, 'solved');
@@ -2703,7 +2768,8 @@ function refreshRandom() {
     'This will start a fresh random puzzle. Your current progress will be lost.',
     'Yes, new word',
     () => {
-      state.randomPuzzle = null; // force new fetch
+      clearProgressFor('random', 'random'); // clear saved random progress
+      state.randomPuzzle = null;            // force new fetch
       state.solved = false;
       state.gaveUp = false;
       startGame('random', 'random');
@@ -3282,18 +3348,17 @@ function closeRules() {
 // ── LANDING RULES ──
 function toggleLandingRules() {
   const exp = document.getElementById('landing-rules-expanded');
-  const open = exp && exp.style.display !== 'none';
-  if (exp) exp.style.display = open ? 'none' : 'block';
+  if (!exp) return;
+  const open = exp.style.display !== 'none';
+  exp.style.display = open ? 'none' : 'block';
   const arrow = document.getElementById('landing-rules-arrow');
   const label = document.getElementById('landing-rules-label');
   if (arrow) arrow.textContent = open ? '▼' : '▲';
   if (label) label.textContent = open ? 'SHOW MORE' : 'SHOW LESS';
 }
-
-// ── PROFILE DROPDOWN ──
 function toggleProfileMenu() {
   const dd = document.getElementById('profile-dropdown');
-  if (dd) dd.style.display = dd.style.display === 'none' ? 'block' : 'none';
+  if (dd) dd.style.display = dd.style.display==='none' ? 'block' : 'none';
 }
 function closeProfileMenu() {
   const dd = document.getElementById('profile-dropdown');
@@ -3305,8 +3370,6 @@ document.addEventListener('click', e => {
   if (dd && btn && !btn.contains(e.target) && !dd.contains(e.target))
     dd.style.display = 'none';
 });
-
-// ── RULES MODAL ──
 function showRules() {
   closeProfileMenu();
   const o = document.getElementById('rules-overlay');
