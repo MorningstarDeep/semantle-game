@@ -5,7 +5,10 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="description" content="Play Semantle online – guess the hidden word using meaning similarity. A fun semantic word game with unlimited practice mode." />
 <title>Semantle Game – Guess the Word by Meaning Online</title>
-<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preload" href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500&display=swap" as="style" onload="this.onload=null;this.rel='stylesheet'">
+<noscript><link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"></noscript>
 <link rel="canonical" href="https://semantle.me/" />
 <meta name="theme-color" content="#080b0f">
 <meta property="og:site_name" content="Semantle">
@@ -21,7 +24,7 @@
 <meta name="twitter:description" content="Play Semantle online. Guess the hidden word using meaning similarity.">
 <meta name="twitter:image" content="https://semantle.me/og-image.png">
 <meta name="robots" content="index, follow">
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script>
 <style>
   /* ══════════════════════════════════════════════════
      CSS CUSTOM PROPERTIES
@@ -599,7 +602,7 @@
       </div>
     </div>
 
-    <!-- How it works — inline on landing -->
+    <!-- How it works — inline -->
     <div style="width:100%;animation:fadeUp 0.8s 0.15s ease both;">
       <div style="background:var(--card);border:1px solid var(--border);border-radius:14px;overflow:hidden;">
         <div style="padding:16px 18px;">
@@ -617,13 +620,12 @@
         </button>
         <div id="landing-rules-expanded" style="display:none;padding:0 18px 16px;border-top:1px solid var(--border);">
           <div style="margin-top:14px;display:flex;flex-direction:column;gap:7px;font-size:12px;color:var(--secondary);">
-            <div style="display:flex;gap:8px;"><span style="color:var(--accent);flex-shrink:0;">✓</span>Daily Riddle & Theme modes require login. One attempt per day. Builds streak.</div>
-            <div style="display:flex;gap:8px;"><span style="color:var(--accent);flex-shrink:0;">✓</span>Random mode is free, unlimited, no streak. Great for practice.</div>
-            <div style="display:flex;gap:8px;"><span style="color:var(--accent);flex-shrink:0;">✓</span>Up to 5 hints — letter count, category, definition, synonym.</div>
-            <div style="display:flex;gap:8px;"><span style="color:var(--accent);flex-shrink:0;">✓</span>Giving up on a daily puzzle breaks your streak. Solving keeps it alive.</div>
-            <div style="display:flex;gap:8px;"><span style="color:#ef4444;flex-shrink:0;">✗</span>Only real dictionary words accepted — gibberish is rejected.</div>
+            <div style="display:flex;gap:8px;"><span style="color:var(--accent);flex-shrink:0;">✓</span>Daily Riddle & Theme: login required, one attempt/day, builds streak.</div>
+            <div style="display:flex;gap:8px;"><span style="color:var(--accent);flex-shrink:0;">✓</span>Random mode: free, unlimited, no streak.</div>
+            <div style="display:flex;gap:8px;"><span style="color:var(--accent);flex-shrink:0;">✓</span>Up to 5 hints per game.</div>
+            <div style="display:flex;gap:8px;"><span style="color:#ef4444;flex-shrink:0;">✗</span>Only real dictionary words accepted.</div>
           </div>
-          <button onclick="showRules()" style="margin-top:12px;width:100%;background:none;border:1px solid var(--border);color:var(--secondary);border-radius:8px;padding:9px;font-family:'DM Mono',monospace;font-size:11px;cursor:pointer;transition:all 0.2s;" onmouseover="this.style.borderColor='var(--accent)';this.style.color='var(--accent)'" onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--secondary)'">📖 Full Rules & Examples →</button>
+          <button onclick="showRules()" style="margin-top:12px;width:100%;background:none;border:1px solid var(--border);color:var(--secondary);border-radius:8px;padding:9px;font-family:'DM Mono',monospace;font-size:11px;cursor:pointer;transition:all 0.2s;" onmouseover="this.style.borderColor='var(--accent)';this.style.color='var(--accent)'" onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--secondary)'">📖 Full Rules →</button>
         </div>
       </div>
     </div>
@@ -1723,9 +1725,20 @@ async function submitRename() {
 
 // ── LOAD USER STATS ──
 async function loadUserStats() {
+  const today = new Date().toISOString().split('T')[0];
+
+  // Run both queries in parallel
+  const [userResult, progResult] = await Promise.all([
+    db.from('users').select('*').eq('username', state.username).single(),
+    db.from('user_progress')
+      .select('puzzle_type, solved, guesses, hints_used, time_seconds')
+      .eq('username', state.username).eq('date', today)
+  ]);
+
+  const userData = userResult.data;
+  const prog = progResult.data;
+
   // ── users row ──
-  const { data: userData } = await db
-    .from('users').select('*').eq('username', state.username).single();
 
   if (userData) {
     // Row exists — use DB values
@@ -1746,13 +1759,7 @@ async function loadUserStats() {
     });
   }
 
-  // ── today's solved/gaveup status (user_progress) ──
-  const today = new Date().toISOString().split('T')[0];
-  const { data: prog } = await db
-    .from('user_progress')
-    .select('puzzle_type, solved, guesses, hints_used, time_seconds')
-    .eq('username', state.username)
-    .eq('date', today);
+  // ── today's solved/gaveup status (already loaded in parallel above) ──
 
   state.todaySolved  = {};
   state.todayGaveUp  = {};
@@ -1895,7 +1902,9 @@ async function startGame(mode, difficulty) {
     }
     // Fallback: pull a random riddle of that difficulty from DB
     if (!puzzle || !puzzle.answer) {
-      const { data } = await db.from('riddles').select('*').eq('difficulty', difficulty);
+      const { data } = await db.from('riddles')
+        .select('id,riddle_text,answer,category,definition,synonyms,difficulty')
+        .eq('difficulty', difficulty);
       if (data && data.length) puzzle = { ...data[Math.floor(Math.random() * data.length)], mode: 'riddle' };
     }
 
@@ -1913,7 +1922,7 @@ async function startGame(mode, difficulty) {
     }
     // Fallback: pick a random theme + word from themes table
     if (!puzzle) {
-      const { data: themes } = await db.from('themes').select('*');
+      const { data: themes } = await db.from('themes').select('id,theme_name,theme_emoji,word_pool');
       if (themes && themes.length) {
         const t = themes[Math.floor(Math.random() * themes.length)];
         const pool = t.word_pool || [];
@@ -2594,25 +2603,26 @@ async function showWin() {
     const today = new Date().toISOString().split('T')[0];
     const ptype = state.mode === 'theme' ? 'theme' : state.difficulty;
 
-    await db.from('leaderboard').upsert({
-      username: state.username, puzzle_type: ptype,
-      guesses: totalGuesses, hints_used: state.hintsUsed,
-      time_seconds: elapsed, date: today
-    }, { onConflict: 'username,puzzle_type,date' });
+    const newStreak = (state.userStats.streak || 0) + 1;
+    const newBest   = Math.max(newStreak, state.userStats.best_streak || 0);
+    const newSolved = (state.userStats.total_solved || 0) + 1;
 
-    await db.from('user_progress').upsert({
-      username: state.username, puzzle_type: ptype, date: today,
-      solved: true, guesses: totalGuesses,
-      hints_used: state.hintsUsed, time_seconds: elapsed
-    }, { onConflict: 'username,puzzle_type,date' });
-
-    const newStreak  = (state.userStats.streak || 0) + 1;
-    const newBest    = Math.max(newStreak, state.userStats.best_streak || 0);
-    const newSolved  = (state.userStats.total_solved || 0) + 1;
-
-    await db.from('users').update({
-      streak: newStreak, best_streak: newBest, total_solved: newSolved
-    }).eq('username', state.username);
+    // Fire all 3 DB writes in parallel — saves ~400ms
+    await Promise.all([
+      db.from('leaderboard').upsert({
+        username: state.username, puzzle_type: ptype,
+        guesses: totalGuesses, hints_used: state.hintsUsed,
+        time_seconds: elapsed, date: today
+      }, { onConflict: 'username,puzzle_type,date' }),
+      db.from('user_progress').upsert({
+        username: state.username, puzzle_type: ptype, date: today,
+        solved: true, guesses: totalGuesses,
+        hints_used: state.hintsUsed, time_seconds: elapsed
+      }, { onConflict: 'username,puzzle_type,date' }),
+      db.from('users').update({
+        streak: newStreak, best_streak: newBest, total_solved: newSolved
+      }).eq('username', state.username)
+    ]);
 
     state.userStats = { ...state.userStats, streak: newStreak, best_streak: newBest, total_solved: newSolved };
     state.todaySolved[ptype] = true;
