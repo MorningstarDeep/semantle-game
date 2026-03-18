@@ -1579,8 +1579,9 @@ async function createSession(username) {
   localStorage.setItem('semantle_token', token);
   localStorage.setItem('semantle_username', username);
   state.username = username;
-  resetGameState(); // clear anonymous session state before loading logged-in state
+  resetGameState(); // clear live session state — but NOT localStorage progress
   await Promise.all([loadUserStats(), loadDailyPuzzle()]);
+  loadAllProgress(); // reload progress from localStorage for new session
   ['login-username','login-password','reg-username','reg-password','reg-confirm'].forEach(id => {
     const el = document.getElementById(id); if (el) el.value = '';
   });
@@ -1596,11 +1597,13 @@ function logOut() {
     if (token) await db.from('sessions').delete().eq('token', token);
     localStorage.removeItem('semantle_token');
     localStorage.removeItem('semantle_username');
+    saveGameProgress(); // save any mid-game progress before logout
     state.username = null;
     state.userStats = { streak: 0, best_streak: 0, total_solved: 0 };
     state.todaySolved = {}; state.todayGaveUp = {}; state.todayResults = {};
     state.dailyPuzzle = null;
-    resetGameState();
+    resetGameState(); // clear live session state — localStorage progress preserved
+    loadAllProgress(); // re-mirror from localStorage for anonymous session
     showScreen('landing');
     toast('Logged out. See you soon!');
   });
@@ -2054,8 +2057,10 @@ async function startGame(mode, difficulty) {
 
 let guessCache = {};
 function resetGameState() {
+  // NOTE: Does NOT clear gameProgress or localStorage —
+  // progress persists across logout/login (user expectation).
+  // Only clears the live in-memory game session.
   guessCache    = {};
-  gameProgress  = {};
   state.guesses        = [];
   state.guessCount     = 0;
   state.hintsUsed      = 0;
@@ -2067,52 +2072,97 @@ function resetGameState() {
   state.randomPuzzle   = null;
   state.mode           = null;
   state.difficulty     = null;
-}     // cleared on session change via resetGameState()
-let gameProgress = {};   // in-progress game states, keyed by mode+date+session
+}
 
-// ── GAME PROGRESS KEY ──
+// ── GAME PROGRESS — localStorage-backed ──
+// Progress survives logout, page refresh, and re-login.
+// Keys embed date (daily modes) or username (random) so:
+//   - Next day → stale key → ignored → fresh start automatically
+//   - New user login → different random key → no bleed
+//   - Same user re-login → same key → progress restored ✅
+//
+// Storage key prefix: 'smp_' (semantle progress)
+// All writes/reads go through these 4 functions.
+
+let gameProgress = {}; // in-memory mirror of localStorage entries
+
+// ── PROGRESS KEY ──
 function getProgressKey(mode, difficulty) {
-  if (mode === 'random') return 'random-' + (state.username || 'anonymous');
+  if (mode === 'random') {
+    // Keyed to user: anonymous vs logged-in get separate random puzzles
+    return 'random-' + (state.username || 'anonymous');
+  }
   const today = getTodayIST();
   if (mode === 'theme') return 'theme-' + today;
   return 'riddle-' + difficulty + '-' + today;
 }
 
+// ── LOAD ALL PROGRESS FROM localStorage ──
+// Called once at page init. Populates in-memory mirror.
+// Prunes entries older than today to keep localStorage clean.
+function loadAllProgress() {
+  const today = getTodayIST();
+  const keysToRemove = [];
+  for (let i = 0; i < localStorage.length; i++) {
+    const lsKey = localStorage.key(i);
+    if (!lsKey || !lsKey.startsWith('smp_')) continue;
+    try {
+      const data = JSON.parse(localStorage.getItem(lsKey));
+      if (!data) { keysToRemove.push(lsKey); continue; }
+      // Prune stale daily entries (wrong date)
+      const progKey = lsKey.slice(4); // strip 'smp_' prefix
+      if ((progKey.startsWith('riddle-') || progKey.startsWith('theme-'))
+          && !progKey.endsWith(today)) {
+        keysToRemove.push(lsKey);
+        continue;
+      }
+      gameProgress[progKey] = data;
+    } catch(e) { keysToRemove.push(lsKey); }
+  }
+  keysToRemove.forEach(k => { try { localStorage.removeItem(k); } catch(e) {} });
+}
+
 // ── SAVE CURRENT GAME PROGRESS ──
-// Called when user navigates away mid-game (goHome, back button)
-// Saves guesses, hints, puzzle, time — everything needed to restore
+// Called on every guess, hint, and when navigating away.
 function saveGameProgress() {
   if (!state.currentPuzzle || state.solved || state.gaveUp) return;
   if (!state.mode) return;
   const key = getProgressKey(state.mode, state.difficulty);
-  gameProgress[key] = {
-    guesses:       [...state.guesses],
-    guessCount:    state.guessCount,
-    hintsUsed:     state.hintsUsed,
-    bestSimilarity:state.bestSimilarity,
-    startTime:     state.startTime,
-    currentPuzzle: state.currentPuzzle,
-    mode:          state.mode,
-    difficulty:    state.difficulty,
-    // Store last hint text so it can be restored
-    lastHintText:  document.getElementById('hint-text')?.textContent || null
+  const data = {
+    guesses:        [...state.guesses],
+    guessCount:     state.guessCount,
+    hintsUsed:      state.hintsUsed,
+    bestSimilarity: state.bestSimilarity,
+    startTime:      state.startTime,
+    currentPuzzle:  state.currentPuzzle,
+    mode:           state.mode,
+    difficulty:     state.difficulty,
+    lastHintText:   document.getElementById('hint-text')?.textContent || null
   };
+  gameProgress[key] = data;
+  try { localStorage.setItem('smp_' + key, JSON.stringify(data)); } catch(e) {}
 }
 
-// ── RESTORE GAME PROGRESS ──
-// Returns saved progress if it exists and game wasn't finished
+// ── GET SAVED PROGRESS ──
 function getProgressFor(mode, difficulty) {
+  // Try memory first (fastest), fall back to localStorage
   const key = getProgressKey(mode, difficulty);
-  const saved = gameProgress[key];
-  if (!saved) return null;
-  // Validate: puzzle must match (guards against day rollover)
-  return saved;
+  if (gameProgress[key]) return gameProgress[key];
+  try {
+    const raw = localStorage.getItem('smp_' + key);
+    if (raw) {
+      const data = JSON.parse(raw);
+      if (data) { gameProgress[key] = data; return data; }
+    }
+  } catch(e) {}
+  return null;
 }
 
-// ── CLEAR GAME PROGRESS ──
+// ── CLEAR PROGRESS (game over) ──
 function clearProgressFor(mode, difficulty) {
   const key = getProgressKey(mode, difficulty);
   delete gameProgress[key];
+  try { localStorage.removeItem('smp_' + key); } catch(e) {}
 }
 
 // ── LAYER 1: Browser lemmatizer ──
@@ -2357,6 +2407,7 @@ async function submitGuess() {
 
   updateProgress(state.bestSimilarity);
   renderGuesses();
+  saveGameProgress(); // persist after every guess
   document.getElementById('guess-count').textContent = state.guessCount + (state.hintsUsed ? ` +${state.hintsUsed}h` : '');
 
   if (result.matched === state.currentPuzzle.answer.toLowerCase() || result.similarity >= 99.9) {
@@ -2439,6 +2490,7 @@ function getHint() {
   document.getElementById('hint-text').textContent = texts[n];
   document.getElementById('hint-panel').classList.add('visible');
   document.getElementById('guess-count').textContent = state.guessCount + ` +${state.hintsUsed}h`;
+  saveGameProgress(); // persist hint state
 }
 
 // ── GIVE UP ──
@@ -3381,6 +3433,7 @@ function closeRules() {
 }
 
 // ── START ──
+loadAllProgress(); // restore any in-progress games from localStorage
 init().catch(err => {
   console.error('Init failed:', err);
   // Show error on loading screen for debugging
