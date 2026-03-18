@@ -2380,7 +2380,7 @@ async function submitGuess() {
   // ── Word not in vocabulary ──
   // Only reject if server explicitly confirmed word not found
   if (result.notFound || result.error === 'word not found') {
-    showFeedback(`"${normalized}" is not in our dictionary`, 'error');
+    showFeedback(`"${normalized}" is not a valid word`, 'error');
     hideSuggestion();
     input.classList.add('shake');
     setTimeout(() => input.classList.remove('shake'), 400);
