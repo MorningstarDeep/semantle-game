@@ -2084,7 +2084,7 @@ async function processGuess(rawGuess, answer) {
       word:       normalized,
       typed:      normalized,
       matched:    result.matched || normalized,
-      similarity: result.similarity || 0,
+      similarity: result.similarity != null ? result.similarity : 0,
       corrected:  result.corrected || false,
       notFound:   result.error === 'word not found',
       error:      result.error || null
@@ -2150,7 +2150,9 @@ async function submitGuess() {
   if (!result) { showFeedback('Something went wrong. Try again.', 'error'); return; }
 
   // ── Word not in vocabulary ──
-  if (result.notFound || result.similarity === 0 || result.error === 'word not found') {
+  // Only reject if server explicitly says not found — never reject based on similarity score
+  // (a word with 0% similarity to the answer is still a valid guess!)
+  if (result.notFound || result.error === 'word not found') {
     showFeedback(`"${normalized}" is not in our dictionary`, 'error');
     hideSuggestion();
     input.classList.add('shake');
