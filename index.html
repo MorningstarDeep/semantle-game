@@ -2514,8 +2514,18 @@ function giveUp() {
 
       showFeedback(`The answer was: ${state.currentPuzzle.answer}`, 'error');
 
-      // Save gave-up state to DB so it persists across sessions
-      if (state.mode !== 'random') {
+      if (state.mode === 'random') {
+        // Random mode give up: clear progress AND puzzle cache
+        // so next entry gives a completely fresh word
+        clearProgressFor('random', 'random');
+        state.randomPuzzle = null;
+        // Update total_solved count only (no streak for random)
+        if (state.username) {
+          const newSolved = (state.userStats.total_solved || 0) + 0; // gave up, don't count
+          // Nothing to update — gave up doesn't count as solved
+        }
+      } else {
+        // Daily modes: save to DB, update streak, lock mode for the day
         const today = getTodayIST();
         const ptype = state.mode === 'theme' ? 'theme' : state.difficulty;
         await db.from('user_progress').upsert({
@@ -2800,9 +2810,14 @@ async function showWin() {
     showEndScreen(state.mode, state.difficulty, 'solved');
 
   } else {
-    // Random mode — use win overlay
+    // Random mode solved: clear progress + puzzle cache → fresh word on next entry
+    clearProgressFor('random', 'random');
+    state.randomPuzzle = null;
+
     const newSolved = (state.userStats.total_solved || 0) + 1;
-    await db.from('users').update({ total_solved: newSolved }).eq('username', state.username);
+    if (state.username) {
+      await db.from('users').update({ total_solved: newSolved }).eq('username', state.username);
+    }
     state.userStats.total_solved = newSolved;
 
     document.getElementById('win-word').textContent    = state.currentPuzzle.answer;
