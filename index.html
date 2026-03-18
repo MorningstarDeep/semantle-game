@@ -592,29 +592,35 @@
     <!-- Random mode — open to all -->
     <div style="width:100%;animation:fadeUp 0.8s 0.1s ease both;">
       <div style="font-family:'DM Mono',monospace;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);text-align:center;margin-bottom:12px;word-break:break-word;">Play instantly — no account needed</div>
-      <div class="mode-card" id="landing-random-card" onclick="toggleLandingRandom()" style="border-color:var(--accent);background:linear-gradient(135deg,rgba(0,255,136,0.06),var(--card));cursor:pointer;">
-        <div class="mode-icon" style="font-size:32px;border:none;background:transparent;">♾️</div>
-        <div class="mode-info">
-          <div class="mode-name">Random Mode</div>
-          <div class="mode-desc">Choose difficulty and play instantly.</div>
+
+      <!-- Random mode card + expandable difficulty — single bordered container -->
+      <div style="background:var(--card);border:1px solid var(--accent);border-radius:16px;overflow:hidden;">
+        <!-- Header row -->
+        <div onclick="toggleLandingRandom()" style="display:flex;align-items:center;gap:14px;padding:16px 18px;cursor:pointer;background:linear-gradient(135deg,rgba(0,255,136,0.07),transparent);transition:background 0.2s;" onmouseover="this.style.background='linear-gradient(135deg,rgba(0,255,136,0.12),transparent)'" onmouseout="this.style.background='linear-gradient(135deg,rgba(0,255,136,0.07),transparent)'">
+          <div style="font-size:30px;width:48px;height:48px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">♾️</div>
+          <div style="flex:1;">
+            <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:16px;">Random Mode</div>
+            <div style="font-size:13px;color:var(--secondary);margin-top:2px;">Choose difficulty and play instantly.</div>
+          </div>
+          <div style="display:flex;align-items:center;gap:8px;flex-shrink:0;">
+            <div style="font-family:'DM Mono',monospace;font-size:11px;color:var(--accent);background:var(--accent-glow);border:1px solid rgba(0,255,136,0.3);padding:4px 10px;border-radius:20px;">Free</div>
+            <span id="landing-random-arrow" style="font-size:11px;color:var(--muted);font-family:'DM Mono',monospace;transition:transform 0.2s;">▼</span>
+          </div>
         </div>
-        <div style="display:flex;align-items:center;gap:8px;">
-          <div style="font-family:'DM Mono',monospace;font-size:11px;color:var(--accent);background:var(--accent-glow);border:1px solid rgba(0,255,136,0.3);padding:4px 10px;border-radius:20px;">Free</div>
-          <span style="font-size:11px;color:var(--muted);font-family:'DM Mono',monospace;" id="landing-random-arrow">▼</span>
-        </div>
-      </div>
-      <div id="landing-random-subs" style="display:none;flex-direction:column;gap:8px;padding:0 4px;margin-top:-10px;">
-        <div class="mode-card sub-card" onclick="startRandomMode('easy')" style="border-color:rgba(0,255,136,0.3);">
-          <div class="mode-icon" style="width:36px;height:36px;font-size:18px;">🟢</div>
-          <div class="mode-info"><div class="mode-name" style="font-size:14px;">Easy</div><div class="mode-desc">Common words, generous hints</div></div>
-        </div>
-        <div class="mode-card sub-card" onclick="startRandomMode('medium')" style="border-color:rgba(255,204,68,0.3);">
-          <div class="mode-icon" style="width:36px;height:36px;font-size:18px;">🟡</div>
-          <div class="mode-info"><div class="mode-name" style="font-size:14px;">Medium</div><div class="mode-desc">Balanced challenge</div></div>
-        </div>
-        <div class="mode-card sub-card" onclick="startRandomMode('hard')" style="border-color:rgba(239,68,68,0.3);">
-          <div class="mode-icon" style="width:36px;height:36px;font-size:18px;">🔴</div>
-          <div class="mode-info"><div class="mode-name" style="font-size:14px;">Hard</div><div class="mode-desc">Rare words, brutal hints</div></div>
+        <!-- Expandable difficulty options — separated by a border, no float -->
+        <div id="landing-random-subs" style="display:none;border-top:1px solid var(--border);padding:10px;flex-direction:column;gap:8px;">
+          <div onclick="startRandomMode('easy')" style="display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:10px;border:1px solid rgba(0,255,136,0.25);background:rgba(0,255,136,0.04);cursor:pointer;transition:all 0.15s;" onmouseover="this.style.background='rgba(0,255,136,0.09)'" onmouseout="this.style.background='rgba(0,255,136,0.04)'">
+            <span style="font-size:20px;">🟢</span>
+            <div><div style="font-family:'Syne',sans-serif;font-weight:700;font-size:14px;">Easy</div><div style="font-size:12px;color:var(--secondary);">Common words · Generous hints</div></div>
+          </div>
+          <div onclick="startRandomMode('medium')" style="display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:10px;border:1px solid rgba(255,204,68,0.25);background:rgba(255,204,68,0.04);cursor:pointer;transition:all 0.15s;" onmouseover="this.style.background='rgba(255,204,68,0.09)'" onmouseout="this.style.background='rgba(255,204,68,0.04)'">
+            <span style="font-size:20px;">🟡</span>
+            <div><div style="font-family:'Syne',sans-serif;font-weight:700;font-size:14px;">Medium</div><div style="font-size:12px;color:var(--secondary);">Balanced challenge · Less direct hints</div></div>
+          </div>
+          <div onclick="startRandomMode('hard')" style="display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:10px;border:1px solid rgba(239,68,68,0.25);background:rgba(239,68,68,0.04);cursor:pointer;transition:all 0.15s;" onmouseover="this.style.background='rgba(239,68,68,0.09)'" onmouseout="this.style.background='rgba(239,68,68,0.04)'">
+            <span style="font-size:20px;">🔴</span>
+            <div><div style="font-family:'Syne',sans-serif;font-weight:700;font-size:14px;">Hard</div><div style="font-size:12px;color:var(--secondary);">Rare words · Brutal hints</div></div>
+          </div>
         </div>
       </div>
     </div>
@@ -706,7 +712,7 @@
             <div style="text-align:center;">
               <div style="font-size:28px;margin-bottom:6px;">🔒</div>
               <div style="font-family:'Syne',sans-serif;font-weight:800;font-size:18px;margin-bottom:4px;">Unlock Daily Modes</div>
-              <div style="font-size:12px;color:var(--secondary);max-width:220px;line-height:1.5;">Streaks, leaderboards, daily riddles &amp; themes — completely free.</div>
+              <div style="font-size:12px;color:var(--secondary);width:220px;line-height:1.6;text-align:center;margin:0 auto;white-space:normal;">Streaks, leaderboards, daily riddles &amp; themes — completely free.</div>
             </div>
             <div style="display:flex;gap:10px;">
               <button onclick="showScreen('login-screen')" style="background:var(--accent);color:#000;border:none;border-radius:12px;padding:12px 24px;font-family:'Syne',sans-serif;font-weight:700;font-size:14px;cursor:pointer;transition:all 0.15s;box-shadow:0 0 20px rgba(0,255,136,0.3);" onmouseover="this.style.transform='scale(1.04)'" onmouseout="this.style.transform='scale(1)'">Log In</button>
@@ -939,36 +945,30 @@
         <div class="mode-badge" id="badge-theme">Daily</div>
       </div>
 
-      <!-- Random Mode — expandable difficulty picker -->
-      <div class="mode-card" id="card-random" onclick="toggleRandomExpand()" style="cursor:pointer;">
-        <div class="mode-icon" style="font-size:32px;border:none;background:transparent;">♾️</div>
-        <div class="mode-info">
-          <div class="mode-name">Random Mode</div>
-          <div class="mode-desc">Unlimited practice. Choose your difficulty.</div>
-        </div>
-        <div style="font-size:11px;color:var(--muted);font-family:'DM Mono',monospace;" id="random-arrow">▼</div>
-      </div>
-      <!-- Random difficulty sub-cards -->
-      <div id="random-sub-cards" style="display:none;flex-direction:column;gap:8px;padding:0 4px;">
-        <div class="mode-card sub-card" onclick="startRandomMode('easy'); event.stopPropagation()" style="border-color:rgba(0,255,136,0.3);">
-          <div class="mode-icon" style="width:40px;height:40px;font-size:20px;">🟢</div>
+      <!-- Random Mode — expandable difficulty picker (same card-container style as landing) -->
+      <div style="background:var(--card);border:1px solid var(--border);border-radius:var(--radius-lg);overflow:hidden;transition:border-color 0.2s;" onmouseover="this.style.borderColor='rgba(255,255,255,0.15)'" onmouseout="this.style.borderColor='var(--border)'">
+        <!-- Header row -->
+        <div id="card-random" onclick="toggleRandomExpand()" style="display:flex;align-items:center;gap:14px;padding:16px 18px;cursor:pointer;transition:background 0.15s;" onmouseover="this.style.background='var(--surface)'" onmouseout="this.style.background='transparent'">
+          <div style="font-size:28px;width:46px;height:46px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">♾️</div>
           <div class="mode-info">
-            <div class="mode-name" style="font-size:15px;">Easy Random</div>
-            <div class="mode-desc">Common words. More generous hints.</div>
+            <div class="mode-name">Random Mode</div>
+            <div class="mode-desc">Unlimited practice. Choose difficulty.</div>
           </div>
+          <div id="random-arrow" style="font-size:11px;color:var(--muted);font-family:'DM Mono',monospace;flex-shrink:0;transition:transform 0.2s;">▼</div>
         </div>
-        <div class="mode-card sub-card" onclick="startRandomMode('medium'); event.stopPropagation()" style="border-color:rgba(255,204,68,0.3);">
-          <div class="mode-icon" style="width:40px;height:40px;font-size:20px;">🟡</div>
-          <div class="mode-info">
-            <div class="mode-name" style="font-size:15px;">Medium Random</div>
-            <div class="mode-desc">Balanced. Hints reveal less.</div>
+        <!-- Difficulty options — below the header, never floating -->
+        <div id="random-sub-cards" style="display:none;border-top:1px solid var(--border);padding:10px;flex-direction:column;gap:8px;">
+          <div onclick="startRandomMode('easy')" style="display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:10px;border:1px solid rgba(0,255,136,0.25);background:rgba(0,255,136,0.04);cursor:pointer;transition:background 0.15s;" onmouseover="this.style.background='rgba(0,255,136,0.09)'" onmouseout="this.style.background='rgba(0,255,136,0.04)'">
+            <span style="font-size:20px;flex-shrink:0;">🟢</span>
+            <div><div style="font-family:'Syne',sans-serif;font-weight:700;font-size:14px;">Easy</div><div style="font-size:12px;color:var(--secondary);">Common words · Generous hints</div></div>
           </div>
-        </div>
-        <div class="mode-card sub-card" onclick="startRandomMode('hard'); event.stopPropagation()" style="border-color:rgba(239,68,68,0.3);">
-          <div class="mode-icon" style="width:40px;height:40px;font-size:20px;">🔴</div>
-          <div class="mode-info">
-            <div class="mode-name" style="font-size:15px;">Hard Random</div>
-            <div class="mode-desc">Rare words. Brutal hints.</div>
+          <div onclick="startRandomMode('medium')" style="display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:10px;border:1px solid rgba(255,204,68,0.25);background:rgba(255,204,68,0.04);cursor:pointer;transition:background 0.15s;" onmouseover="this.style.background='rgba(255,204,68,0.09)'" onmouseout="this.style.background='rgba(255,204,68,0.04)'">
+            <span style="font-size:20px;flex-shrink:0;">🟡</span>
+            <div><div style="font-family:'Syne',sans-serif;font-weight:700;font-size:14px;">Medium</div><div style="font-size:12px;color:var(--secondary);">Balanced challenge · Less direct hints</div></div>
+          </div>
+          <div onclick="startRandomMode('hard')" style="display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:10px;border:1px solid rgba(239,68,68,0.25);background:rgba(239,68,68,0.04);cursor:pointer;transition:background 0.15s;" onmouseover="this.style.background='rgba(239,68,68,0.09)'" onmouseout="this.style.background='rgba(239,68,68,0.04)'">
+            <span style="font-size:20px;flex-shrink:0;">🔴</span>
+            <div><div style="font-family:'Syne',sans-serif;font-weight:700;font-size:14px;">Hard</div><div style="font-size:12px;color:var(--secondary);">Rare words · Brutal hints</div></div>
           </div>
         </div>
       </div>
@@ -2615,43 +2615,73 @@ function renderGuesses() {
 // Medium: balanced  — letters, category, short definition, first letter, partial synonym
 // Hard:   brutal    — only vague clues, no direct letters revealed
 function getHints(difficulty, puzzle) {
-  const a = puzzle.answer || '';
-  const cat = puzzle.category || 'a common concept';
-  const def = (puzzle.definition || '').substring(0, 50);
+  const a   = puzzle.answer || '';
+  const cat = puzzle.category || '';
+  const def = puzzle.definition || '';
   const syn = (puzzle.synonyms || [])[0] || null;
-  const firstLetter = a[0]?.toUpperCase() || '?';
-  const lastLetter  = a[a.length-1]?.toUpperCase() || '?';
+  const len = a.length;
+  const vowels     = a.split('').filter(c => 'aeiou'.includes(c)).length;
+  const consonants = len - vowels;
+  const uniqLetters = new Set(a.split('')).size;
+  const hasDouble  = a.split('').some((c,i) => a[i+1] === c);
+  const alphHalf   = a.charCodeAt(0) < 110 ? 'first half (A–M)' : 'second half (N–Z)';
+  const vagueLen   = len <= 4 ? 'very short' : len <= 6 ? 'short' : len <= 9 ? 'medium length' : 'long';
+
+  // Scramble — only used in easy mode
+  const scramble = w => {
+    const arr = w.split('');
+    for (let i = arr.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [arr[i], arr[j]] = [arr[j], arr[i]];
+    }
+    return arr.join('').toUpperCase();
+  };
+
+  // Mask synonym — fully masked except length
+  const maskFull = w => w ? '*'.repeat(w.length) + ` (${w.length} letters)` : null;
+
+  // Partial definition — first 4 words only, nothing identifiable
+  const vagDef = def ? def.split(' ').slice(0,4).join(' ') + '...' : null;
+
+  // Very vague category — only first word, no context
+  const vagCat = cat ? cat.split(/[\s,\/]/)[0].toLowerCase() : null;
 
   if (difficulty === 'easy') {
+    // Easy: still requires 15–25 guesses to solve
+    // NO first letter. Scrambled letters is the "generous" hint.
     return [
-      `The word has ${a.length} letters.`,
-      `It starts with "${firstLetter}".`,
-      `Category: ${cat}.`,
-      def ? `Definition: "${def}..."` : `It ends with "${lastLetter}".`,
-      syn ? `A synonym: "${syn}".` : `It contains the letter "${a[Math.floor(a.length/2)].toUpperCase()}".`
+      `The word has ${len} letters.`,
+      cat  ? `Broad category: ${vagCat}.` : `It is a ${vagueLen} word.`,
+      `Scrambled: "${scramble(a)}". Unscramble to find it.`,
+      def  ? `Partial clue: "${vagDef}"` : `It has ${vowels} vowel${vowels!==1?'s':''}.`,
+      syn  ? `A masked related word: ${maskFull(syn)}` : `Letters span the alphabet's ${alphHalf}.`
     ];
   }
+
   if (difficulty === 'medium') {
+    // Medium: 25–50 guesses expected. No scramble, no category name.
     return [
-      `The word has ${a.length} letters.`,
-      `Category: ${cat}.`,
-      def ? `Definition (partial): "${def.substring(0, 28)}..."` : `It's a ${a.length}-letter word.`,
-      `It starts with "${firstLetter}".`,
-      syn ? `Related word: starts with "${syn[0].toUpperCase()}", has ${syn.length} letters.`
-          : `The word ends with "${lastLetter}".`
+      `The word is ${vagueLen} — ${len} letters total.`,
+      `It contains ${vowels} vowel${vowels!==1?'s':''} and ${consonants} consonant${consonants!==1?'s':''}.`,
+      hasDouble ? 'At least one letter appears more than once.'
+                : `All ${uniqLetters} letters are distinct.`,
+      def  ? `Very partial clue: "${def.split(' ').slice(0,3).join(' ')}..."` : `It has ${uniqLetters} unique letters.`,
+      syn  ? `A related concept — fully masked: ${maskFull(syn)}`
+           : `First letter is in the ${alphHalf} of the alphabet.`
     ];
   }
-  // Hard — no direct letter reveals, only vague clues
-  const lengthHint = a.length <= 4 ? 'short (4 letters or fewer)'
-                   : a.length <= 7 ? 'medium length (5–7 letters)'
-                   : 'long (8+ letters)';
+
+  // Hard: 50+ guesses expected. Zero semantic information.
+  // Only pure structural/mathematical properties of the word.
+  const letterFreq = a.split('').reduce((acc, c) => { acc[c] = (acc[c]||0)+1; return acc; }, {});
+  const maxFreq    = Math.max(...Object.values(letterFreq));
+  const sumChars   = a.split('').reduce((s,c) => s + c.charCodeAt(0) - 96, 0); // a=1,b=2...
   return [
-    `The word is ${lengthHint}.`,
-    `Broad category: ${cat.split(' ')[0]}.`,
-    def ? `Vague clue: "${def.substring(0, 18)}..."` : `It's a ${a.length >= 8 ? 'long' : 'short'} word.`,
-    `The word has ${new Set(a.split('')).size} unique letters.`,
-    syn ? `A distant related concept: "${syn[0]}${'*'.repeat(syn.length - 1)}".`
-        : `First letter: somewhere in the alphabet's ${a.charCodeAt(0) < 110 ? 'first' : 'second'} half.`
+    `Letter count: ${len}. Vowel ratio: ${vowels}/${len}.`,
+    `Unique letters: ${uniqLetters}. ${hasDouble ? 'Has repeating letters.' : 'No repeating letters.'}`,
+    `Most frequent letter appears ${maxFreq} time${maxFreq!==1?'s':''}.`,
+    `Sum of letter positions (a=1): ${sumChars}. First letter is in the ${alphHalf}.`,
+    def  ? `Abstract fragment: "${def.split(' ').slice(0,2).join(' ')}..."` : 'No further hints.'
   ];
 }
 
@@ -3605,14 +3635,14 @@ function toggleRandomExpand() {
   const subs  = document.getElementById('random-sub-cards');
   const arrow = document.getElementById('random-arrow');
   if (subs)  subs.style.display  = randomExpanded ? 'flex' : 'none';
-  if (arrow) arrow.textContent   = randomExpanded ? '▲' : '▼';
+  if (arrow) { arrow.textContent = randomExpanded ? '▲' : '▼'; arrow.style.transform = randomExpanded ? 'rotate(180deg)' : 'rotate(0)'; }
 }
 
 function toggleLandingRandom() {
   const subs  = document.getElementById('landing-random-subs');
   const arrow = document.getElementById('landing-random-arrow');
   if (!subs) return;
-  const open = subs.style.display !== 'none';
+  const open = subs.style.display === 'flex';
   subs.style.display  = open ? 'none' : 'flex';
   if (arrow) arrow.textContent = open ? '▼' : '▲';
 }
