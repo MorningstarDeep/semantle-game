@@ -189,15 +189,17 @@
 
   /* User topbar */
   #user-topbar {
-    position:fixed; top:14px; right:14px; z-index:50;
-    display:flex; align-items:center; gap:8px;
+    position:fixed; top:14px; right:14px; z-index:200;
+    display:flex; align-items:center; gap:8px; flex-wrap:nowrap;
   }
-  #user-topbar > div {
-    display:flex; align-items:center; gap:8px;
-    background:var(--card); border:1px solid var(--border);
-    border-radius:30px; padding: 6px 14px 6px 8px;
-    min-width:0; overflow:hidden;
+  .topbar-label { display:inline; }
+  .dd-item {
+    width:100%; background:none; border:none; color:var(--text);
+    padding:10px 14px; border-radius:10px; cursor:pointer;
+    font-family:'DM Sans',sans-serif; font-size:14px;
+    text-align:left; display:block; transition:background 0.15s;
   }
+  .dd-item:hover { background:var(--surface); }
   .user-avatar {
     width:32px; height:32px; border-radius:50%; flex-shrink:0;
     background:linear-gradient(135deg,var(--accent),#0066ff);
@@ -510,10 +512,9 @@
     .mode-desc { font-size: 12px; }
     .stats-row { gap: 14px; }
     .stat-num { font-size: 18px; }
-    #user-topbar { top:10px; right:10px; gap:6px; }
-    #user-topbar > div { padding:5px 10px 5px 6px; }
-    #user-topbar > div span:last-of-type { display:none; }
-    #user-topbar button { width:30px !important; height:30px !important; font-size:13px !important; }
+    #user-topbar { top:10px; right:10px; gap:5px; }
+    .topbar-label { display:none; }
+    #profile-btn { padding:4px 8px 4px 5px !important; }
     .username-card { padding: 28px 18px; border-radius: 18px; }
     .username-icon { font-size: 40px; margin-bottom: 14px; }
     .username-input { font-size: 15px; padding: 11px 14px; }
@@ -761,23 +762,42 @@
     </div>
 
     <!-- Top-right user controls — fixed position -->
-    <div id="user-topbar" style="position:fixed;top:16px;right:16px;z-index:50;display:flex;align-items:center;gap:8px;">
-      <div style="display:flex;align-items:center;gap:8px;background:var(--card);border:1px solid var(--border);border-radius:30px;padding:6px 14px 6px 8px;">
-        <div class="user-avatar" id="home-avatar">?</div>
-        <span class="user-name" id="home-username" style="font-size:13px;font-family:'DM Mono',monospace;">loading...</span>
+    <!-- Top-right: Account pill + Rules + Log Out -->
+    <div id="user-topbar" style="position:fixed;top:14px;right:14px;z-index:200;display:flex;align-items:center;gap:8px;flex-wrap:nowrap;">
+      <!-- Account pill with dropdown -->
+      <div style="position:relative;">
+        <button id="profile-btn" onclick="toggleProfileMenu()"
+          style="background:var(--card);border:1px solid var(--border);border-radius:20px;padding:5px 12px 5px 6px;cursor:pointer;display:flex;align-items:center;gap:8px;transition:all 0.2s;"
+          onmouseover="this.style.borderColor='var(--accent)'"
+          onmouseout="this.style.borderColor='var(--border)'">
+          <div class="user-avatar" id="home-avatar" style="width:28px;height:28px;font-size:12px;">?</div>
+          <span class="topbar-label" id="home-username" style="font-size:12px;font-family:'DM Mono',monospace;color:var(--text);max-width:90px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">...</span>
+          <span style="color:var(--muted);font-size:9px;">▾</span>
+        </button>
+        <div id="profile-dropdown" style="display:none;position:fixed;top:56px;right:14px;background:var(--card);border:1px solid var(--border);border-radius:16px;padding:6px;min-width:200px;box-shadow:0 12px 40px rgba(0,0,0,0.5);z-index:500;">
+          <div style="padding:10px 14px;border-bottom:1px solid var(--border);margin-bottom:4px;">
+            <div style="font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:3px;">Account</div>
+            <div id="dropdown-username" style="font-family:'Syne',sans-serif;font-weight:700;font-size:16px;color:var(--accent);">...</div>
+          </div>
+          <button onclick="closeProfileMenu();openRenameModal()" class="dd-item">✎ &nbsp;Change Username</button>
+          <button onclick="closeProfileMenu();openChangePasswordModal()" class="dd-item">🔑 &nbsp;Change Password</button>
+          <button onclick="closeProfileMenu();showAdmin()" id="dropdown-admin-btn" class="dd-item" style="display:none;color:#ffaa00;">⚙️ &nbsp;Admin Panel</button>
+        </div>
       </div>
-      <button onclick="openRenameModal()" title="Change username"
-        style="background:var(--card);border:1px solid var(--border);color:var(--secondary);width:36px;height:36px;border-radius:50%;cursor:pointer;font-size:15px;transition:all 0.2s;display:flex;align-items:center;justify-content:center;"
+      <!-- Rules button -->
+      <button onclick="showRules()"
+        style="background:var(--card);border:1px solid var(--border);color:var(--secondary);height:36px;padding:0 12px;border-radius:18px;cursor:pointer;font-family:'DM Mono',monospace;font-size:11px;transition:all 0.2s;display:flex;align-items:center;gap:5px;white-space:nowrap;"
         onmouseover="this.style.borderColor='var(--accent)';this.style.color='var(--accent)'"
-        onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--secondary)'">✎</button>
-      <button onclick="openChangePasswordModal()" title="Change password"
-        style="background:var(--card);border:1px solid var(--border);color:var(--secondary);width:36px;height:36px;border-radius:50%;cursor:pointer;font-size:15px;transition:all 0.2s;display:flex;align-items:center;justify-content:center;"
-        onmouseover="this.style.borderColor='var(--accent)';this.style.color='var(--accent)'"
-        onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--secondary)'">🔑</button>
-      <button onclick="logOut()" title="Log out"
-        style="background:var(--card);border:1px solid var(--border);color:var(--secondary);width:36px;height:36px;border-radius:50%;cursor:pointer;font-size:15px;transition:all 0.2s;display:flex;align-items:center;justify-content:center;"
-        onmouseover="this.style.borderColor='#ef4444';this.style.color='#ef4444'"
-        onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--secondary)'">⏏</button>
+        onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--secondary)'">
+        📖 <span class="topbar-label">Rules</span>
+      </button>
+      <!-- Log Out — text button -->
+      <button onclick="logOut()"
+        style="background:var(--card);border:1px solid var(--border);color:#ef4444;height:36px;padding:0 14px;border-radius:18px;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;transition:all 0.2s;white-space:nowrap;"
+        onmouseover="this.style.borderColor='#ef4444';this.style.background='rgba(239,68,68,0.08)'"
+        onmouseout="this.style.borderColor='var(--border)';this.style.background='var(--card)'">
+        Log Out
+      </button>
     </div>
 
     <div class="mode-cards">
@@ -892,7 +912,7 @@
         style="display:none;background:var(--card);border:1px solid var(--border);color:var(--secondary);padding:6px 12px;border-radius:8px;cursor:pointer;font-size:13px;font-family:'DM Sans',sans-serif;transition:all 0.2s;"
         onmouseover="this.style.borderColor='var(--accent)';this.style.color='var(--accent)'"
         onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--secondary)'">↺ New Word</button>
-      <div class="streak-badge">🔥 <span id="streak-count">0</span></div>
+      <div class="streak-badge" id="streak-badge">🔥 <span id="streak-count">0</span></div>
     </div>
   </div>
 
@@ -1325,6 +1345,54 @@ INSERT INTO riddles (difficulty, riddle_text, answer, category, definition, syno
   </div>
 </div>
 
+<!-- ══════════ RULES MODAL ══════════ -->
+<div id="rules-overlay" onclick="if(event.target===this)closeRules()" style="display:none;position:fixed;inset:0;background:rgba(8,11,15,0.92);z-index:600;align-items:center;justify-content:center;padding:16px;backdrop-filter:blur(8px);">
+  <div style="background:var(--card);border:1px solid var(--border);border-radius:20px;padding:28px 24px;max-width:520px;width:100%;max-height:90vh;overflow-y:auto;animation:popIn 0.3s ease both;">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;">
+      <div style="font-family:'Syne',sans-serif;font-size:22px;font-weight:800;">📖 How to Play</div>
+      <button onclick="closeRules()" style="background:none;border:1px solid var(--border);color:var(--muted);width:32px;height:32px;border-radius:50%;cursor:pointer;font-size:14px;flex-shrink:0;">✕</button>
+    </div>
+    <div style="background:rgba(0,255,136,0.06);border:1px solid rgba(0,255,136,0.2);border-radius:12px;padding:14px;margin-bottom:18px;">
+      <div style="font-family:'Syne',sans-serif;font-weight:700;color:var(--accent);margin-bottom:6px;">🧠 The Idea</div>
+      <div style="font-size:13px;color:var(--text);line-height:1.6;">Guess the secret word by <strong>meaning</strong>, not spelling. Each guess gets a similarity score from 0% to 100%.</div>
+    </div>
+    <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:14px;margin-bottom:10px;">🎮 Game Modes</div>
+    <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:18px;">
+      <div style="background:var(--surface);border-radius:10px;padding:12px;font-size:13px;">
+        <div style="font-weight:700;margin-bottom:4px;">🎭 Daily Riddle <span style="font-size:11px;color:var(--accent);font-family:'DM Mono',monospace;">[Login required]</span></div>
+        <div style="color:var(--secondary);">A riddle is shown. Solve it to find the answer word. 3 difficulties. One attempt per day. Solving builds your streak — giving up resets it.</div>
+      </div>
+      <div style="background:var(--surface);border-radius:10px;padding:12px;font-size:13px;">
+        <div style="font-weight:700;margin-bottom:4px;">🌊 Daily Theme <span style="font-size:11px;color:var(--accent);font-family:'DM Mono',monospace;">[Login required]</span></div>
+        <div style="color:var(--secondary);">A theme category is revealed. Guess the specific hidden word. One attempt per day. Builds streak.</div>
+      </div>
+      <div style="background:var(--surface);border-radius:10px;padding:12px;font-size:13px;">
+        <div style="font-weight:700;margin-bottom:4px;">♾️ Random Mode <span style="font-size:11px;color:var(--muted);font-family:'DM Mono',monospace;">[No login needed]</span></div>
+        <div style="color:var(--secondary);">Unlimited practice. No streak. Counts toward Total Solved.</div>
+      </div>
+    </div>
+    <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:14px;margin-bottom:10px;">🌡️ Similarity Score</div>
+    <div style="display:flex;flex-direction:column;gap:4px;margin-bottom:18px;font-size:12px;">
+      <div style="display:flex;align-items:center;gap:10px;padding:7px 12px;background:var(--surface);border-radius:8px;"><span style="min-width:80px;color:#ff4444;font-family:'DM Mono',monospace;">🔥🔥🔥🔥🔥 90%+</span><span style="color:var(--secondary);">Extremely close!</span></div>
+      <div style="display:flex;align-items:center;gap:10px;padding:7px 12px;background:var(--surface);border-radius:8px;"><span style="min-width:80px;color:#ff7700;font-family:'DM Mono',monospace;">🔥🔥🔥🔥 75%+</span><span style="color:var(--secondary);">Very warm</span></div>
+      <div style="display:flex;align-items:center;gap:10px;padding:7px 12px;background:var(--surface);border-radius:8px;"><span style="min-width:80px;color:#ffaa00;font-family:'DM Mono',monospace;">🔥🔥🔥 60%+</span><span style="color:var(--secondary);">Warm</span></div>
+      <div style="display:flex;align-items:center;gap:10px;padding:7px 12px;background:var(--surface);border-radius:8px;"><span style="min-width:80px;color:#ffcc44;font-family:'DM Mono',monospace;">🔥🔥 40%+</span><span style="color:var(--secondary);">Lukewarm</span></div>
+      <div style="display:flex;align-items:center;gap:10px;padding:7px 12px;background:var(--surface);border-radius:8px;"><span style="min-width:80px;color:#88aaff;font-family:'DM Mono',monospace;">🔥 20%+</span><span style="color:var(--secondary);">Cold</span></div>
+      <div style="display:flex;align-items:center;gap:10px;padding:7px 12px;background:var(--surface);border-radius:8px;"><span style="min-width:80px;color:#3b82f6;font-family:'DM Mono',monospace;">❄️ 0–19%</span><span style="color:var(--secondary);">Freezing</span></div>
+    </div>
+    <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:14px;margin-bottom:10px;">📜 Rules</div>
+    <div style="display:flex;flex-direction:column;gap:6px;margin-bottom:22px;font-size:12px;color:var(--secondary);">
+      <div style="display:flex;gap:8px;"><span style="color:var(--accent);flex-shrink:0;">✓</span>Type any real word — see how close it is semantically to the answer</div>
+      <div style="display:flex;gap:8px;"><span style="color:var(--accent);flex-shrink:0;">✓</span>Guesses sorted by similarity, highest at the top</div>
+      <div style="display:flex;gap:8px;"><span style="color:var(--accent);flex-shrink:0;">✓</span>Up to 5 hints — letter count, first letter, category, definition, synonym</div>
+      <div style="display:flex;gap:8px;"><span style="color:var(--accent);flex-shrink:0;">✓</span>Daily modes: 1 attempt/day. Giving up reveals answer but breaks streak</div>
+      <div style="display:flex;gap:8px;"><span style="color:var(--accent);flex-shrink:0;">✓</span>Plurals auto-accepted — "dogs" counts as "dog"</div>
+      <div style="display:flex;gap:8px;"><span style="color:#ef4444;flex-shrink:0;">✗</span>Gibberish/unknown words rejected — type correctly!</div>
+    </div>
+    <button onclick="closeRules()" style="width:100%;background:var(--accent);color:#000;border:none;border-radius:12px;padding:13px;font-family:'Syne',sans-serif;font-weight:700;font-size:15px;cursor:pointer;">Got it — Let's Play! 🎮</button>
+  </div>
+</div>
+
 <!-- ══════════════════════════════ SCRIPT ══════════════════════════════ -->
 <script>
 // ── SUPABASE INIT ──
@@ -1395,20 +1463,29 @@ async function init() {
 
   if (storedToken && storedUsername) {
     setLoaderText('Verifying session...');
-    const { data: session } = await db.from('sessions')
+    const sessionPromise = db.from('sessions')
       .select('username').eq('token', storedToken).eq('username', storedUsername).single();
-    if (session) {
-      state.username = storedUsername;
-      setLoaderText('Fetching your stats...');
-      await loadUserStats();
-      setLoaderText("Loading today's puzzle...");
-      await loadDailyPuzzle();
-      setLoaderText('Ready!');
-      setTimeout(() => { showScreen('home'); refreshHomeUI(); }, 600);
-    } else {
+    const timeoutPromise = new Promise((_, reject) =>
+      setTimeout(() => reject(new Error('timeout')), 6000)
+    );
+    try {
+      const { data: session } = await Promise.race([sessionPromise, timeoutPromise]);
+      if (session) {
+        state.username = storedUsername;
+        setLoaderText('Fetching your stats...');
+        await Promise.all([loadUserStats(), loadDailyPuzzle()]);
+        setLoaderText('Ready!');
+        setTimeout(() => { showScreen('home'); refreshHomeUI(); }, 400);
+      } else {
+        localStorage.removeItem('semantle_token');
+        localStorage.removeItem('semantle_username');
+        setTimeout(() => showScreen('landing'), 400);
+      }
+    } catch (e) {
+      console.warn('Session check:', e.message);
       localStorage.removeItem('semantle_token');
       localStorage.removeItem('semantle_username');
-      setTimeout(() => showScreen('landing'), 800);
+      setTimeout(() => showScreen('landing'), 400);
     }
   } else {
     setTimeout(() => showScreen('landing'), 800);
@@ -1726,9 +1803,11 @@ function refreshHomeUI() {
     riddleBadge.textContent = 'Daily';
   }
 
-  // Show admin button only for admin user
-  const adminBtn = document.getElementById('admin-btn');
-  if (adminBtn) adminBtn.style.display = state.username === ADMIN_USERNAME ? 'block' : 'none';
+  // Update dropdown
+  const ddUser = document.getElementById('dropdown-username');
+  if (ddUser) ddUser.textContent = state.username || '';
+  const ddAdmin = document.getElementById('dropdown-admin-btn');
+  if (ddAdmin) ddAdmin.style.display = state.username === ADMIN_USERNAME ? 'block' : 'none';
 
   // Update theme card icon/desc
   if (state.dailyPuzzle?.theme) {
@@ -1822,11 +1901,12 @@ async function startGame(mode, difficulty) {
     }
 
   } else {
-    // Random mode — pick from DB
-    const { data } = await db.from('riddles').select('*');
-    if (data && data.length) {
-      puzzle = data[Math.floor(Math.random() * data.length)];
-      puzzle.mode = 'random';
+    // Random mode — fast single row fetch
+    const { count } = await db.from('riddles').select('*', { count: 'exact', head: true });
+    if (count && count > 0) {
+      const offset = Math.floor(Math.random() * count);
+      const { data } = await db.from('riddles').select('*').range(offset, offset);
+      if (data && data.length) puzzle = { ...data[0], mode: 'random' };
     }
   }
 
@@ -1836,6 +1916,8 @@ async function startGame(mode, difficulty) {
   // Build game UI
   const modeLabels = { riddle: 'Daily Riddle · ' + difficulty, theme: 'Daily Theme', random: 'Random Mode' };
   document.getElementById('mode-label').textContent = modeLabels[mode] || mode;
+  const streakBadge = document.getElementById('streak-badge');
+  if (streakBadge) streakBadge.style.display = (mode !== 'random' && !!state.username) ? 'flex' : 'none';
 
   // Puzzle card
   if (mode === 'riddle') {
@@ -1952,8 +2034,7 @@ function browserLemmatize(word) {
 }
 
 // ── LAYER 2: Supabase smart processor ──
-// Calls process_guess() which does:
-// fuzzy matching + vocabulary check + real similarity
+// ── SERVER: calls process_guess() RPC ──
 async function serverProcessGuess(guess, answer) {
   const { data, error } = await db.rpc('process_guess', {
     raw_guess: guess,
@@ -1968,54 +2049,53 @@ async function processGuess(rawGuess, answer) {
   const normalized = rawGuess.toLowerCase().replace(/[^a-z]/g, '').trim();
   if (!normalized) return null;
 
-  // Exact match — skip all processing
+  // Exact match with answer — always 100%, never lemmatize
   if (normalized === answer.toLowerCase()) {
-    return { word: normalized, matched: normalized, similarity: 100, corrected: false };
+    return { word: normalized, matched: normalized, similarity: 100, corrected: false, notFound: false };
   }
 
-  // Check full result cache
+  // Cache check
   const cacheKey = normalized + '|' + answer.toLowerCase();
   if (guessCache[cacheKey]) return guessCache[cacheKey];
 
-  // Layer 1: browser lemmatize
-  const lemmatized = browserLemmatize(normalized);
+  // Browser lemmatize (plurals, -ing forms)
+  // NEVER lemmatize if word matches the answer exactly
+  const lemmatized = normalized === answer.toLowerCase() ? normalized : browserLemmatize(normalized);
 
-  // If lemmatized to a different word, check cache for that too
   const lemmaCacheKey = lemmatized + '|' + answer.toLowerCase();
   if (guessCache[lemmaCacheKey]) {
-    const cached = { ...guessCache[lemmaCacheKey], word: normalized, corrected: lemmatized !== normalized };
+    const cached = { ...guessCache[lemmaCacheKey], word: normalized };
     guessCache[cacheKey] = cached;
     return cached;
   }
 
-  // Layer 2: server processing
-  // Try lemmatized word first, then original if lemmatized not found
+  // Server processing — send lemmatized form
+  // Server handles: suffix stripping, phonetic expansion, fuzzy matching, similarity
   let result = await serverProcessGuess(lemmatized, answer);
 
-  // If lemmatized word not found and it differs from original, try original
+  // If lemmatized form not found and differs from original, try original
   if (result && result.error === 'word not found' && lemmatized !== normalized) {
     const result2 = await serverProcessGuess(normalized, answer);
     if (result2 && result2.error !== 'word not found') result = result2;
   }
 
   if (result) {
-    const wasCorrected = result.corrected || (result.matched !== normalized) || (lemmatized !== normalized);
     const final = {
       word:       normalized,
       typed:      normalized,
-      matched:    result.matched || lemmatized,
+      matched:    result.matched || normalized,
       similarity: result.similarity || 0,
-      corrected:  wasCorrected && result.matched !== normalized,
-      notFound:   result.error === 'word not found'
+      corrected:  result.corrected || false,
+      notFound:   result.error === 'word not found',
+      error:      result.error || null
     };
     guessCache[cacheKey]      = final;
     guessCache[lemmaCacheKey] = final;
     return final;
   }
 
-  // Fallback if server completely fails
-  const hash = [...(normalized + answer)].reduce((acc, c) => (acc * 31 + c.charCodeAt(0)) & 0xffff, 0);
-  return { word: normalized, typed: normalized, matched: normalized, similarity: 4 + (hash % 22), corrected: false, notFound: true };
+  // Server completely failed — return not found (no fake scores)
+  return { word: normalized, typed: normalized, matched: normalized, similarity: 0, corrected: false, notFound: true, error: 'word not found' };
 }
 
 function getHeatInfo(pct) {
@@ -2577,12 +2657,12 @@ ${statusLine}
 Top guesses:
 ${guessLines}
 
-Play at: semantle-game.vercel.app`;
+Play at: semantle.me`;
 
   // Try native share API (mobile), fall back to clipboard
   try {
     if (navigator.share) {
-      await navigator.share({ text: shareText, url: 'https://semantle-game.vercel.app' });
+      await navigator.share({ text: shareText, url: 'https://semantle.me' });
     } else {
       await navigator.clipboard.writeText(shareText);
       // Show copied feedback
@@ -3071,6 +3151,35 @@ async function changeAdminPassword() {
   msg.style.color = 'var(--accent)';
   msg.textContent = '✅ Updated!';
   setTimeout(() => closeAdminPwModal(), 1000);
+}
+
+// ── PROFILE DROPDOWN ──
+function toggleProfileMenu() {
+  const dd = document.getElementById('profile-dropdown');
+  if (!dd) return;
+  dd.style.display = dd.style.display === 'none' ? 'block' : 'none';
+}
+function closeProfileMenu() {
+  const dd = document.getElementById('profile-dropdown');
+  if (dd) dd.style.display = 'none';
+}
+document.addEventListener('click', (e) => {
+  const btn = document.getElementById('profile-btn');
+  const dd  = document.getElementById('profile-dropdown');
+  if (dd && btn && !btn.contains(e.target) && !dd.contains(e.target)) {
+    dd.style.display = 'none';
+  }
+});
+
+// ── RULES ──
+function showRules() {
+  closeProfileMenu();
+  const o = document.getElementById('rules-overlay');
+  if (o) o.style.display = 'flex';
+}
+function closeRules() {
+  const o = document.getElementById('rules-overlay');
+  if (o) o.style.display = 'none';
 }
 
 // ── START ──
