@@ -7,7 +7,7 @@
 <title>Semantle Game – Guess the Word by Meaning Online</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="preload" href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500&display=swap" as="style" onload="this.onload=null;this.rel='stylesheet'">
+<link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500&display=swap" onload="this.onload=null;this.rel='stylesheet'">
 <noscript><link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"></noscript>
 <link rel="canonical" href="https://semantle.me/" />
 <meta name="theme-color" content="#080b0f">
@@ -602,30 +602,30 @@
       </div>
     </div>
 
-    <!-- How it works — inline -->
+    <!-- How it works -->
     <div style="width:100%;animation:fadeUp 0.8s 0.15s ease both;">
       <div style="background:var(--card);border:1px solid var(--border);border-radius:14px;overflow:hidden;">
         <div style="padding:16px 18px;">
           <div style="font-family:'DM Mono',monospace;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--accent);margin-bottom:10px;opacity:0.8;">How it works</div>
           <div style="display:flex;flex-direction:column;gap:7px;">
             <div style="font-size:13px;color:var(--secondary);line-height:1.5;display:flex;gap:8px;"><span style="color:var(--accent);font-family:'DM Mono',monospace;flex-shrink:0;">1.</span>A secret word is hidden. Guess any word to see how semantically close you are.</div>
-            <div style="font-size:13px;color:var(--secondary);line-height:1.5;display:flex;gap:8px;"><span style="color:var(--accent);font-family:'DM Mono',monospace;flex-shrink:0;">2.</span>Scores from ❄️ 0% (cold) to 🔥🔥🔥🔥🔥 100% (got it!).</div>
+            <div style="font-size:13px;color:var(--secondary);line-height:1.5;display:flex;gap:8px;"><span style="color:var(--accent);font-family:'DM Mono',monospace;flex-shrink:0;">2.</span>Scores from ❄️ 0% (cold) to 🔥🔥🔥🔥🔥 100% (exact match).</div>
             <div style="font-size:13px;color:var(--secondary);line-height:1.5;display:flex;gap:8px;"><span style="color:var(--accent);font-family:'DM Mono',monospace;flex-shrink:0;">3.</span>Meaning matters — "ocean" scores higher than "pond" if the answer is "water".</div>
           </div>
         </div>
         <button onclick="toggleLandingRules()" id="landing-rules-btn"
-          style="width:100%;background:var(--surface);border:none;border-top:1px solid var(--border);color:var(--muted);padding:10px;cursor:pointer;font-family:'DM Mono',monospace;font-size:11px;letter-spacing:1px;transition:all 0.2s;display:flex;align-items:center;justify-content:center;gap:6px;"
-          onmouseover="this.style.color='var(--accent)'" onmouseout="this.style.color='var(--muted)'">
+          style="width:100%;background:var(--surface);border:none;border-top:1px solid var(--border);color:var(--muted);padding:10px;cursor:pointer;font-family:'DM Mono',monospace;font-size:11px;letter-spacing:1px;transition:all 0.2s;display:flex;align-items:center;justify-content:center;gap:6px;">
           <span id="landing-rules-arrow">▼</span> <span id="landing-rules-label">SHOW MORE</span>
         </button>
         <div id="landing-rules-expanded" style="display:none;padding:0 18px 16px;border-top:1px solid var(--border);">
           <div style="margin-top:14px;display:flex;flex-direction:column;gap:7px;font-size:12px;color:var(--secondary);">
-            <div style="display:flex;gap:8px;"><span style="color:var(--accent);flex-shrink:0;">✓</span>Daily Riddle & Theme: login required, one attempt/day, builds streak.</div>
+            <div style="display:flex;gap:8px;"><span style="color:var(--accent);flex-shrink:0;">✓</span>Daily Riddle &amp; Theme: login required, 1 attempt/day, builds streak.</div>
             <div style="display:flex;gap:8px;"><span style="color:var(--accent);flex-shrink:0;">✓</span>Random mode: free, unlimited, no streak.</div>
-            <div style="display:flex;gap:8px;"><span style="color:var(--accent);flex-shrink:0;">✓</span>Up to 5 hints per game.</div>
-            <div style="display:flex;gap:8px;"><span style="color:#ef4444;flex-shrink:0;">✗</span>Only real dictionary words accepted.</div>
+            <div style="display:flex;gap:8px;"><span style="color:var(--accent);flex-shrink:0;">✓</span>Up to 5 hints: letter count, first letter, category, definition, synonym.</div>
+            <div style="display:flex;gap:8px;"><span style="color:var(--accent);flex-shrink:0;">✓</span>Plurals auto-accepted — "dogs" counts as "dog".</div>
+            <div style="display:flex;gap:8px;"><span style="color:#ef4444;flex-shrink:0;">✗</span>Gibberish/unknown words are rejected.</div>
           </div>
-          <button onclick="showRules()" style="margin-top:12px;width:100%;background:none;border:1px solid var(--border);color:var(--secondary);border-radius:8px;padding:9px;font-family:'DM Mono',monospace;font-size:11px;cursor:pointer;transition:all 0.2s;" onmouseover="this.style.borderColor='var(--accent)';this.style.color='var(--accent)'" onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--secondary)'">📖 Full Rules →</button>
+          <button onclick="showRules()" style="margin-top:12px;width:100%;background:none;border:1px solid var(--border);color:var(--secondary);border-radius:8px;padding:9px;font-family:'DM Mono',monospace;font-size:11px;cursor:pointer;transition:all 0.2s;">📖 Full Rules &amp; Score Guide →</button>
         </div>
       </div>
     </div>
@@ -1435,11 +1435,21 @@ const ADMIN_USERNAME = 'morningstardeep';
 const ADMIN_PASSWORD_HASH = 'a79748fb0bae49272a7ef9168652eec8417ee763b384b5c1e773519a9f07fabf';
 
 // ── STATE ──
+// ── IST DATE HELPER ──
+// All daily puzzles are generated at midnight IST (UTC+5:30).
+// Every date query MUST use IST date to match the puzzle row in DB.
+function getTodayIST() {
+  const now = new Date();
+  const istDate = new Date(now.getTime() + 5.5 * 60 * 60 * 1000);
+  return istDate.toISOString().split('T')[0];
+}
+
 let state = {
   username: null,
   mode: null,
   difficulty: null,
   currentPuzzle: null,
+  randomPuzzle: null,       // cached random puzzle — persists across nav
   dailyPuzzle: null,
   guesses: [],
   hintsUsed: 0,
@@ -1725,20 +1735,16 @@ async function submitRename() {
 
 // ── LOAD USER STATS ──
 async function loadUserStats() {
-  const today = new Date().toISOString().split('T')[0];
-
+  const today = getTodayIST();
   // Run both queries in parallel
-  const [userResult, progResult] = await Promise.all([
+  const [{ data: userData }, { data: prog }] = await Promise.all([
     db.from('users').select('*').eq('username', state.username).single(),
     db.from('user_progress')
-      .select('puzzle_type, solved, guesses, hints_used, time_seconds')
+      .select('puzzle_type,solved,guesses,hints_used,time_seconds')
       .eq('username', state.username).eq('date', today)
   ]);
-
-  const userData = userResult.data;
-  const prog = progResult.data;
-
   // ── users row ──
+  const _skip = null; // queries already done above
 
   if (userData) {
     // Row exists — use DB values
@@ -1759,7 +1765,7 @@ async function loadUserStats() {
     });
   }
 
-  // ── today's solved/gaveup status (already loaded in parallel above) ──
+  // ── today's solved/gaveup status (loaded in parallel above) ──
 
   state.todaySolved  = {};
   state.todayGaveUp  = {};
@@ -1777,7 +1783,7 @@ async function loadUserStats() {
 
 // ── LOAD DAILY PUZZLE ──
 async function loadDailyPuzzle() {
-  const today = new Date().toISOString().split('T')[0];
+  const today = getTodayIST();
   const { data } = await db.from('daily_puzzles')
     .select(`
       *,
@@ -1874,15 +1880,23 @@ async function startGame(mode, difficulty) {
     }
   }
 
+  // Restore guesses if re-entering random mode with same puzzle
+  const restoringRandom = (mode === 'random' && state.randomPuzzle &&
+                           !state.solved && !state.gaveUp &&
+                           state.mode === 'random');
+
   state.mode = mode;
   state.difficulty = difficulty;
-  state.guesses = [];
-  state.hintsUsed = 0;
-  state.guessCount = 0;
-  state.bestSimilarity = 0;
+  if (!restoringRandom) {
+    state.guesses = [];
+    state.hintsUsed = 0;
+    state.guessCount = 0;
+    state.bestSimilarity = 0;
+  }
   state.solved = false;
   state.gaveUp = false;
-  state.startTime = Date.now();
+  state.startTime = state.startTime || Date.now();
+  if (!restoringRandom) state.startTime = Date.now();
   hideSuggestion();
   clearFeedback();
 
@@ -1902,9 +1916,7 @@ async function startGame(mode, difficulty) {
     }
     // Fallback: pull a random riddle of that difficulty from DB
     if (!puzzle || !puzzle.answer) {
-      const { data } = await db.from('riddles')
-        .select('id,riddle_text,answer,category,definition,synonyms,difficulty')
-        .eq('difficulty', difficulty);
+      const { data } = await db.from('riddles').select('*').eq('difficulty', difficulty);
       if (data && data.length) puzzle = { ...data[Math.floor(Math.random() * data.length)], mode: 'riddle' };
     }
 
@@ -1922,7 +1934,7 @@ async function startGame(mode, difficulty) {
     }
     // Fallback: pick a random theme + word from themes table
     if (!puzzle) {
-      const { data: themes } = await db.from('themes').select('id,theme_name,theme_emoji,word_pool');
+      const { data: themes } = await db.from('themes').select('*');
       if (themes && themes.length) {
         const t = themes[Math.floor(Math.random() * themes.length)];
         const pool = t.word_pool || [];
@@ -1939,12 +1951,21 @@ async function startGame(mode, difficulty) {
     }
 
   } else {
-    // Random mode — fast single row fetch
-    const { count } = await db.from('riddles').select('*', { count: 'exact', head: true });
-    if (count && count > 0) {
-      const offset = Math.floor(Math.random() * count);
-      const { data } = await db.from('riddles').select('*').range(offset, offset);
-      if (data && data.length) puzzle = { ...data[0], mode: 'random' };
+    // Random mode — use cached puzzle if still in progress (not solved/gave up)
+    // This ensures the word doesn't change when user navigates back and re-enters
+    if (state.randomPuzzle && !state.solved && !state.gaveUp) {
+      puzzle = state.randomPuzzle;
+    } else {
+      // Fetch new random puzzle
+      const { count } = await db.from('riddles').select('*', { count: 'exact', head: true });
+      if (count && count > 0) {
+        const offset = Math.floor(Math.random() * count);
+        const { data } = await db.from('riddles').select('id,riddle_text,answer,category,definition,synonyms,difficulty').range(offset, offset);
+        if (data && data.length) {
+          puzzle = { ...data[0], mode: 'random' };
+          state.randomPuzzle = puzzle; // cache it
+        }
+      }
     }
   }
 
@@ -2352,7 +2373,7 @@ function giveUp() {
 
       // Save gave-up state to DB so it persists across sessions
       if (state.mode !== 'random') {
-        const today = new Date().toISOString().split('T')[0];
+        const today = getTodayIST();
         const ptype = state.mode === 'theme' ? 'theme' : state.difficulty;
         await db.from('user_progress').upsert({
           username: state.username,
@@ -2365,6 +2386,16 @@ function giveUp() {
         }, { onConflict: 'username,puzzle_type,date' });
 
         state.todayGaveUp[ptype] = true;
+        state.todayResults[ptype] = {
+          guesses:    state.guessCount,
+          hints:      state.hintsUsed,
+          time:       Math.round((Date.now() - state.startTime) / 1000),
+          answer:     state.currentPuzzle.answer,
+          riddleText: state.currentPuzzle.riddle_text || null,
+          theme:      state.currentPuzzle.theme       || null,
+          mode:       state.mode,
+          difficulty: state.difficulty
+        };
         await breakStreak();
       }
     }
@@ -2442,7 +2473,7 @@ function selectLbSubTab(sub, el) {
 async function loadLeaderboardData() {
   const table = document.getElementById('lb-table');
   table.innerHTML = '<div class="lb-empty">Loading...</div>';
-  const today = new Date().toISOString().split('T')[0];
+  const today = getTodayIST();
 
   if (currentLbTab === 'streak') {
     // Streak leaderboard: from users table, sorted by streak desc
@@ -2542,47 +2573,43 @@ function showEndScreen(mode, difficulty, status) {
     document.getElementById('end-subtitle').textContent = 'You gave up on this puzzle today. The answer was:';
   }
 
-  // ── Answer ──
-  let answer = '?';
-  if (mode === 'riddle' && state.dailyPuzzle?.[difficulty]?.answer) {
-    answer = state.dailyPuzzle[difficulty].answer;
-  } else if (mode === 'theme' && state.dailyPuzzle?.theme_word) {
-    answer = state.dailyPuzzle.theme_word;
-  } else if (state.currentPuzzle?.answer) {
-    answer = state.currentPuzzle.answer;
-  }
+  // ── Answer — ALWAYS from todayResults (stored when game was played) ──
+  // NEVER from state.currentPuzzle — that changes when a new game starts
+  // todayResults[ptype] is populated on both solve and giveUp
+  const storedAnswer     = result.answer;
+  const storedRiddleText = result.riddleText;
+  const storedTheme      = result.theme;
+
+  // Final fallback chain (only if game was played before todayResults storage was added)
+  const answer = storedAnswer
+    || (mode === 'riddle' ? state.dailyPuzzle?.[difficulty]?.answer : null)
+    || (mode === 'theme'  ? state.dailyPuzzle?.theme_word           : null)
+    || '?';
+
   document.getElementById('end-answer').textContent = answer;
 
-  // ── Riddle / Theme context ──
-  const ctx = document.getElementById('end-context');
+  // ── Riddle / Theme context — from stored data only ──
+  const ctx      = document.getElementById('end-context');
   const ctxLabel = document.getElementById('end-context-label');
   const ctxText  = document.getElementById('end-context-text');
 
   if (mode === 'riddle') {
-    const riddleText = state.dailyPuzzle?.[difficulty]?.riddle_text
-                    || state.currentPuzzle?.riddle_text
-                    || null;
+    const riddleText = storedRiddleText || state.dailyPuzzle?.[difficulty]?.riddle_text || null;
     if (riddleText) {
       ctxLabel.innerHTML = `The Riddle <span style="flex:1;height:1px;background:linear-gradient(to right,rgba(0,255,136,0.2),transparent);display:inline-block;margin-left:6px;"></span>`;
       ctxText.textContent = riddleText;
       ctx.style.display = 'block';
-    } else {
-      ctx.style.display = 'none';
-    }
+    } else { ctx.style.display = 'none'; }
+
   } else if (mode === 'theme') {
-    const theme = state.dailyPuzzle?.theme || state.currentPuzzle?.theme;
+    const theme = storedTheme || state.dailyPuzzle?.theme || null;
     if (theme) {
-      const emoji = theme.theme_emoji || '🎯';
-      const name  = theme.theme_name  || 'Theme';
       ctxLabel.innerHTML = `Today's Theme <span style="flex:1;height:1px;background:linear-gradient(to right,rgba(0,255,136,0.2),transparent);display:inline-block;margin-left:6px;"></span>`;
-      ctxText.innerHTML  = `<span style="font-size:28px;margin-right:10px;">${emoji}</span>${name}`;
+      ctxText.innerHTML  = `<span style="font-size:28px;margin-right:10px;">${theme.theme_emoji||'🎯'}</span>${theme.theme_name||'Theme'}`;
       ctx.style.display = 'block';
-    } else {
-      ctx.style.display = 'none';
-    }
-  } else {
-    ctx.style.display = 'none';
-  }
+    } else { ctx.style.display = 'none'; }
+
+  } else { ctx.style.display = 'none'; }
 
   document.getElementById('end-guesses').textContent = result.guesses ?? '—';
   document.getElementById('end-hints').textContent   = result.hints   ?? '—';
@@ -2600,14 +2627,13 @@ async function showWin() {
   const totalGuesses = state.guessCount + state.hintsUsed;
 
   if (state.mode !== 'random') {
-    const today = new Date().toISOString().split('T')[0];
+    const today = getTodayIST();
     const ptype = state.mode === 'theme' ? 'theme' : state.difficulty;
 
     const newStreak = (state.userStats.streak || 0) + 1;
     const newBest   = Math.max(newStreak, state.userStats.best_streak || 0);
     const newSolved = (state.userStats.total_solved || 0) + 1;
 
-    // Fire all 3 DB writes in parallel — saves ~400ms
     await Promise.all([
       db.from('leaderboard').upsert({
         username: state.username, puzzle_type: ptype,
@@ -2626,7 +2652,16 @@ async function showWin() {
 
     state.userStats = { ...state.userStats, streak: newStreak, best_streak: newBest, total_solved: newSolved };
     state.todaySolved[ptype] = true;
-    state.todayResults[ptype] = { guesses: totalGuesses, hints: state.hintsUsed, time: elapsed };
+    state.todayResults[ptype] = {
+      guesses:    totalGuesses,
+      hints:      state.hintsUsed,
+      time:       elapsed,
+      answer:     state.currentPuzzle.answer,
+      riddleText: state.currentPuzzle.riddle_text || null,
+      theme:      state.currentPuzzle.theme       || null,
+      mode:       state.mode,
+      difficulty: state.difficulty
+    };
 
     // Show inline end screen
     showEndScreen(state.mode, state.difficulty, 'solved');
@@ -2651,7 +2686,12 @@ function refreshRandom() {
     'New Word?',
     'This will start a fresh random puzzle. Your current progress will be lost.',
     'Yes, new word',
-    () => startGame('random', 'random'),
+    () => {
+      state.randomPuzzle = null; // clear cache so a new one is fetched
+      state.solved = false;
+      state.gaveUp = false;
+      startGame('random', 'random');
+    },
     '↺'
   );
 }
@@ -2682,7 +2722,7 @@ async function shareResult(source) {
 
   // Status line
   const statusLine = state.gaveUp
-    ? `😔 Gave up — the answer was "${state.currentPuzzle?.answer}"`
+    ? `😔 Gave up — the answer was "${result.answer || state.currentPuzzle?.answer}"`
     : `🎉 Solved in ${result.guesses ?? state.guessCount + state.hintsUsed} guesses!`;
 
   // Top guesses block
@@ -2769,7 +2809,7 @@ async function verifyAdminPassword() {
   await loadThemesOverview();
   await loadSchedule();
   await loadBulkThemeSelect();
-  document.getElementById('puzzle-date').value = new Date().toISOString().split('T')[0];
+  document.getElementById('puzzle-date').value = getTodayIST();
 }
 
 function switchAdminTab(tab, el) {
@@ -2946,7 +2986,7 @@ async function loadSchedule() {
     return;
   }
 
-  const today = new Date().toISOString().split('T')[0];
+  const today = getTodayIST();
   list.innerHTML = data.map(p => {
     const isToday = p.date === today;
     return `
@@ -3194,9 +3234,38 @@ async function changeAdminPassword() {
   setTimeout(() => closeAdminPwModal(), 1000);
 }
 
+// ── PROFILE DROPDOWN ──
+function toggleProfileMenu() {
+  const dd = document.getElementById('profile-dropdown');
+  if (!dd) return;
+  dd.style.display = dd.style.display === 'none' ? 'block' : 'none';
+}
+function closeProfileMenu() {
+  const dd = document.getElementById('profile-dropdown');
+  if (dd) dd.style.display = 'none';
+}
+document.addEventListener('click', (e) => {
+  const btn = document.getElementById('profile-btn');
+  const dd  = document.getElementById('profile-dropdown');
+  if (dd && btn && !btn.contains(e.target) && !dd.contains(e.target)) {
+    dd.style.display = 'none';
+  }
+});
+
+// ── RULES ──
+function showRules() {
+  closeProfileMenu();
+  const o = document.getElementById('rules-overlay');
+  if (o) o.style.display = 'flex';
+}
+function closeRules() {
+  const o = document.getElementById('rules-overlay');
+  if (o) o.style.display = 'none';
+}
+
 // ── LANDING RULES EXPAND ──
 function toggleLandingRules() {
-  const exp = document.getElementById('landing-rules-expanded');
+  const exp   = document.getElementById('landing-rules-expanded');
   const arrow = document.getElementById('landing-rules-arrow');
   const label = document.getElementById('landing-rules-label');
   if (!exp) return;
@@ -3219,12 +3288,11 @@ function closeProfileMenu() {
 document.addEventListener('click', (e) => {
   const btn = document.getElementById('profile-btn');
   const dd  = document.getElementById('profile-dropdown');
-  if (dd && btn && !btn.contains(e.target) && !dd.contains(e.target)) {
+  if (dd && btn && !btn.contains(e.target) && !dd.contains(e.target))
     dd.style.display = 'none';
-  }
 });
 
-// ── RULES ──
+// ── RULES MODAL ──
 function showRules() {
   closeProfileMenu();
   const o = document.getElementById('rules-overlay');
