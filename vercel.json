@@ -1,5 +1,19 @@
 {
-  "routes": [
-    { "src": "/sitemap.xml", "dest": "/sitemap.xml" }
+  "redirects": [
+    {
+      "source": "http://www.semantle.me/(.*)",
+      "destination": "https://semantle.me/$1",
+      "permanent": true
+    },
+    {
+      "source": "http://semantle.me/(.*)",
+      "destination": "https://semantle.me/$1",
+      "permanent": true
+    },
+    {
+      "source": "https://www.semantle.me/(.*)",
+      "destination": "https://semantle.me/$1",
+      "permanent": true
+    }
   ]
 }
