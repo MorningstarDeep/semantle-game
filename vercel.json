@@ -1,17 +1,13 @@
 {
   "redirects": [
     {
-      "source": "http://www.semantle.me/(.*)",
-      "destination": "https://semantle.me/$1",
-      "permanent": true
-    },
-    {
-      "source": "http://semantle.me/(.*)",
-      "destination": "https://semantle.me/$1",
-      "permanent": true
-    },
-    {
-      "source": "https://www.semantle.me/(.*)",
+      "source": "/(.*)",
+      "has": [
+        {
+          "type": "host",
+          "value": "www.semantle.me"
+        }
+      ],
       "destination": "https://semantle.me/$1",
       "permanent": true
     }
