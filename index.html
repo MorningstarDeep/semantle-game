@@ -600,9 +600,51 @@
     :root { --fs-logo: 100px; }
     .home-inner, #game, #leaderboard-screen { max-width: 720px; }
   }
+
+  /* ══════════════════════════════════════════════════
+     STICKY BOTTOM AD BAR
+  ══════════════════════════════════════════════════ */
+  #sticky-ad-bar {
+    position: fixed;
+    bottom: 0; left: 0; right: 0;
+    z-index: 9999;
+    background: var(--surface);
+    border-top: 1px solid var(--border);
+    padding: 6px 0 4px;
+    text-align: center;
+    min-height: 60px;
+  }
+  #sticky-ad-bar .adsbygoogle {
+    display: block;
+    max-width: 728px;
+    margin: 0 auto;
+  }
+  /* Push all screen content up so it's not hidden behind the sticky ad */
+  .screen { padding-bottom: 80px !important; }
+  #game { padding-bottom: 90px !important; }
+
+  /* Inline ad container used inside screens */
+  .inline-ad-wrap {
+    width: 100%;
+    max-width: 560px;
+    margin: 0 auto;
+    padding: 4px 0;
+    text-align: center;
+  }
 </style>
 </head>
 <body>
+
+<!-- STICKY BOTTOM AD BAR — shown on all screens -->
+<div id="sticky-ad-bar">
+  <ins class="adsbygoogle"
+       style="display:block"
+       data-ad-client="ca-pub-4447692643301149"
+       data-ad-slot="8553622529"
+       data-ad-format="auto"
+       data-full-width-responsive="true"></ins>
+  <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+</div>
 
 <!-- TOAST -->
 <div class="toast" id="toast"></div>
@@ -1011,6 +1053,19 @@
     </div>
 
     <div style="display:flex;gap:16px;align-items:center;">
+      <!-- Inline ad above stats -->
+      <div class="inline-ad-wrap" style="margin-bottom:8px;width:100%;">
+        <ins class="adsbygoogle"
+             style="display:block"
+             data-ad-client="ca-pub-4447692643301149"
+             data-ad-slot="8553622529"
+             data-ad-format="auto"
+             data-full-width-responsive="true"></ins>
+        <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+      </div>
+    </div>
+
+    <div style="display:flex;gap:16px;align-items:center;">
       <div class="stats-row">
         <div class="stat-chip">
           <span class="stat-num" id="stat-streak">0</span>
@@ -1039,6 +1094,16 @@
   <div class="lb-header">
     <button class="back-btn" onclick="showScreen('home')">← Back</button>
     <div class="lb-title">Leaderboard</div>
+  </div>
+  <!-- Inline ad in leaderboard -->
+  <div class="inline-ad-wrap" style="margin-bottom:12px;">
+    <ins class="adsbygoogle"
+         style="display:block"
+         data-ad-client="ca-pub-4447692643301149"
+         data-ad-slot="8553622529"
+         data-ad-format="auto"
+         data-full-width-responsive="true"></ins>
+    <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
   </div>
   <!-- Primary tabs -->
   <div class="lb-tabs" id="lb-primary-tabs">
@@ -1113,6 +1178,17 @@
     </div>
   </div>
 
+  <!-- Inline ad in game screen -->
+  <div class="inline-ad-wrap">
+    <ins class="adsbygoogle"
+         style="display:block"
+         data-ad-client="ca-pub-4447692643301149"
+         data-ad-slot="8553622529"
+         data-ad-format="auto"
+         data-full-width-responsive="true"></ins>
+    <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+  </div>
+
   <div class="guess-list" id="guess-list"></div>
 </div>
 
@@ -1173,6 +1249,17 @@
     </div>
 
     <!-- Come back tomorrow message -->
+    <!-- Inline ad before come-back block -->
+    <div class="inline-ad-wrap">
+      <ins class="adsbygoogle"
+           style="display:block"
+           data-ad-client="ca-pub-4447692643301149"
+           data-ad-slot="8553622529"
+           data-ad-format="auto"
+           data-full-width-responsive="true"></ins>
+      <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+    </div>
+
     <div style="background:var(--card);border:1px solid var(--border);border-radius:16px;padding:20px 24px;display:flex;align-items:center;gap:14px;">
       <span style="font-size:28px;">🗓️</span>
       <div>
@@ -1204,6 +1291,16 @@
       <div class="win-stat"><div class="win-stat-num" id="win-guesses">—</div><div class="win-stat-label">Guesses</div></div>
       <div class="win-stat"><div class="win-stat-num" id="win-hints">—</div><div class="win-stat-label">Hints</div></div>
       <div class="win-stat"><div class="win-stat-num" id="win-time">—</div><div class="win-stat-label">Seconds</div></div>
+    </div>
+    <!-- Inline ad in win overlay -->
+    <div style="width:100%;margin:12px 0;">
+      <ins class="adsbygoogle"
+           style="display:block"
+           data-ad-client="ca-pub-4447692643301149"
+           data-ad-slot="8553622529"
+           data-ad-format="auto"
+           data-full-width-responsive="true"></ins>
+      <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
     </div>
     <div class="win-actions">
       <button class="win-btn primary" onclick="nextPuzzle()">Play Next →</button>
